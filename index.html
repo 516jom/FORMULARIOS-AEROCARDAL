@@ -1,4 +1,3 @@
-<index>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -339,8 +338,8 @@
         }
 
         function ensureAuth(actionCallback) {
-            if (GOOGLE_CLIENT_ID === '520674997135-nqt9gjl00t89lkfstqglk4iecfan44em.apps.googleusercontent.com') {
-                alert("⚠️ Integración inactiva: Revisa el CLIENT_ID."); return;
+            if (!GOOGLE_CLIENT_ID) {
+                alert("⚠️ Falta el CLIENT_ID."); return;
             }
             if (!val('m_pov')) {
                 alert("⚠️ Por favor, ingresa el P.O.V. N° en la cabecera antes de operar en la nube.");
@@ -1300,6 +1299,3 @@
     </script>
 </body>
 </html>
-```eof
-
-*(Nota: En la línea 327 debes mantener el identificador real de Google que creaste para que funcione la conexión. Si ya lo habías puesto antes, pégalo de nuevo en esa variable).*
