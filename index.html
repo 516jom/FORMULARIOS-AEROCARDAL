@@ -509,7 +509,7 @@
         }
 
         async function generarBlobPDF() {
-            triggerUpdate(); 
+            updateAll(); // Forzamos la actualización síncrona de inmediato
             const printDiv = el('print-layout');
             
             printDiv.style.display = 'block';
