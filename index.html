@@ -75,24 +75,23 @@
         .btn { padding: 9px 14px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 0.9rem;}
         .btn-danger { background-color: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 5px 10px; font-size: 0.75rem;}
         .btn-success { background-color: rgba(255, 255, 255, 0.1); border: 1px solid var(--success); color: var(--success); padding: 4px 8px; font-size: 0.75rem;}
-        .btn-outline { background-color: var(--accent); color: var(--bg-main); width: 100%; padding: 12px; font-size: 1rem; margin-top: 10px;}
-        .btn-drive { background-color: transparent; border: 1px solid #4285F4; color: #4285F4; }
-
+        .btn-outline { background-color: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 10px 16px; font-size: 0.9rem;}
+        
         .summary-box { background: var(--bg-input); border: 1px solid var(--border-color); padding: 0.85rem; border-radius: 8px; }
         .summary-title { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; text-transform: uppercase;}
         .summary-value { font-size: 1.6rem; font-weight: bold; font-family: monospace; color: var(--text-main); }
         .summary-sub { font-size: 0.8rem; color: var(--accent); margin-top: 2px;}
 
         hr.divider { border: 0; border-top: 1px solid var(--border-color); margin: 12px 0; }
-        .fab-container { position: fixed; bottom: 0; left: 0; width: 100%; padding: 0.8rem 1rem; background: rgba(17, 17, 17, 0.95); backdrop-filter: blur(5px); border-top: 1px solid var(--border-color); text-align: center; z-index: 100; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;}
-        .btn-print { background-color: var(--accent); color: #000; border: none; padding: 12px 24px; font-size: 1rem; font-weight: bold; border-radius: 30px; box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2); }
+        .fab-container { position: fixed; bottom: 0; left: 0; width: 100%; padding: 0.8rem 1rem; background: rgba(17, 17, 17, 0.95); backdrop-filter: blur(5px); border-top: 1px solid var(--border-color); text-align: center; z-index: 100; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;}
+        .btn-print { background-color: var(--accent); color: #000; border: none; padding: 10px 24px; font-size: 0.9rem; font-weight: bold; border-radius: 6px; }
 
         .checkbox-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; font-size: 0.8rem; line-height: 1.3; }
         .checkbox-item input[type="checkbox"] { flex-shrink: 0; margin-top: 2px; width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer;}
         .form-category-title { font-size: 0.75rem; font-weight: bold; color: var(--accent); margin: 15px 0 8px 0; background: rgba(255,255,255,0.05); padding: 6px; border-radius: 4px; border-left: 3px solid var(--accent);}
         .signature-block { margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border-color); font-size: 0.85rem; color: var(--text-muted); }
 
-        /* Pantalla de Carga Overlay */
+        /* Pantalla de Carga Overlay PWA Ready */
         #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: none; justify-content: center; align-items: center; flex-direction: column; color: var(--accent); backdrop-filter: blur(4px); }
         .spinner { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--accent); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -107,7 +106,6 @@
             #print-layout { display: block !important; font-family: Arial, sans-serif; width: 100%; font-size: 8.5px; line-height: 1.2; }
         }
 
-        /* Estilos base para cuando forzamos #print-layout visible para html2pdf */
         #print-layout { font-family: Arial, sans-serif; font-size: 8.5px; line-height: 1.2; background: white; color: black; }
         .page-break { page-break-before: always; padding-top: 5px; clear: both;}
         .print-table { width: 100%; border-collapse: collapse; border: 1px solid black; margin-bottom: 4px; page-break-inside: avoid; table-layout: fixed;}
@@ -139,25 +137,33 @@
 </head>
 <body>
 
-    <!-- Overlay de Carga -->
+    <!-- Overlay de Carga y Acciones PDF / Drive -->
     <div id="loading-overlay">
-        <div class="spinner"></div>
-        <div id="loading-text" style="font-weight: bold; font-size: 1.1rem;">Procesando...</div>
+        <div id="loading-spinner" class="spinner"></div>
+        <div id="loading-text" style="font-weight: bold; font-size: 1.1rem; text-align: center; margin-bottom: 20px;">Procesando...</div>
+        
+        <button id="btn-open-pdf" class="btn btn-outline" style="display:none; background-color: var(--success); color: #000; font-weight: bold; padding: 15px 30px; border-radius: 30px; font-size: 1.1rem; border: none; box-shadow: 0 4px 12px rgba(255,255,255,0.2);">
+            📂 VER PDF EN DRIVE
+        </button>
+        
+        <button id="btn-close-overlay" class="btn btn-danger" style="display:none; margin-top: 20px; border: none; text-decoration: underline;" onclick="cerrarOverlay()">
+            Volver a la app
+        </button>
     </div>
 
     <header>
         <h1>AEROCARDAL - PLANIFICACIÓN OPERACIONAL</h1>
-        <div class="subtitle">VERSIÓN 5.0 (PWA & GOOGLE DRIVE)</div>
+        <div class="subtitle">VERSIÓN 6.0 (CLOUD SYNC)</div>
     </header>
 
     <main id="mobile-ui" class="container">
         <!-- CABECERA GENERAL -->
         <div class="card">
-            <div class="card-header"><span>📋 CABECERA DEL VUELO (HERENCIA GLOBAL)</span></div>
+            <div class="card-header"><span>📋 CABECERA DEL VUELO (OBLIGATORIA PARA CLOUD)</span></div>
             <div class="card-content grid-3">
                 <div class="form-group"><label style="color:var(--accent);">Fecha del Vuelo</label><input type="date" id="m_fecha_gen" onchange="triggerUpdate()"></div>
                 <div class="form-group"><label style="color:var(--accent);">Folio BIT</label><input type="text" id="m_folio_gen" placeholder="Folio Único..." oninput="triggerUpdate()"></div>
-                <div class="form-group"><label>P.O.V. N°</label><input type="text" id="m_pov" oninput="triggerUpdate()"></div>
+                <div class="form-group"><label style="color:#4285F4; text-shadow: 0 0 5px rgba(66,133,244,0.5);">P.O.V. N° (Carpeta)</label><input type="text" id="m_pov" oninput="triggerUpdate()" placeholder="Ej: 1234"></div>
                 
                 <div class="form-group">
                     <label style="color:var(--accent);">Matrícula (3 últimas letras)</label>
@@ -203,7 +209,7 @@
 
         <!-- TRAMOS DINÁMICOS -->
         <div id="tramos-container"></div>
-        <button class="btn btn-outline" onclick="addLeg()">+ AGREGAR TRAMO</button>
+        <button class="btn btn-outline" style="width: 100%; border-style: dashed;" onclick="addLeg()">+ AGREGAR TRAMO</button>
         
         <!-- FORMULARIOS ADJUNTOS -->
         <hr class="divider" style="margin: 20px 0;">
@@ -271,15 +277,12 @@
         </div>
     </main>
 
-    <!-- Botones de Acción (FAB) -->
+    <!-- Botones de Acción (FAB) - ACTUALIZADOS PARA GOOGLE DRIVE -->
     <div class="fab-container">
         <button class="btn btn-danger" style="width:auto; margin:0;" onclick="clearAllData()">🗑️ Limpiar</button>
-        <button class="btn btn-outline" style="width:auto; margin:0; border-color:var(--success); color:var(--success);" onclick="exportData()">📤 JSON</button>
-        <label class="btn btn-outline" style="width:auto; margin:0; border-color:var(--warning); color:var(--warning); cursor:pointer;">
-            📥 Importar<input type="file" id="import_file" accept=".json" style="display:none;" onchange="importData(event)">
-        </label>
-        <button class="btn btn-outline btn-drive" style="width:auto; margin:0;" onclick="authAndUpload()">☁️ Google Drive</button>
-        <button class="btn-print" style="width:auto; margin:0;" onclick="exportarPDFiOS()">🖨️ PDF / Compartir</button>
+        <button class="btn btn-outline" style="width:auto; margin:0; border-color:var(--warning); color:var(--warning);" onclick="ensureAuth(accionLeer)">📂 Leer</button>
+        <button class="btn btn-outline" style="width:auto; margin:0; border-color:var(--success); color:var(--success);" onclick="ensureAuth(accionGuardar)">💾 Guardar</button>
+        <button class="btn-print" style="width:auto; margin:0;" onclick="ensureAuth(accionGenerarPDF)">📄 Generar PDF</button>
     </div>
 
     <!-- LAYOUT DE IMPRESIÓN (PDF) -->
@@ -310,13 +313,13 @@
     <!-- SCRIPT PRINCIPAL -->
     <script>
         // =======================================================
-        // CONFIGURACIÓN DE GOOGLE DRIVE API (OAuth 2.0)
+        // INTEGRACIÓN NATIVA CON GOOGLE DRIVE API V3
         // =======================================================
-        // DEBES REEMPLAZAR ESTE CLIENT_ID POR EL CREADO EN GOOGLE CLOUD CONSOLE
         const GOOGLE_CLIENT_ID = '520674997135-nqt9gjl00t89lkfstqglk4iecfan44em.apps.googleusercontent.com'; 
-        
+        const DRIVE_API_URL = 'https://www.googleapis.com/drive/v3/files';
         let tokenClient;
         let accessToken = null;
+        let pendingAction = null;
 
         function initDrive() {
             if (!window.google) return;
@@ -326,87 +329,200 @@
                 callback: (tokenResponse) => {
                     if (tokenResponse && tokenResponse.access_token) {
                         accessToken = tokenResponse.access_token;
-                        procesarSubidaDrive();
+                        if (pendingAction) {
+                            pendingAction();
+                            pendingAction = null;
+                        }
                     }
                 }
             });
         }
 
-        function authAndUpload() {
-            if (GOOGLE_CLIENT_ID === 'TU_CLIENT_ID_AQUI.apps.googleusercontent.com') {
-                alert("⚠️ Integración inactiva: Falta configurar el CLIENT_ID de Google Cloud en el código fuente.");
-                return;
+        function ensureAuth(actionCallback) {
+            if (GOOGLE_CLIENT_ID === '520674997135-nqt9gjl00t89lkfstqglk4iecfan44em.apps.googleusercontent.com') {
+                alert("⚠️ Integración inactiva: Revisa el CLIENT_ID."); return;
             }
             if (!val('m_pov')) {
-                alert("⚠️ Debes ingresar el P.O.V. N° antes de guardar en Drive.");
+                alert("⚠️ Por favor, ingresa el P.O.V. N° en la cabecera antes de operar en la nube.");
                 return;
             }
             if (!accessToken) {
-                tokenClient.requestAccessToken({prompt: 'consent'});
+                pendingAction = actionCallback;
+                tokenClient.requestAccessToken({prompt: ''}); 
             } else {
-                procesarSubidaDrive();
+                actionCallback();
             }
         }
 
-        async function procesarSubidaDrive() {
-            mostrarCargando("Generando PDF y subiendo a Google Drive...");
-            try {
-                const pdfBlob = await generarBlobPDF();
-                const povName = val('m_pov') || 'Sin_Numero';
-                const dateStr = val('m_fecha_gen') || new Date().toISOString().split('T')[0];
-                const fileName = `Planificacion_POV_${povName}_${dateStr}.pdf`;
-                
-                const metadata = { name: fileName, mimeType: 'application/pdf' };
-                const form = new FormData();
-                form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-                form.append('file', pdfBlob);
-
-                const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-                    method: 'POST',
-                    headers: { 'Authorization': 'Bearer ' + accessToken },
-                    body: form
-                });
-
-                if (response.ok) {
-                    alert("✅ Documento PDF guardado exitosamente en la raíz de Google Drive.");
-                } else {
-                    const err = await response.json();
-                    throw new Error(err.error.message);
-                }
-            } catch(error) {
-                alert("❌ Error al guardar en Drive: " + error.message);
-                accessToken = null; // Reset token on failure
-            } finally {
-                ocultarCargando();
-            }
-        }
-
-        // =======================================================
-        // EXPORTACIÓN A PDF PARA SAFARI / iOS PWA
-        // =======================================================
+        // --- MANEJO DE UI CARGA / MODAL ---
         function mostrarCargando(texto) {
+            el('loading-spinner').style.display = 'block';
+            el('btn-open-pdf').style.display = 'none';
+            el('btn-close-overlay').style.display = 'none';
             el('loading-text').innerText = texto;
             el('loading-overlay').style.display = 'flex';
         }
-        function ocultarCargando() {
-            el('loading-overlay').style.display = 'none';
+
+        function ocultarCargando() { el('loading-overlay').style.display = 'none'; }
+        function cerrarOverlay() { ocultarCargando(); }
+
+        function mostrarModalPDF(link) {
+            el('loading-spinner').style.display = 'none';
+            el('loading-text').innerText = "✅ ¡Documento listo en Google Drive!";
+            const btn = el('btn-open-pdf');
+            btn.style.display = 'block';
+            btn.onclick = () => window.open(link, '_blank');
+            el('btn-close-overlay').style.display = 'block';
+        }
+
+        // --- FUNCIONES DRIVE (CARPETAS Y ARCHIVOS) ---
+        async function getOrCreateFolder(povName) {
+            const folderName = `POV_${povName}`;
+            const query = encodeURIComponent(`name='${folderName}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+            let res = await fetch(`${DRIVE_API_URL}?q=${query}&fields=files(id, name)`, { headers: { 'Authorization': 'Bearer ' + accessToken } });
+            let data = await res.json();
+            
+            if (data.files && data.files.length > 0) {
+                return data.files[0].id;
+            } else {
+                let createRes = await fetch(DRIVE_API_URL, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: folderName, mimeType: 'application/vnd.google-apps.folder' })
+                });
+                let createData = await createRes.json();
+                return createData.id;
+            }
+        }
+
+        async function findFileInFolder(filename, folderId) {
+            const query = encodeURIComponent(`name='${filename}' and '${folderId}' in parents and trashed=false`);
+            let res = await fetch(`${DRIVE_API_URL}?q=${query}&fields=files(id, name, webViewLink)`, { headers: { 'Authorization': 'Bearer ' + accessToken } });
+            let data = await res.json();
+            return (data.files && data.files.length > 0) ? data.files[0] : null;
+        }
+
+        async function uploadFileRaw(blob, filename, folderId, existingFileId = null) {
+            const metadata = { name: filename };
+            if (!existingFileId) metadata.parents = [folderId];
+            
+            const boundary = '-------314159265358979323846';
+            const delimiter = "\r\n--" + boundary + "\r\n";
+            const close_delim = "\r\n--" + boundary + "--";
+
+            const reader = new FileReader();
+            return new Promise((resolve, reject) => {
+                reader.onload = async function() {
+                    const base64Data = reader.result.split(',')[1];
+                    const multipartRequestBody =
+                        delimiter +
+                        'Content-Type: application/json\r\n\r\n' +
+                        JSON.stringify(metadata) +
+                        delimiter +
+                        'Content-Type: ' + blob.type + '\r\n' +
+                        'Content-Transfer-Encoding: base64\r\n\r\n' +
+                        base64Data +
+                        close_delim;
+
+                    const url = existingFileId ? 
+                        `https://www.googleapis.com/upload/drive/v3/files/${existingFileId}?uploadType=multipart` : 
+                        `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart`;
+                    
+                    try {
+                        let res = await fetch(url, {
+                            method: existingFileId ? 'PATCH' : 'POST',
+                            headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'multipart/related; boundary=' + boundary },
+                            body: multipartRequestBody
+                        });
+                        if (!res.ok) throw new Error("Error en la subida a Drive");
+                        resolve(await res.json());
+                    } catch(e) { reject(e); }
+                };
+                reader.onerror = () => reject(new Error("Error leyendo el archivo"));
+                reader.readAsDataURL(blob);
+            });
+        }
+
+        // --- ACCIONES DE LOS BOTONES ---
+        async function accionGuardar() {
+            mostrarCargando("Guardando progreso en Drive...");
+            try {
+                let pov = val('m_pov');
+                let folderId = await getOrCreateFolder(pov);
+                let file = await findFileInFolder('Progreso.json', folderId);
+                let dataBlob = new Blob([getAllData()], { type: "application/json" });
+                await uploadFileRaw(dataBlob, 'Progreso.json', folderId, file ? file.id : null);
+                alert("✅ Progreso guardado exitosamente en la carpeta de Drive.");
+            } catch(e) {
+                alert("❌ Error: " + e.message); accessToken = null;
+            } finally { ocultarCargando(); }
+        }
+
+        async function accionLeer() {
+            mostrarCargando("Buscando progreso en Drive...");
+            try {
+                let pov = val('m_pov');
+                let folderId = await getOrCreateFolder(pov);
+                let file = await findFileInFolder('Progreso.json', folderId);
+                if (!file) {
+                    alert("⚠️ No se encontró ningún progreso guardado para este POV.");
+                    ocultarCargando();
+                    return;
+                }
+                let res = await fetch(`${DRIVE_API_URL}/${file.id}?alt=media`, { headers: { 'Authorization': 'Bearer ' + accessToken } });
+                let content = await res.json();
+                loadDataIntoApp(content);
+                alert("✅ Progreso recuperado.");
+            } catch(e) {
+                alert("❌ Error: " + e.message); accessToken = null;
+            } finally { ocultarCargando(); }
+        }
+
+        async function accionGenerarPDF() {
+            mostrarCargando("Renderizando documento PDF...\n(Espera unos segundos)");
+            
+            // Timeout ligero para que se dibuje el loader antes de congelar UI
+            setTimeout(async () => {
+                try {
+                    let pov = val('m_pov');
+                    let pdfBlob = await generarBlobPDF();
+                    
+                    mostrarCargando("Subiendo a Google Drive...");
+                    let folderId = await getOrCreateFolder(pov);
+                    let dateStr = val('m_fecha_gen') || new Date().toISOString().split('T')[0];
+                    let filename = `Planificacion_POV_${pov}_${dateStr}.pdf`;
+                    
+                    let existingFile = await findFileInFolder(filename, folderId);
+                    let uploadRes = await uploadFileRaw(pdfBlob, filename, folderId, existingFile ? existingFile.id : null);
+                    
+                    // Extraer link webViewLink haciendo GET al archivo
+                    let finalRes = await fetch(`${DRIVE_API_URL}/${uploadRes.id}?fields=webViewLink`, { headers: { 'Authorization': 'Bearer ' + accessToken } });
+                    let finalData = await finalRes.json();
+                    
+                    mostrarModalPDF(finalData.webViewLink);
+                    
+                } catch(e) {
+                    alert("❌ Error: " + e.message);
+                    accessToken = null;
+                    ocultarCargando();
+                }
+            }, 300);
         }
 
         async function generarBlobPDF() {
-            triggerUpdate(); // Forzar actualización de datos UI a Print
+            triggerUpdate(); 
             const printDiv = el('print-layout');
             
-            // Hacer visible temporalmente para html2pdf (fuera de pantalla)
             printDiv.style.display = 'block';
             printDiv.style.position = 'absolute';
             printDiv.style.left = '-99999px';
             printDiv.style.top = '0';
-            printDiv.style.width = '800px'; // Forzar ancho de renderizado
+            printDiv.style.width = '800px';
 
             const opt = {
-                margin: 6, // 6mm igual que @page margin
-                filename: `Planificacion_POV_${val('m_pov') || 'SinNumero'}.pdf`,
-                image: { type: 'jpeg', quality: 1.0 },
+                margin: 6,
+                filename: 'temp.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2, useCORS: true, logging: false },
                 jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
             };
@@ -414,7 +530,6 @@
             try {
                 return await html2pdf().set(opt).from(printDiv).outputPdf('blob');
             } finally {
-                // Restaurar estilos
                 printDiv.style.display = 'none';
                 printDiv.style.position = '';
                 printDiv.style.left = '';
@@ -423,43 +538,8 @@
             }
         }
 
-        async function exportarPDFiOS() {
-            mostrarCargando("Procesando y generando PDF...");
-            try {
-                const blob = await generarBlobPDF();
-                const pov = val('m_pov') || 'SinNumero';
-                const fileName = `Planificacion_POV_${pov}.pdf`;
-                const file = new File([blob], fileName, { type: 'application/pdf' });
-
-                // Detección de API Share (Nativa iOS PWA)
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    await navigator.share({
-                        files: [file],
-                        title: fileName,
-                        text: `Documentación PDF Planificación POV ${pov}`
-                    });
-                } else {
-                    // Fallback navegadores escritorio / Android
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = fileName;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    setTimeout(() => URL.revokeObjectURL(url), 1000);
-                }
-            } catch (error) {
-                if (error.name !== 'AbortError') { // Ignorar error si el usuario cancela Share
-                    alert("Error al generar PDF: " + error.message);
-                }
-            } finally {
-                ocultarCargando();
-            }
-        }
-
         // =======================================================
-        // CÓDIGO OPERACIONAL ORIGINAL (INTACTO)
+        // CÓDIGO OPERACIONAL ORIGINAL
         // =======================================================
         const el = id => document.getElementById(id);
         const val = id => el(id)?.value || '';
@@ -1166,28 +1246,8 @@
         function autoSave() { localStorage.setItem('aerocardal_flight_data', getAllData()); }
 
         function clearAllData() {
-            if(!confirm("⚠️ ¿Estás seguro de LIMPIAR TODOS los datos? Perderás el progreso no guardado.")) return;
+            if(!confirm("⚠️ ¿Estás seguro de LIMPIAR TODOS los datos? Perderás el progreso local.")) return;
             localStorage.removeItem('aerocardal_flight_data'); window.location.reload();
-        }
-
-        function exportData() {
-            const dataStr = getAllData();
-            const blob = new Blob([dataStr], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url;
-            a.download = `Planificacion_${val('m_fecha_gen') || 'vuelo'}.json`; 
-            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-        }
-
-        function importData(event) {
-            const file = event.target.files[0]; if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try { const data = JSON.parse(e.target.result); loadDataIntoApp(data); alert("✅ Datos cargados correctamente."); } 
-                catch (error) { alert("❌ Error al leer el archivo. Asegúrate de que sea un JSON válido."); }
-                event.target.value = ''; 
-            };
-            reader.readAsText(file);
         }
 
         function loadDataIntoApp(data) {
@@ -1233,10 +1293,13 @@
             buildForms();
             let saved = localStorage.getItem('aerocardal_flight_data');
             if (saved) {
-                if(confirm("Se encontró un vuelo en progreso guardado localmente. ¿Deseas recuperarlo?")) { loadDataIntoApp(JSON.parse(saved)); } 
+                if(confirm("Se encontró un vuelo en progreso guardado localmente en este iPad. ¿Deseas recuperarlo?")) { loadDataIntoApp(JSON.parse(saved)); } 
                 else { localStorage.removeItem('aerocardal_flight_data'); addLeg('SCEL'); toggleSinObservaciones(); lookupPilots(); }
             } else { addLeg('SCEL'); toggleSinObservaciones(); lookupPilots(); }
         };
     </script>
 </body>
 </html>
+```eof
+
+*(Nota: En la línea 327 debes mantener el identificador real de Google que creaste para que funcione la conexión. Si ya lo habías puesto antes, pégalo de nuevo en esa variable).*
