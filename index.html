@@ -96,7 +96,7 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* =======================================================
-           ESTILOS DE IMPRESIÓN (TAMAÑO CARTA + 6MM) - PARA HTML2PDF Y NATIVO
+           ESTILOS DE IMPRESIÓN (TAMAÑO CARTA + 6MM)
            ======================================================= */
         @media print {
             @page { size: letter portrait; margin: 6mm; }
@@ -509,47 +509,63 @@
         }
 
         // =======================================================
-        // SOLUCIÓN AL BUG DEL PDF EN BLANCO (SCROLL FIX)
+        // SOLUCIÓN DEFINITIVA: SIMULAR MODO IMPRESIÓN NATIVO
         // =======================================================
         async function generarBlobPDF() {
             updateAll(); // Sincroniza todos los datos al layout de impresión.
 
             const printDiv = el('print-layout');
+            const mainUi = el('mobile-ui');
+            const header = document.querySelector('header');
+            const fab = document.querySelector('.fab-container');
+            
             const originalScroll = window.scrollY; // Guardamos en qué parte de la pantalla estabas
             
-            // 1. SCROLL AL TOPE: Esto elimina el bug de la hoja en blanco por desfase de cámara.
-            window.scrollTo(0, 0);
+            // 1. SIMULAR MODO IMPRESIÓN (El secreto de por qué window.print() funcionaba)
+            // Ocultamos la interfaz de la app para que el documento suba a la coordenada Y=0 real.
+            if(mainUi) mainUi.style.display = 'none';
+            if(header) header.style.display = 'none';
+            if(fab) fab.style.display = 'none';
 
-            // 2. Mostrar el layout físicamente (el fondo negro tapa esto, no se verá feo)
+            // 2. Mostrar el layout de impresión en todo su esplendor
             printDiv.style.display = 'block';
-            printDiv.style.width = '800px'; // Forzar proporciones de escritorio
+            printDiv.style.width = '800px'; 
             printDiv.style.backgroundColor = 'white';
 
-            // 3. Pausa para asegurar que el DOM se haya pintado antes del "flash"
-            await new Promise(resolve => setTimeout(resolve, 400));
+            // 3. Scroll al tope real (0,0)
+            window.scrollTo(0, 0);
+
+            // 4. Pausa para dar tiempo al navegador a reordenar el DOM sin la interfaz móvil
+            await new Promise(resolve => setTimeout(resolve, 500));
 
             const opt = {
                 margin: 6,
                 filename: 'temp.pdf',
                 image: { type: 'jpeg', quality: 0.98 },
+                pagebreak: { mode: ['css', 'legacy'] }, // Garantiza el corte de hojas exacto
                 html2canvas: { 
                     scale: 2, 
                     useCORS: true, 
                     logging: false,
-                    scrollY: 0, // Le dice a la cámara que inicie estrictamente desde arriba
                     windowWidth: 800
                 },
                 jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
             };
 
             try {
-                // 4. MÉTODO CORRECTO (.output en lugar de .outputPdf para no cortar el renderizado)
+                // Generamos el documento
                 return await html2pdf().set(opt).from(printDiv).output('blob');
             } finally {
-                // 5. Ocultar el documento de impresión y devolver el scroll a donde estabas
+                // 5. RESTAURAR LA APP A SU ESTADO NORMAL (como si nada hubiera pasado)
                 printDiv.style.display = 'none';
                 printDiv.style.width = '';
                 printDiv.style.backgroundColor = '';
+                
+                if(mainUi) mainUi.style.display = '';
+                if(header) header.style.display = '';
+                if(fab) fab.style.display = ''; // Esto restaura su regla flex original del CSS
+                
+                // Te devolvemos a donde estabas leyendo
                 window.scrollTo(0, originalScroll);
             }
         }
