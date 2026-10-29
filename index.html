@@ -512,64 +512,59 @@
         // SOLUCIÓN DEFINITIVA: SIMULAR MODO IMPRESIÓN NATIVO
         // =======================================================
         async function generarBlobPDF() {
-            updateAll(); // Sincroniza todos los datos al layout de impresión.
+            updateAll(); // Sincroniza todos los datos
 
             const printDiv = el('print-layout');
             const mainUi = el('mobile-ui');
             const header = document.querySelector('header');
             const fab = document.querySelector('.fab-container');
+            const originalScroll = window.scrollY;
             
-            const originalScroll = window.scrollY; // Guardamos en qué parte de la pantalla estabas
-            
-            // 1. SIMULAR MODO IMPRESIÓN (El secreto de por qué window.print() funcionaba)
-            // Ocultamos la interfaz de la app para que el documento suba a la coordenada Y=0 real.
+            // 1. Ocultar interfaz móvil
             if(mainUi) mainUi.style.display = 'none';
             if(header) header.style.display = 'none';
             if(fab) fab.style.display = 'none';
 
-            // 2. Mostrar el layout de impresión en todo su esplendor
+            // 2. Activar contenedor de impresión con ancho de hoja carta en píxeles (aprox 794px para 96 DPI)
             printDiv.style.display = 'block';
-            printDiv.style.width = '800px'; 
+            printDiv.style.width = '794px'; 
+            printDiv.style.margin = '0 auto';
             printDiv.style.backgroundColor = 'white';
 
-            // 3. Scroll al tope real (0,0)
             window.scrollTo(0, 0);
-
-            // 4. Pausa para dar tiempo al navegador a reordenar el DOM sin la interfaz móvil
             await new Promise(resolve => setTimeout(resolve, 500));
 
             const opt = {
-                margin: 6,
+                margin: [6, 6, 6, 6], // Márgenes en mm uniformes
                 filename: 'temp.pdf',
                 image: { type: 'jpeg', quality: 0.98 },
-                pagebreak: { mode: ['css', 'legacy'] }, // Garantiza el corte de hojas exacto
+                pagebreak: { mode: ['css', 'legacy'] },
                 html2canvas: { 
                     scale: 2, 
                     useCORS: true, 
                     logging: false,
-                    windowWidth: 800
+                    letterRendering: true,
+                    windowWidth: 794 // Forzar ancho exacto del canvas para evitar el desplazamiento
                 },
                 jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
             };
 
             try {
-                // Generamos el documento
                 return await html2pdf().set(opt).from(printDiv).output('blob');
             } finally {
-                // 5. RESTAURAR LA APP A SU ESTADO NORMAL (como si nada hubiera pasado)
+                // 3. Restaurar la interfaz normal
                 printDiv.style.display = 'none';
                 printDiv.style.width = '';
+                printDiv.style.margin = '';
                 printDiv.style.backgroundColor = '';
                 
                 if(mainUi) mainUi.style.display = '';
                 if(header) header.style.display = '';
-                if(fab) fab.style.display = ''; // Esto restaura su regla flex original del CSS
+                if(fab) fab.style.display = '';
                 
-                // Te devolvemos a donde estabas leyendo
                 window.scrollTo(0, originalScroll);
             }
         }
-
         // =======================================================
         // CÓDIGO OPERACIONAL ORIGINAL
         // =======================================================
