@@ -276,7 +276,7 @@
         </div>
     </main>
 
-    <!-- Botones de Acción (FAB) - ACTUALIZADOS PARA GOOGLE DRIVE -->
+    <!-- Botones de Acción (FAB) -->
     <div class="fab-container">
         <button class="btn btn-danger" style="width:auto; margin:0;" onclick="clearAllData()">🗑️ Limpiar</button>
         <button class="btn btn-outline" style="width:auto; margin:0; border-color:var(--warning); color:var(--warning);" onclick="ensureAuth(accionLeer)">📂 Leer</button>
@@ -508,32 +508,51 @@
             }, 300);
         }
 
+        // =======================================================
+        // SOLUCIÓN AL BUG DEL PDF EN BLANCO
+        // =======================================================
         async function generarBlobPDF() {
-            updateAll(); // Sincronización inmediata para que el layout de impresión tenga todos los datos
+            updateAll(); // Sincroniza todos los datos al layout de impresión.
+
             const printDiv = el('print-layout');
             
+            // CAMBIO CLAVE 1:
+            // Lo hacemos visible *dentro* de las coordenadas de la pantalla (top 0, left 0)
+            // html2canvas no puede "fotografiar" elementos en left: -99999px.
+            // Como el modal de "Procesando..." tiene z-index 9999, esto quedará tapado y no se verá.
             printDiv.style.display = 'block';
             printDiv.style.position = 'absolute';
-            printDiv.style.left = '-99999px';
+            printDiv.style.left = '0';
             printDiv.style.top = '0';
-            printDiv.style.width = '800px';
+            printDiv.style.width = '800px'; 
+            printDiv.style.backgroundColor = 'white';
+            printDiv.style.zIndex = '100'; 
+
+            // CAMBIO CLAVE 2: 
+            // Pausa obligatoria. Damos tiempo al navegador (400ms) para que dibuje el DOM
+            // actualizado antes de que html2canvas lance el "flash" de su cámara.
+            await new Promise(resolve => setTimeout(resolve, 400));
 
             const opt = {
                 margin: 6,
                 filename: 'temp.pdf',
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, logging: false },
+                // windowWidth asegura que el viewport que procesa html2canvas sea fijo
+                html2canvas: { scale: 2, useCORS: true, logging: false, windowWidth: 800 }, 
                 jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
             };
 
             try {
                 return await html2pdf().set(opt).from(printDiv).outputPdf('blob');
             } finally {
+                // Dejamos todo como estaba
                 printDiv.style.display = 'none';
                 printDiv.style.position = '';
                 printDiv.style.left = '';
                 printDiv.style.top = '';
                 printDiv.style.width = '';
+                printDiv.style.backgroundColor = '';
+                printDiv.style.zIndex = '';
             }
         }
 
