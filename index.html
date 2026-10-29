@@ -509,50 +509,48 @@
         }
 
         // =======================================================
-        // SOLUCIÓN AL BUG DEL PDF EN BLANCO
+        // SOLUCIÓN AL BUG DEL PDF EN BLANCO (SCROLL FIX)
         // =======================================================
         async function generarBlobPDF() {
             updateAll(); // Sincroniza todos los datos al layout de impresión.
 
             const printDiv = el('print-layout');
+            const originalScroll = window.scrollY; // Guardamos en qué parte de la pantalla estabas
             
-            // CAMBIO CLAVE 1:
-            // Lo hacemos visible *dentro* de las coordenadas de la pantalla (top 0, left 0)
-            // html2canvas no puede "fotografiar" elementos en left: -99999px.
-            // Como el modal de "Procesando..." tiene z-index 9999, esto quedará tapado y no se verá.
-            printDiv.style.display = 'block';
-            printDiv.style.position = 'absolute';
-            printDiv.style.left = '0';
-            printDiv.style.top = '0';
-            printDiv.style.width = '800px'; 
-            printDiv.style.backgroundColor = 'white';
-            printDiv.style.zIndex = '100'; 
+            // 1. SCROLL AL TOPE: Esto elimina el bug de la hoja en blanco por desfase de cámara.
+            window.scrollTo(0, 0);
 
-            // CAMBIO CLAVE 2: 
-            // Pausa obligatoria. Damos tiempo al navegador (400ms) para que dibuje el DOM
-            // actualizado antes de que html2canvas lance el "flash" de su cámara.
+            // 2. Mostrar el layout físicamente (el fondo negro tapa esto, no se verá feo)
+            printDiv.style.display = 'block';
+            printDiv.style.width = '800px'; // Forzar proporciones de escritorio
+            printDiv.style.backgroundColor = 'white';
+
+            // 3. Pausa para asegurar que el DOM se haya pintado antes del "flash"
             await new Promise(resolve => setTimeout(resolve, 400));
 
             const opt = {
                 margin: 6,
                 filename: 'temp.pdf',
                 image: { type: 'jpeg', quality: 0.98 },
-                // windowWidth asegura que el viewport que procesa html2canvas sea fijo
-                html2canvas: { scale: 2, useCORS: true, logging: false, windowWidth: 800 }, 
+                html2canvas: { 
+                    scale: 2, 
+                    useCORS: true, 
+                    logging: false,
+                    scrollY: 0, // Le dice a la cámara que inicie estrictamente desde arriba
+                    windowWidth: 800
+                },
                 jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
             };
 
             try {
-                return await html2pdf().set(opt).from(printDiv).outputPdf('blob');
+                // 4. MÉTODO CORRECTO (.output en lugar de .outputPdf para no cortar el renderizado)
+                return await html2pdf().set(opt).from(printDiv).output('blob');
             } finally {
-                // Dejamos todo como estaba
+                // 5. Ocultar el documento de impresión y devolver el scroll a donde estabas
                 printDiv.style.display = 'none';
-                printDiv.style.position = '';
-                printDiv.style.left = '';
-                printDiv.style.top = '';
                 printDiv.style.width = '';
                 printDiv.style.backgroundColor = '';
-                printDiv.style.zIndex = '';
+                window.scrollTo(0, originalScroll);
             }
         }
 
