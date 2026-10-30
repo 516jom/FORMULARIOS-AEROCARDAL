@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Planificación Operacional - Aerocardal</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.7/build/pdfmake.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.7/build/vfs_fonts.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer onload="initDrive()"></script>
+
+    <style>
+        :root {
+            --bg-main: #111111; --bg-card: #1E1E1E; --bg-input: #0A0A0A;
+            --border-color: #333333; --border-focus: #777777;
+            --text-main: #EEEEEE; --text-muted: #888888;
+            --accent: #FFFFFF; --accent-hover: #CCCCCC;
+            --warning: #AAAAAA; --danger: #666666; --success: #DDDDDD;
+        }
+
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        body { margin: 0; padding: 0; background-color: var(--bg-main); color: var(--text-main); -webkit-font-smoothing: antialiased; }
+
+        header { background-color: var(--bg-card); border-bottom: 1px solid var(--border-color); padding: 0.8rem 1rem; text-align: center; position: sticky; top: 0; z-index: 10; }
+        h1 { margin: 0; font-size: 1.2rem; font-weight: 700; color: var(--accent); letter-spacing: 1px;}
+        .subtitle { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; font-weight: bold; }
+
+        .container { padding: 1rem 1rem 150px 1rem; max-width: 900px; margin: 0 auto; }
+        .card { background: var(--bg-card); margin-bottom: 1.2rem; border-radius: 10px; border: 1px solid var(--border-color); overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .card-header { padding: 0.85rem 1rem; font-size: 1rem; font-weight: 600; background-color: rgba(255,255,255,0.05); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .card-content { padding: 1rem; }
+
+        details.card summary, details.param-section summary { padding: 0.85rem 1rem; font-size: 1rem; font-weight: 600; background-color: rgba(255,255,255,0.05); cursor: pointer; user-select: none; outline: none; border-bottom: 1px solid transparent; transition: background 0.2s;}
+        details.card summary::-webkit-details-marker, details.param-section summary::-webkit-details-marker { display:none; }
+        details.card summary .arrow::after, details.param-section summary .arrow::after { content: "▼"; float: right; font-size: 0.8rem; color: var(--text-muted); margin-top: 3px; margin-left: 8px;}
+        details.card[open] summary { border-bottom: 1px solid var(--border-color); }
+        details.card[open] summary .arrow::after, details.param-section[open] summary .arrow::after { content: "▲"; }
+        details.card summary:hover, details.param-section summary:hover { background-color: rgba(255,255,255,0.1); }
+
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
+        .grid-6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.5rem; }
+        @media (max-width: 600px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } .grid-3 { grid-template-columns: 1fr; } .grid-6 {grid-template-columns: repeat(3, 1fr);} }
+
+        .form-group { margin-bottom: 0.8rem; }
+        .form-group label { display: flex; justify-content: space-between; align-items: center; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.35rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        input[type="text"], input[type="number"], input[type="date"], select, textarea {
+            width: 100%; padding: 10px 12px; font-size: 1rem; color: var(--text-main);
+            border: 1px solid var(--border-color); border-radius: 6px; background-color: var(--bg-input);
+            transition: all 0.2s;
+        }
+        input:focus, select:focus, textarea:focus { border-color: var(--border-focus); outline: none; box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2); }
+        textarea { resize: vertical; min-height: 60px; font-family: inherit; }
+
+        .time-input { text-align: center; font-family: monospace; font-size: 1.2rem !important; font-weight: bold; color: var(--accent) !important; letter-spacing: 2px;}
+        .inherited-input { background-color: rgba(255, 255, 255, 0.05) !important; color: var(--accent) !important; font-weight: bold; border: 1px solid rgba(255, 255, 255, 0.3) !important; cursor: not-allowed; }
+
+        .link-btn { cursor: pointer; font-size: 1rem; user-select: none; transition: transform 0.2s; }
+        .link-btn:active { transform: scale(0.9); }
+
+        .time-sequence-box { background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.8rem; margin: 0.5rem 0 1rem 0; }
+        .time-sequence-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        @media (max-width: 550px) { .time-sequence-grid { grid-template-columns: repeat(2, 1fr); } }
+        .time-step { text-align: center; }
+        .time-step label { font-size: 0.7rem; color: var(--accent); display: block; margin-bottom: 3px; }
+        .time-step span { font-size: 0.62rem; color: var(--text-muted); display: block; margin-bottom: 6px; }
+
+        .btn { padding: 9px 14px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 0.9rem;}
+        .btn-danger { background-color: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 5px 10px; font-size: 0.75rem;}
+        .btn-success { background-color: rgba(255, 255, 255, 0.1); border: 1px solid var(--success); color: var(--success); padding: 4px 8px; font-size: 0.75rem;}
+        .btn-outline { background-color: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 10px 16px; font-size: 0.9rem;}
+
+        .summary-box { background: var(--bg-input); border: 1px solid var(--border-color); padding: 0.85rem; border-radius: 8px; }
+        .summary-title { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; text-transform: uppercase;}
+        .summary-value { font-size: 1.6rem; font-weight: bold; font-family: monospace; color: var(--text-main); }
+        .summary-sub { font-size: 0.8rem; color: var(--accent); margin-top: 2px;}
+
+        hr.divider { border: 0; border-top: 1px solid var(--border-color); margin: 12px 0; }
+        .fab-container { position: fixed; bottom: 0; left: 0; width: 100%; padding: 0.8rem 1rem; background: rgba(17, 17, 17, 0.95); backdrop-filter: blur(5px); border-top: 1px solid var(--border-color); text-align: center; z-index: 100; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;}
+        .btn-print { background-color: var(--accent); color: #000; border: none; padding: 10px 24px; font-size: 0.9rem; font-weight: bold; border-radius: 6px; }
+
+        .checkbox-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; font-size: 0.8rem; line-height: 1.3; }
+        .checkbox-item input[type="checkbox"] { flex-shrink: 0; margin-top: 2px; width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer;}
+        .form-category-title { font-size: 0.75rem; font-weight: bold; color: var(--accent); margin: 15px 0 8px 0; background: rgba(255,255,255,0.05); padding: 6px; border-radius: 4px; border-left: 3px solid var(--accent);}
+        .signature-block { margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border-color); font-size: 0.85rem; color: var(--text-muted); }
+
+        #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: none; justify-content: center; align-items: center; flex-direction: column; color: var(--accent); backdrop-filter: blur(4px); }
+        .spinner { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--accent); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div id="loading-overlay">
+        <div id="loading-spinner" class="spinner"></div>
+        <div id="loading-text" style="font-weight: bold; font-size: 1.1rem; text-align: center; margin-bottom: 20px; white-space: pre-line;">Procesando...</div>
+
+        <button id="btn-open-pdf" class="btn btn-outline" style="display:none; background-color: var(--success); color: #000; font-weight: bold; padding: 15px 30px; border-radius: 30px; font-size: 1.1rem; border: none; box-shadow: 0 4px 12px rgba(255,255,255,0.2);">
+            📂 VER PDF EN DRIVE
+        </button>
+
+        <button id="btn-close-overlay" class="btn btn-danger" style="display:none; margin-top: 20px; border: none; text-decoration: underline;" onclick="cerrarOverlay()">
+            Volver a la app
+        </button>
+    </div>
+
+    <header>
+        <h1>AEROCARDAL - PLANIFICACIÓN OPERACIONAL</h1>
+        <div class="subtitle">VERSIÓN 6.0 (CLOUD SYNC)</div>
+    </header>
+
+    <main id="mobile-ui" class="container">
+        <div class="card">
+            <div class="card-header"><span>📋 CABECERA DEL VUELO (OBLIGATORIA PARA CLOUD)</span></div>
+            <div class="card-content grid-3">
+                <div class="form-group"><label style="color:var(--accent);">Fecha del Vuelo</label><input type="date" id="m_fecha_gen" onchange="triggerUpdate()"></div>
+                <div class="form-group"><label style="color:var(--accent);">Folio BIT</label><input type="text" id="m_folio_gen" placeholder="Folio Único..." oninput="triggerUpdate()"></div>
+                <div class="form-group"><label style="color:#4285F4; text-shadow: 0 0 5px rgba(66,133,244,0.5);">P.O.V. N° (Carpeta)</label><input type="text" id="m_pov" oninput="triggerUpdate()" placeholder="Ej: 1234"></div>
+
+                <div class="form-group">
+                    <label style="color:var(--accent);">Matrícula (3 últimas letras)</label>
+                    <div style="display:flex; gap:5px; align-items:center;">
+                        <span style="font-size:0.8rem; font-weight:bold; color:var(--text-muted);">CC-</span>
+                        <input type="text" id="m_matricula_suffix" placeholder="Ej: DLI" maxlength="3" oninput="lookupAircraft()" style="text-transform: uppercase;">
+                        <input type="hidden" id="m_matricula">
+                    </div>
+                    <div id="ui_mat_msg" style="font-size:0.65rem; color:var(--text-muted); margin-top:2px; height:12px;"></div>
+                </div>
+                <div class="form-group">
+                    <label style="color:var(--accent);">Material / Aeronave</label>
+                    <input type="text" id="m_material" placeholder="Auto..." readonly class="inherited-input">
+                </div>
+
+                <div class="form-group">
+                    <label style="color:var(--accent);">Capitán (Iniciales)</label>
+                    <input type="text" id="m_pic_ini" placeholder="Ej: RE" oninput="lookupPilots()" style="text-transform: uppercase;">
+                    <div id="ui_pic_name" style="font-size:0.65rem; color:var(--text-muted); margin-top:4px; height:12px;"></div>
+                </div>
+                <div class="form-group">
+                    <label>FO (Iniciales)</label>
+                    <input type="text" id="m_sic_ini" placeholder="Ej: EI" oninput="lookupPilots()" style="text-transform: uppercase;">
+                    <div id="ui_sic_name" style="font-size:0.65rem; color:var(--text-muted); margin-top:4px; height:12px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><span>🕒 PERIODO DE SERVICIO (DUTY PERIOD)</span></div>
+            <div class="card-content grid-2">
+                <div class="form-group">
+                    <label style="color:var(--accent);">Inicio Duty Period</label>
+                    <input type="text" class="time-input" placeholder="HH:MM" id="duty_start" maxlength="5" inputmode="numeric" oninput="formatTime(this)" onblur="validateTime(this)">
+                </div>
+                <div class="form-group">
+                    <label style="color:var(--text-muted);">Término Duty Period (Editable)</label>
+                    <input type="text" class="time-input" id="duty_end" placeholder="--:--" maxlength="5" inputmode="numeric" oninput="this.dataset.manual = (this.value !== '') ? 'true' : 'false'; formatTime(this)" onblur="validateTime(this)">
+                </div>
+            </div>
+        </div>
+
+        <div id="tramos-container"></div>
+        <button class="btn btn-outline" style="width: 100%; border-style: dashed;" onclick="addLeg()">+ AGREGAR TRAMO</button>
+
+        <hr class="divider" style="margin: 20px 0;">
+        <details class="card" style="border-color: var(--accent);">
+            <summary style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="flex:1;">📝 FORMULARIO: ÍNDICE DE SEGURIDAD (SMS) <span class="arrow"></span></span>
+                <div style="display:flex; align-items:center; gap:12px; padding-left:10px; border-left:1px solid var(--border-color);" onclick="event.stopPropagation();">
+                    <label style="font-size:0.75rem; color:var(--accent); display:flex; align-items:center; gap:5px; margin:0; cursor:pointer;">
+                        <input type="checkbox" id="m_sms_sin_obs" checked onchange="toggleSinObservaciones()"> <span>Vuelo sin obs.</span>
+                    </label>
+                </div>
+            </summary>
+            <div class="card-content">
+                 <div id="sms_form_container"></div>
+                 <div class="form-group" style="margin-top:15px;">
+                     <label>Observaciones:</label>
+                     <textarea id="m_sms_obs" oninput="triggerUpdate()"></textarea>
+                 </div>
+                 <div class="signature-block">
+                     <div>Nombre y firma comandante Vuelo: <strong id="sms_ui_nombre" style="color:var(--accent);">______________________</strong></div>
+                 </div>
+            </div>
+        </details>
+
+        <div id="sec-forms-wrapper"></div>
+
+        <div class="card" style="border-color: var(--accent); margin-top: 1.2rem;">
+            <div class="card-header"><span style="color:var(--accent);">⏱️ RESUMEN GENERAL OPERACIONAL</span></div>
+            <div class="card-content">
+                <div class="summary-title" style="color: var(--accent); margin-bottom: 4px;">🏁 DESGLOSE DIARIO (DUTY, BLOCK, AIR)</div>
+                <div style="overflow-x: auto;">
+                    <table style="width:100%; border-collapse:collapse; margin-bottom:12px; font-size:0.8rem; text-align:center; background:var(--bg-input); border:1px solid var(--border-color); border-radius:8px;">
+                        <thead>
+                            <tr style="background:rgba(255,255,255,0.05); border-bottom:1px solid var(--border-color);">
+                                <th style="padding:8px; text-align:left;">Fecha</th><th>Inicio</th><th>Término</th>
+                                <th style="color:var(--accent);">Duty</th><th style="color:var(--text-muted);">Block</th><th style="color:var(--text-muted);">Air</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ui_duty_table"></tbody>
+                    </table>
+                </div>
+
+                <div class="grid-2">
+                    <div class="summary-box"><div class="summary-title">🏁 DUTY TOTAL ACUMULADO</div><div class="summary-value" id="sum_duty_hhmm">00:00</div><div class="summary-sub" id="sum_duty_dec">0.0 hrs</div></div>
+                    <div class="summary-box"><div class="summary-title">✈️ TOTAL VUELO (AIR TIME)</div><div class="summary-value" id="sum_air_hhmm">00:00</div><div class="summary-sub" id="sum_air_dec">0.0 hrs</div></div>
+                    <div class="summary-box"><div class="summary-title">🛑 TOTAL BLOQUE (BLOCK)</div><div class="summary-value" id="sum_block_hhmm">00:00</div><div class="summary-sub" id="sum_block_dec">0.0 hrs</div></div>
+                    <div class="summary-box"><div class="summary-title">👥 PAX POR TRAMO</div><div class="summary-value" style="font-size: 1.1rem;" id="sum_pax_legs">(0)</div><div class="summary-sub" style="color:transparent;">-</div></div>
+                </div>
+
+                <hr class="divider">
+                <div class="summary-title" style="color: var(--accent);">⛽ BALANCE DE COMBUSTIBLE CONSOLIDADO</div>
+                <div class="grid-4" style="margin-top: 8px;">
+                    <div class="summary-box"><div class="summary-title">1. INICIAL</div><div class="summary-value" style="font-size:1.1rem;" id="sum_fuel_init">0.0</div></div>
+                    <div class="summary-box"><div class="summary-title">2. FINAL</div><div class="summary-value" style="font-size:1.1rem; color:var(--accent);" id="sum_fuel_final">0.0</div></div>
+                    <div class="summary-box"><div class="summary-title">3. RECARGADO</div><div class="summary-value" style="font-size:1.1rem; color:var(--success);" id="sum_fuel_refuel">+0.0</div></div>
+                    <div class="summary-box"><div class="summary-title">4. CONSUMIDO</div><div class="summary-value" style="font-size:1.1rem; color:var(--danger);" id="sum_fuel_used">-0.0</div></div>
+                </div>
+
+                <hr class="divider">
+                <div class="summary-title" style="color: var(--text-main);">👨‍✈️ HORAS OP WEB (TODOS LOS PILOTOS REGISTRADOS)</div>
+                <div id="sum_pilots_container" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;"></div>
+            </div>
+        </div>
+    </main>
+
+    <div class="fab-container">
+        <button class="btn btn-danger" style="width:auto; margin:0;" onclick="clearAllData()">🗑️ Limpiar</button>
+        <button class="btn btn-outline" style="width:auto; margin:0; border-color:var(--warning); color:var(--warning);" onclick="ensureAuth(accionLeer)">📂 Leer</button>
+        <button class="btn btn-outline" style="width:auto; margin:0; border-color:var(--success); color:var(--success);" onclick="ensureAuth(accionGuardar)">💾 Guardar</button>
+        <button class="btn-print" style="width:auto; margin:0;" onclick="ensureAuth(accionGenerarPDF)">📄 Generar PDF</button>
+    </div>
+
+    <script>
+        const GOOGLE_CLIENT_ID = '520674997135-nqt9gjl00t89lkfstqglk4iecfan44em.apps.googleusercontent.com';
+        const DRIVE_API_URL = 'https://www.googleapis.com/drive/v3/files';
+        const DRIVE_UPLOAD_URL = 'https://www.googleapis.com/upload/drive/v3/files';
+        let tokenClient;
+        let accessToken = null;
+        let pendingAction = null;
+
+        function initDrive() {
+            if (!window.google) return;
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: GOOGLE_CLIENT_ID,
+                scope: 'https://www.googleapis.com/auth/drive.file',
+                callback: (tokenResponse) => {
+                    if (tokenResponse && tokenResponse.access_token) {
+                        accessToken = tokenResponse.access_token;
+                        if (pendingAction) {
+                            pendingAction();
+                            pendingAction = null;
+                        }
+                    }
+                }
+            });
+        }
+
+        function ensureAuth(actionCallback) {
+            if (!GOOGLE_CLIENT_ID) {
+                alert("⚠️ Falta el CLIENT_ID."); return;
+            }
+            if (!val('m_pov')) {
+                alert("⚠️ Por favor, ingresa el P.O.V. N° en la cabecera antes de operar en la nube.");
+                return;
+            }
+            if (!tokenClient) {
+                alert("⚠️ Google aún no se ha cargado. Intenta de nuevo en unos segundos.");
+                return;
+            }
+            if (!accessToken) {
+                pendingAction = actionCallback;
+                tokenClient.requestAccessToken({prompt: ''});
+            } else {
+                actionCallback();
+            }
+        }
+
+        function mostrarCargando(texto) {
+            el('loading-spinner').style.display = 'block';
+            el('btn-open-pdf').style.display = 'none';
+            el('btn-close-overlay').style.display = 'none';
+            el('loading-text').innerText = texto;
+            el('loading-overlay').style.display = 'flex';
+        }
+
+        function ocultarCargando() { el('loading-overlay').style.display = 'none'; }
+        function cerrarOverlay() { ocultarCargando(); }
+
+        function mostrarModalPDF(link) {
+            el('loading-spinner').style.display = 'none';
+            el('loading-text').innerText = "✅ ¡Documento listo en Google Drive!";
+            const btn = el('btn-open-pdf');
+            btn.style.display = 'block';
+            btn.onclick = () => window.open(link, '_blank');
+            el('btn-close-overlay').style.display = 'block';
+        }
+
+        const escapeDriveQuery = s => String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        const driveAuthHeader = () => ({ 'Authorization': 'Bearer ' + accessToken });
+
+        async function driveJson(res) {
+            if (!res.ok) throw new Error("Error de Google Drive (" + res.status + ")");
+            return res.json();
+        }
+
+        async function getOrCreateFolder(povName) {
+            const folderName = `POV_${povName}`;
+            const query = encodeURIComponent(`name='${escapeDriveQuery(folderName)}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+            const data = await driveJson(await fetch(`${DRIVE_API_URL}?q=${query}&fields=files(id,name)`, { headers: driveAuthHeader() }));
+            if (data.files && data.files.length > 0) return data.files[0].id;
+
+            const created = await driveJson(await fetch(DRIVE_API_URL, {
+                method: 'POST',
+                headers: { ...driveAuthHeader(), 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: folderName, mimeType: 'application/vnd.google-apps.folder' })
+            }));
+            return created.id;
+        }
+
+        async function findFileInFolder(filename, folderId) {
+            const query = encodeURIComponent(`name='${escapeDriveQuery(filename)}' and '${folderId}' in parents and trashed=false`);
+            const data = await driveJson(await fetch(`${DRIVE_API_URL}?q=${query}&fields=files(id,name,webViewLink)`, { headers: driveAuthHeader() }));
+            return (data.files && data.files.length > 0) ? data.files[0] : null;
+        }
+
+        async function uploadFileRaw(blob, filename, folderId, existingFileId = null) {
+            const metadata = existingFileId ? { name: filename } : { name: filename, parents: [folderId] };
+            const boundary = 'aerocardal_boundary_314159265';
+            const body = new Blob([
+                `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n`,
+                JSON.stringify(metadata),
+                `\r\n--${boundary}\r\nContent-Type: ${blob.type || 'application/octet-stream'}\r\n\r\n`,
+                blob,
+                `\r\n--${boundary}--`
+            ]);
+            const url = `${DRIVE_UPLOAD_URL}${existingFileId ? '/' + existingFileId : ''}?uploadType=multipart&fields=id,webViewLink`;
+            return driveJson(await fetch(url, {
+                method: existingFileId ? 'PATCH' : 'POST',
+                headers: { ...driveAuthHeader(), 'Content-Type': `multipart/related; boundary=${boundary}` },
+                body
+            }));
+        }
+
+        async function accionGuardar() {
+            mostrarCargando("Guardando progreso en Drive...");
+            try {
+                const folderId = await getOrCreateFolder(val('m_pov'));
+                const file = await findFileInFolder('Progreso.json', folderId);
+                const dataBlob = new Blob([getAllData()], { type: "application/json" });
+                await uploadFileRaw(dataBlob, 'Progreso.json', folderId, file ? file.id : null);
+                alert("✅ Progreso guardado exitosamente en la carpeta de Drive.");
+            } catch (e) {
+                alert("❌ Error: " + e.message); accessToken = null;
+            } finally { ocultarCargando(); }
+        }
+
+        async function accionLeer() {
+            mostrarCargando("Buscando progreso en Drive...");
+            try {
+                const folderId = await getOrCreateFolder(val('m_pov'));
+                const file = await findFileInFolder('Progreso.json', folderId);
+                if (!file) {
+                    alert("⚠️ No se encontró ningún progreso guardado para este POV.");
+                    return;
+                }
+                const content = await driveJson(await fetch(`${DRIVE_API_URL}/${file.id}?alt=media`, { headers: driveAuthHeader() }));
+                loadDataIntoApp(content);
+                alert("✅ Progreso recuperado.");
+            } catch (e) {
+                alert("❌ Error: " + e.message); accessToken = null;
+            } finally { ocultarCargando(); }
+        }
+
+        async function accionGenerarPDF() {
+            mostrarCargando("Generando documento PDF...\n(Espera unos segundos)");
+            try {
+                const pov = val('m_pov');
+                const pdfBlob = await generarBlobPDF();
+
+                mostrarCargando("Subiendo a Google Drive...");
+                const folderId = await getOrCreateFolder(pov);
+                const dateStr = val('m_fecha_gen') || new Date().toISOString().split('T')[0];
+                const filename = `Planificacion_POV_${pov}_${dateStr}.pdf`;
+                const existing = await findFileInFolder(filename, folderId);
+                const uploaded = await uploadFileRaw(pdfBlob, filename, folderId, existing ? existing.id : null);
+                if (!uploaded.webViewLink) throw new Error("Drive no devolvió el enlace del archivo");
+
+                mostrarModalPDF(uploaded.webViewLink);
+            } catch (e) {
+                alert("❌ Error: " + e.message);
+                accessToken = null;
+                ocultarCargando();
+            }
+        }
+
+        const el = id => document.getElementById(id);
+        const val = id => el(id)?.value || '';
+        const setVal = (id, v) => { if (el(id)) el(id).value = v; };
+        const setTxt = (id, t) => { if (el(id)) el(id).innerHTML = t; };
+
+        let legIds = [], nextLegId = 1, refuelData = {};
+        let updateRAF = null;
+        let secManualState = {};
+        let lastCalc = null;
+
+        const ordinals = ["", "PRIMER", "SEGUNDO", "TERCER", "CUARTO", "QUINTO", "SEXTO", "SÉPTIMO", "OCTAVO"];
+        const formatDec = val => Number(val || 0).toFixed(1);
+
+        const aeronavesDB = [
+            { trigram: "AOA", matricula: "CC-AOA", material: "G-150" },
+            { trigram: "CWK", matricula: "CC-CWK", material: "G-150" },
+            { trigram: "CWC", matricula: "CC-CWC", material: "D-228" },
+            { trigram: "CWX", matricula: "CC-CWX", material: "D-228" },
+            { trigram: "ANY", matricula: "CC-ANY", material: "PC-12" },
+            { trigram: "DLI", matricula: "CC-DLI", material: "L-410" },
+            { trigram: "DPA", matricula: "CC-DPA", material: "L-410" },
+            { trigram: "DPB", matricula: "CC-DPB", material: "L-410" },
+            { trigram: "DRS", matricula: "CC-DRS", material: "PC-24" }
+        ];
+
+        function lookupAircraft() {
+            const suffix = val('m_matricula_suffix').trim().toUpperCase();
+            const matInput = el('m_material');
+            const fullMatInput = el('m_matricula');
+            const msgDiv = el('ui_mat_msg');
+
+            if (!suffix) { matInput.value = ''; if (fullMatInput) fullMatInput.value = ''; if (msgDiv) msgDiv.innerHTML = '&nbsp;'; triggerUpdate(); return; }
+
+            const matches = aeronavesDB.filter(a => a.trigram.toUpperCase() === suffix || a.matricula.toUpperCase().endsWith(suffix) || a.matricula.toUpperCase() === suffix);
+
+            if (matches.length === 1) { matInput.value = matches[0].material; if (fullMatInput) fullMatInput.value = matches[0].matricula; if (msgDiv) msgDiv.innerHTML = `✅ ${matches[0].matricula}`; }
+            else if (matches.length > 1) { matInput.value = ''; if (fullMatInput) fullMatInput.value = ''; if (msgDiv) msgDiv.innerHTML = `⚠️ Múltiples (${matches.map(m => m.matricula).join(', ')})`; }
+            else { matInput.value = ''; if (fullMatInput) fullMatInput.value = ''; if (msgDiv) msgDiv.innerHTML = `❌ No encontrada`; }
+            triggerUpdate();
+        }
+
+        const pilotosDB = {
+          "JA": { "nombre": "José Arellano G.", "rut": "8.621.855-0", "licencia": "1641" },
+          "SS": { "nombre": "Sebastian Saez X.", "rut": "99.999.999-9", "licencia": "9999" },
+          "FC": { "nombre": "Felipe Casampere G.", "rut": "15.781.258-0", "licencia": "2114" },
+          "AC": { "nombre": "Alfredo Castro C.", "rut": "7.155.617-4", "licencia": "920" },
+          "RE": { "nombre": "Ricardo Espinosa U.", "rut": "6.827.727-2", "licencia": "674" },
+          "IF": { "nombre": "Iván Fabry R.", "rut": "6.111.339-8", "licencia": "1359" },
+          "FG": { "nombre": "Felipe Guínez A.", "rut": "15.771.343-4", "licencia": "2217" },
+          "EI": { "nombre": "Esteban Inostroza L.", "rut": "12.120.521-1", "licencia": "1256" },
+          "AK": { "nombre": "Alexander Kaufmann R.", "rut": "6.926.596-0", "licencia": "4185" },
+          "EM": { "nombre": "Enrique Mancini A.", "rut": "19.310.398-7", "licencia": "4148" },
+          "NM": { "nombre": "Nicolás Mohr S.", "rut": "18239044-5", "licencia": "8888" },
+          "CM": { "nombre": "Claudio Muñoz P.", "rut": "7.999.795-1", "licencia": "921" },
+          "FE": { "nombre": "Francisco Esquivel C.", "rut": "88.888.888-8", "licencia": "1899" },
+          "JO": { "nombre": "José Oyarzún M.", "rut": "16.239.897-0", "licencia": "2387" },
+          "FCH":{ "nombre": "Fernando  Chacana X.", "rut": "66.666.666-6", "licencia": "2604" },
+          "MS": { "nombre": "Mauricio Solano P.", "rut": "14.322.271-3", "licencia": "1657" },
+          "CV": { "nombre": "Cristhian Vázquez F.", "rut": "15.549.870-6", "licencia": "3435" },
+          "MV": { "nombre": "Matías Vega C.", "rut": "77.777.777-7", "licencia": "7777" },
+          "KW": { "nombre": "Klaus Wobbe S.", "rut": "14.103.915-6", "licencia": "1741" },
+          "CB": { "nombre": "Cristobal Briones B.", "rut": "10.345.076-4", "licencia": "2740" }
+        };
+
+        let capitanActual = { nombre: "", rut: "", licencia: "" };
+        let foActual = { nombre: "" };
+
+        function formatNameForSMS(fullName) {
+            if (!fullName) return "";
+            const parts = fullName.split(' ');
+            if (parts.length >= 2) return (parts[0][0] + ". " + parts[1]).toUpperCase();
+            return fullName.toUpperCase();
+        }
+
+        function lookupPilots() {
+            const picIni = val('m_pic_ini').toUpperCase();
+            const sicIni = val('m_sic_ini').toUpperCase();
+            if (pilotosDB[picIni]) { capitanActual = pilotosDB[picIni]; setTxt('ui_pic_name', `👤 ${capitanActual.nombre}`); }
+            else { capitanActual = { nombre: "", rut: "", licencia: "" }; setTxt('ui_pic_name', picIni ? 'No encontrado' : '&nbsp;'); }
+            if (pilotosDB[sicIni]) { foActual = pilotosDB[sicIni]; setTxt('ui_sic_name', `👤 ${foActual.nombre}`); }
+            else { foActual = { nombre: "" }; setTxt('ui_sic_name', sicIni ? 'No encontrado' : '&nbsp;'); }
+            updateFormFooters(); triggerUpdate();
+        }
+
+        function updateFormFooters() {
+            const nom = capitanActual.nombre || "______________________";
+            const rut = capitanActual.rut || "______________________";
+            const lic = capitanActual.licencia || "______________________";
+            setTxt('sms_ui_nombre', nom);
+            document.querySelectorAll('[id^="sec_ui_nombre_"]').forEach(e => e.textContent = nom);
+            document.querySelectorAll('[id^="sec_ui_rut_"]').forEach(e => e.textContent = rut);
+            document.querySelectorAll('[id^="sec_ui_licencia_"]').forEach(e => e.textContent = lic);
+        }
+
+        function toggleSinObservaciones() {
+            const isChecked = el('m_sms_sin_obs')?.checked;
+            for (let i = 1; i <= 47; i++) {
+                const cb = el(`m_sms_${i}`);
+                if (cb) { if (isChecked) cb.checked = false; cb.disabled = isChecked; }
+            }
+            triggerUpdate();
+        }
+
+        function toggleSecSinObs(dateKey) {
+            const isChecked = el(`m_sec_sin_obs_${dateKey}`)?.checked;
+            secManualState[dateKey] = secManualState[dateKey] || {};
+            secManualState[dateKey].sinObs = isChecked;
+            ['A','B','C','D','E','F','G','H','I','J','K'].forEach(id => {
+                const cb = el(`m_sec_${dateKey}_${id}`);
+                if (cb) { cb.checked = isChecked; cb.disabled = isChecked; secManualState[dateKey][id] = isChecked; }
+            });
+            triggerUpdate();
+        }
+
+        function handleSecCheckboxChange(dateKey, id) {
+            const cb = el(`m_sec_${dateKey}_${id}`);
+            if (cb) { secManualState[dateKey] = secManualState[dateKey] || {}; secManualState[dateKey][id] = cb.checked; }
+            triggerUpdate();
+        }
+
+        function renderSecurityForms(dates, legsByDate) {
+            const container = el('sec-forms-wrapper');
+            const prev = {};
+            container.querySelectorAll('input, textarea').forEach(i => { prev[i.id] = i.type === 'checkbox' ? i.checked : i.value; });
+            const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+
+            container.innerHTML = dates.map(dateKey => {
+                const legs = legsByDate[dateKey] || [];
+                const first = legs[0], last = legs[legs.length - 1];
+                const fields = [
+                    ['est', 'Estacionamiento', ''],
+                    ['origen', 'Origen', first?.desde || ''],
+                    ['destino', 'Destino', last?.dest || ''],
+                    ['hinicio', 'H. inicio', first?.tOut || ''],
+                    ['htermino', 'H. término', last?.tIn || ''],
+                    ['alerta', 'Alerta', '']
+                ];
+                const fieldsHtml = fields.map(([name, label, def]) =>
+                    `<div class="form-group"><label>${label}</label><input type="text" id="m_sec_${name}_${dateKey}" value="${esc(def)}" oninput="triggerUpdate()"></div>`
+                ).join('');
+                const itemsHtml = secData.map(item =>
+                    `<label class="checkbox-item"><input type="checkbox" id="m_sec_${dateKey}_${item.id}" onchange="handleSecCheckboxChange('${dateKey}', '${item.id}')"> <span><strong>${item.id}.</strong> ${item.text}</span></label>`
+                ).join('');
+                return `
+                <div class="card" id="sec_card_${dateKey}">
+                    <div class="card-header"><span>🛡️ Inspección de seguridad · ${dateKey}</span></div>
+                    <div class="card-content">
+                        <div class="grid-3">${fieldsHtml}</div>
+                        <label class="checkbox-item"><input type="checkbox" id="m_sec_sin_obs_${dateKey}" onchange="toggleSecSinObs('${dateKey}')"> <span>Sin observaciones</span></label>
+                        <div>${itemsHtml}</div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            Object.entries(prev).forEach(([id, value]) => {
+                const input = el(id);
+                if (!input) return;
+                if (input.type === 'checkbox') input.checked = value;
+                else input.value = value;
+            });
+            dates.forEach(dateKey => {
+                const sinObs = el(`m_sec_sin_obs_${dateKey}`);
+                if (!sinObs?.checked) return;
+                secData.forEach(item => { const cb = el(`m_sec_${dateKey}_${item.id}`); if (cb) { cb.disabled = true; } });
+            });
+        }
+
+        const smsData = [
+            { cat: "I. OPERACIONES DE DESPEGUE - ATERRIZAJE Y EN TIERRA", items: ["Colisión en tierra", "Casi colisión en tierra", "Pérdida de control en tierra", "Salida de la pista", "Incursión en la pista", "Aterrizaje antes de la pista/Después de la pista", "Contacto anormal con la pista", "Incidente derivado de evacuación", "Incidente por: gestión de tránsito aéreo/Comunicaciones(fallas o degradadas)/Vigilancia", "Despegue interrumpido después de alcanzar potencia de despegue", "Aproximación no estabilizada a menos de 500 pies", "Se lleva a cabo una aproximación frustrada a menos de 1000 pies encima del nivel del terreno", "Los procedimientos o el equipo de seguridad operacional son inadecuados o tienen defecto", "Deficiencias graves en la documentación operacional", "Modo incorrecto de cargar combustible, carga o mercancías peligrosas", "Condiciones de superficie peligrosa (Hielo, nieve fundente, frenado deficiente)", "Choque con ave, o daño por objetos extraños (FOD)", "Algunos tripulantes o pasajeros están gravemente enfermos, lesionados, incapacitados o mueren", "Pasajeros violentos, armados o intoxicados, o cuando sea necesario inmovilizar"] },
+            { cat: "II. OPERACIONES EN EL AIRE", items: ["Alerta TCAS/pérdida de separación/casi colisión en el aire", "Colisión en el aire", "Vuelo controlado contra/hacia el terreno (CFIT)", "Pérdida de control en vuelo (Incluye pérdida de sustentación)", "Incidente por gestión de combustible (Aterriza con combustible de reserva o menos)", "Incidente por: Gestión de tránsito aéreo/comunicación-navegación vigilancia", "Incidente por: Configuración de la aeronave (manual-automática)en cualquier fase del vuelo", "Se declara emergencia (la que sea)", "Error de navegación con una desviación importante en la derrota", "Se produce una desviación vertical de más de 500 pies", "Se exceden los parámetros que limitan la configuración de la aeronave", "Desviación importante de los SOP", "Activación del GPWS/TAWS", "Suceso RA del TCAS/ACAS"] },
+            { cat: "III. METEOROLOGÍA", items: ["Incidente por gradiente transversal de la velocidad del viento", "Incidente por tormenta eléctrica", "Incidente por encuentro con turbulencia", "Incidente por formación de hielo"] },
+            { cat: "IV. AERONAVE", items: ["Falla o mal funcionamiento del sistema/Componente (motor), o exceden límites máximos operacionales permitidos del motor en cualquier etapa del vuelo", "Falla o mal funcionamiento del sistema/componente (No del motor)", "Incendio/Humo (Sin impacto)", "Eventos de seguridad en cabina", "Es necesaria una inspección de aterrizaje pesado"] },
+            { cat: "V. TRIPULACIÓN DE VUELO", items: ["Incidente por: Pérdida/Falta de conciencia situacional (Aire/Tierra)", "Incidente por: Falla de CRM/Cross Check- Crew coordinación", "Incidente por: fatiga/estado mental/desorientación espacial/Ilusión visual/incapacitación/Enfermedad y otros factores que reduzcan la performance psicofísica de la tripulación de vuelo", "Incidente por: Falta de/Inadecuada cualificación/Entrenamiento o experiencia", "Incidente por: Interacción con la automatización/Incorrecta selección de instrumentos/radio ayudas/Modos de automatismo/Configuración"] }
+        ];
+
+        const secData = [
+            { id: 'A', text: "INTERIOR DE LA AERONAVE: Asientos, incluyendo bolsas, cojines y por debajo de los asientos, compartimentos para libros de vuelo y manual de vuelo, compartimento de máscaras de oxígeno de la tripulación, el piso, parte delante de los pedales del timón de dirección y por debajo de todos los asientos del puesto de pilotaje; techo, paredes laterales y posteriores; compartimento de chalecos salvavidas, guardarropas y lugar de depósito de equipaje de la tripulación de vuelo; mesa y gavetas, botiquín de primeros auxilios." },
+            { id: 'B', text: "ENTRADA A LA AERONAVE: Escala de acceso a la aeronave, paredes laterales y frontales de la aeronave, parte superior de la puerta de acceso, piso de la entrada a la aeronave y sus paredes laterales." },
+            { id: 'C', text: "COMPARTIMENTO DE PASAJEROS: Asientos de pasajeros, cojines, bolsones de asientos de pasajeros, debajo de asientos de pasajeros y sus compartimentos o gavetas si las tiene, parte posterior del respaldo de cada asiento de pasajeros, apoya cabezas de los asientos de pasajeros, paredes laterales, bandejas de cortesía de pasajeros y su interior, techo o parte superior del compartimento de pasajeros." },
+            { id: 'D', text: "BAÑO: Puerta de acceso al baño si la aeronave lo tiene, compartimento de útiles de baño, galley del baño, asiento y tapa del wc, gabinetes y compartimento de basura del baño." },
+            { id: 'E', text: "GALLEY PRINCIPAL: Si la aeronave cuenta con galley, se revisará todos los compartimentos que tenga, gavetas y cajones de almacenamiento de cubiertos, vajilla, útiles de servicio, compartimento para el hielo, compartimento para vasos y copas, compartimento para guardar el catering, bandejas de servicio, servilleteros, botellas de licores, vinos, cervezas o bebidas, compartimento de basuras." },
+            { id: 'F', text: "EXTERIOR DE LA AERONAVE - FUSELAJE: Todas las tapas o puertas de acceso a los diferentes sistemas, compartimento de conexión al GPU o similar, tapas de acceso al sistema de agua potable si lo tuviere y de limpieza del baño si lo tuviere; tapas del sistema hidráulico, eléctrico o cualquier otro sistema que se acceda en el fuselaje, sistemas de antenas, tomas de presión estática, tapas para el reabastecimiento de combustible, cualquier otra tapa o puerta de acceso que tenga la aeronave." },
+            { id: 'G', text: "COMPARTIMENTO DE ACCESORIOS: Si la aeronave cuenta con compartimento dedicado a los accesorios o sistemas eléctricos, electrónicos, hidráulicos, de enfriamiento u otros sistemas, se deben revisar que en el interior de cada uno de ellos estén libres de cualquier objeto extraño o elementos prohibidos, armas, explosivos, líquidos ya sean inflamable o corrosivos." },
+            { id: 'H', text: "COMPARTIMENTO DE CARGA: Compartimento de carga delantero y trasero, especialmente verificando que no existan elementos prohibidos o sospechosos, puerta de acceso a cada compartimento, interior, piso y techo del compartimento, sistemas abisagrados." },
+            { id: 'I', text: "CAVIDADES DE ALOJAMIENTO DE LAS RUEDAS DEL TREN DE ATERRIZAJE: Alojamiento de la rueda de nariz, paneles, compartimento, paredes internas, sistema hidráulico del tren de aterrizaje, pistones y palancas de la rueda de nariz. Compartimento de alojamiento del tren principal de ambas ruedas, actuadores, vigas, brazos, montantes, compartimento interno, paredes y techo de cada uno de esos compartimentos de las ruedas derecha e izquierda." },
+            { id: 'J', text: "ALAS: Revisar secciones de los flaps de cada ala, cubiertas de cierre, tapas de combustible si las tuviere en esa posición, slats, alas en general, tapas de acceso a sistemas si los tuviere en esa estructura." },
+            { id: 'K', text: "MOTORES Y SUS SOPORTES: Toma de entrada y de salida de los motores, tapa de aceite, álabes, hélices, cubos de las hélices, tapas de acceso a cada motor, sistema de escape, montantes del motor y cualquier tapa de inspección visual que cuente cada motor." }
+        ];
+
+        function buildForms() {
+            let smsHtml = '';
+            let globalIndex = 1;
+            smsData.forEach(cat => {
+                smsHtml += `<div class="form-category-title">${cat.cat}</div>`;
+                cat.items.forEach(item => {
+                    smsHtml += `<label class="checkbox-item"><input type="checkbox" id="m_sms_${globalIndex}" onchange="triggerUpdate()"> <span>${globalIndex}. ${item}</span></label>`;
+                    globalIndex++;
+                });
+            });
+            el('sms_form_container').innerHTML = smsHtml;
+        }
+
+        function triggerUpdate() { if (updateRAF) cancelAnimationFrame(updateRAF); updateRAF = requestAnimationFrame(updateAll); }
+
+        function formatTime(input) {
+            let v = input.value.replace(/\D/g, '').substring(0, 4);
+            input.value = v.length >= 3 ? v.substring(0, 2) + ':' + v.substring(2, 4) : v;
+            if (v.length === 4) validateTime(input);
+        }
+
+        function validateTime(input) {
+            if (!input.value) return triggerUpdate();
+            let [h, m] = input.value.split(':').map(Number);
+            if (input.value.includes(':')) { h = Math.min(h || 0, 23); m = Math.min(m || 0, 59); input.value = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`; }
+            else { input.value = ""; }
+            triggerUpdate();
+        }
+
+        const timeToMins = t => { if (!t || !t.includes(':')) return null; const [h, m] = t.split(':').map(Number); return (isNaN(h) || isNaN(m)) ? null : h * 60 + m; };
+        const minsToTime = m => { if (m === null || isNaN(m)) return "--:--"; m = (m % 1440 + 1440) % 1440; return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`; };
+        const timeDiffMins = (start, end) => { const s = timeToMins(start), e = timeToMins(end); if (s === null || e === null) return 0; return e - s < 0 ? (e - s) + 1440 : e - s; };
+        const addMins = (t, mins) => { if (!t || !t.includes(':')) return ""; let [h, m] = t.split(':').map(Number); let total = h * 60 + m + mins; total = ((total % 1440) + 1440) % 1440; return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`; };
+
+        function toggleLink(id, field) {
+            const input = el(`m_t${id}_${field}`), btn = el(`lbtn_${field}_${id}`);
+            const isLinked = input.dataset.linked === "true";
+            input.dataset.linked = !isLinked; input.readOnly = !isLinked;
+            input.classList.toggle('inherited-input', !isLinked);
+            btn.textContent = isLinked ? "🔓" : "🔗"; btn.title = isLinked ? "Restablecer herencia" : "Desvincular";
+            if (isLinked) triggerUpdate();
+        }
+
+        function addRefuelRecord(id) { (refuelData[id] = refuelData[id] || []).push({ id: Date.now(), amount: '', time: '' }); renderRefuels(id); }
+        function removeRefuelRecord(legId, recordId) { refuelData[legId] = refuelData[legId].filter(r => r.id !== recordId); renderRefuels(legId); }
+        function updateRefuelRecord(legId, recordId, field, value) { const rec = refuelData[legId].find(r => r.id === recordId); if (rec) rec[field] = value; triggerUpdate(); }
+
+        function renderRefuels(id) {
+            const container = el(`refuel_container_${id}`);
+            if (!container) return;
+            container.innerHTML = (refuelData[id] || []).map(r => `
+                <div style="display:flex; gap:4px; align-items:center;">
+                    <input type="number" step="0.1" placeholder="Lbs/Kg" style="padding:6px; font-size:0.85rem;" value="${r.amount}" oninput="updateRefuelRecord(${id}, ${r.id}, 'amount', this.value)">
+                    <input type="text" class="time-input" placeholder="HH:MM" maxlength="5" inputmode="numeric" style="padding:6px; font-size:0.85rem;" value="${r.time}" oninput="formatTime(this)" onblur="validateTime(this); updateRefuelRecord(${id}, ${r.id}, 'time', this.value)">
+                    <button class="btn btn-danger" style="padding:4px 8px;" onclick="removeRefuelRecord(${id}, ${r.id})">X</button>
+                </div>`).join('');
+            triggerUpdate();
+        }
+
+        const getLegRefuelTotal = id => (refuelData[id] || []).reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
+
+        function getLegHTML(id, index, defaultOrigin = '') {
+            refuelData[id] = [];
+            return `
+            <div class="card" id="leg_card_${id}">
+                <div class="card-header"><span>🛫 ${ordinals[index] || index + '°'} TRAMO (Leg #${index})</span>${index > 1 ? `<button class="btn btn-danger" onclick="removeLeg(${id})">Eliminar</button>` : ''}</div>
+                <div class="card-content">
+                    <div class="grid-4" style="margin-bottom: 8px;">
+                        <div class="form-group"><label>Desde <span class="link-btn" id="lbtn_desde_${id}" onclick="toggleLink(${id}, 'desde')">🔗</span></label><input type="text" id="m_t${id}_desde" data-linked="true" value="${defaultOrigin}" style="text-transform: uppercase;" oninput="triggerUpdate()"></div>
+                        <div class="form-group"><label>Destino</label><input type="text" id="m_t${id}_dest" oninput="triggerUpdate()" style="text-transform: uppercase;"></div>
+                        <div class="form-group"><label>PF</label><input type="text" id="m_t${id}_pf" placeholder="Ej: RE" oninput="triggerUpdate()"></div>
+                        <div class="form-group"><label>PM</label><input type="text" id="m_t${id}_pm" placeholder="Ej: EI" oninput="triggerUpdate()"></div>
+                    </div>
+                    <div class="time-sequence-box">
+                        <div style="font-size:0.72rem; color:var(--text-main); margin-bottom:8px; font-weight:bold;">SECUENCIA HORARIA (ESTRICTA 24H)</div>
+                        <div class="time-sequence-grid">
+                            <div class="time-step"><label>1. BLOCK OUT</label><span>Salida Calzos</span><input type="text" class="time-input" placeholder="HH:MM" maxlength="5" inputmode="numeric" id="m_t${id}_time_out" oninput="formatTime(this)" onblur="validateTime(this)"></div>
+                            <div class="time-step"><label>2. AIR OFF</label><span>Despegue</span><input type="text" class="time-input" placeholder="HH:MM" maxlength="5" inputmode="numeric" id="m_t${id}_time_off" oninput="formatTime(this)" onblur="validateTime(this)"></div>
+                            <div class="time-step"><label>3. AIR ON</label><span>Aterrizaje</span><input type="text" class="time-input" placeholder="HH:MM" maxlength="5" inputmode="numeric" id="m_t${id}_time_on" oninput="formatTime(this)" onblur="validateTime(this)"></div>
+                            <div class="time-step"><label>4. BLOCK IN</label><span>Llegada Calzos</span><input type="text" class="time-input" placeholder="HH:MM" maxlength="5" inputmode="numeric" id="m_t${id}_time_in" oninput="formatTime(this)" onblur="validateTime(this)"></div>
+                        </div>
+                        <div style="margin-top:8px; padding:6px; background:rgba(255,255,255,0.05); border-radius:6px; font-size:0.75rem; text-align:center; border: 1px dashed rgba(255,255,255,0.2);">
+                            <span style="color:var(--text-muted);">BLOCK TIME:</span> <strong id="ui_t${id}_block_diff" style="color:var(--text-main);">--:--</strong> &nbsp;|&nbsp; <span style="color:var(--text-muted);">AIR TIME:</span> <strong id="ui_t${id}_air_diff" style="color:var(--text-main);">--:--</strong>
+                        </div>
+                    </div>
+                    <div class="grid-2">
+                        <div><label style="font-size:0.7rem; color:var(--text-muted); font-weight:bold;">HORÓMETRO</label><div style="display:flex; gap:5px; margin-top:4px;"><input type="number" step="0.1" id="m_t${id}_horo_bot" placeholder="Inicial" oninput="triggerUpdate()"><input type="number" step="0.1" id="m_t${id}_horo_top" placeholder="Final" oninput="this.dataset.manual = (this.value !== '') ? 'true' : 'false'; triggerUpdate()"></div></div>
+                        <div><label style="font-size:0.7rem; color:var(--text-muted); font-weight:bold;">DATOS EXTRA</label><div style="display:flex; gap:5px; margin-top:4px;"><input type="number" id="m_t${id}_pax" placeholder="PAX" oninput="triggerUpdate()"><input type="text" id="m_t${id}_dist" placeholder="Dist" oninput="triggerUpdate()"></div></div>
+                    </div>
+                    <div style="margin-top:12px; padding:10px; border:1px solid var(--border-color); border-radius:8px; background:rgba(0,0,0,0.2);">
+                        <label style="font-size:0.75rem; color:var(--text-main); font-weight:bold; margin-bottom:8px; display:block;">COMBUSTIBLE PRINCIPAL (1 DECIMAL)</label>
+                        <div class="grid-3">
+                            <div><label style="font-size:0.65rem; color:var(--text-muted);">1. FUEL ON</label><input type="number" step="0.1" id="m_t${id}_fuel_on" oninput="this.dataset.manual=(this.value !== '') ? 'true' : 'false'; triggerUpdate()"></div>
+                            <div><label style="font-size:0.65rem; color:var(--text-muted);">2. FUEL OFF</label><input type="number" step="0.1" id="m_t${id}_fuel_off" oninput="triggerUpdate()"></div>
+                            <div style="background:rgba(255,255,255,0.03); padding:6px; border-radius:6px; border: 1px dashed var(--border-color);"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;"><span style="font-size:0.65rem; color:var(--success);">3. REFUEL</span><button class="btn btn-success" onclick="addRefuelRecord(${id})">+ Añadir</button></div><div id="refuel_container_${id}" style="display:flex; flex-direction:column; gap:4px;"></div></div>
+                        </div>
+                    </div>
+                    <details class="param-section" style="background: rgba(255,255,255,0.02); border: 1px dashed var(--border-color); border-radius: 8px; margin-top: 15px;">
+                        <summary style="display:flex; justify-content:space-between; align-items:center; padding: 12px;"><div style="font-size: 0.8rem; font-weight: bold; flex:1;">⚙️ PARÁMETROS DE VUELO Y WAYPOINTS <span class="arrow"></span></div></summary>
+                        <div style="padding: 0 12px 12px 12px;">
+                            <div class="grid-6">${['fl','mach','isa','oat','gspd','ff','n1','n2','oilt','oilp','itt','obs'].map(f => `<div class="form-group"><label>${f.toUpperCase()}</label><input type="text" id="m_t${id}_${f}" oninput="triggerUpdate()"></div>`).join('')}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-main); font-weight: bold; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; margin: 10px 0;">🛢️ COMBUSTIBLE WAYPOINTS</div>
+                            <div class="grid-4">${[1,2,3,4].map(w => `<div style="background:rgba(0,0,0,0.2); padding:5px; border-radius:4px;"><div class="form-group"><label>WP ${w}</label><input type="text" id="m_t${id}_wp${w}" oninput="triggerUpdate()"></div><div class="form-group"><label>Plan</label><input type="text" id="m_t${id}_cp${w}" oninput="triggerUpdate()"></div><div class="form-group"><label>Real</label><input type="text" id="m_t${id}_cr${w}" oninput="triggerUpdate()"></div></div>`).join('')}</div>
+                            <div class="grid-2" style="margin-top:10px;"><div class="form-group"><label>METEOROLOGÍA</label><textarea id="m_t${id}_meteo" oninput="triggerUpdate()"></textarea></div><div class="form-group"><label>AUTORIZACIÓN ATC</label><textarea id="m_t${id}_atc" oninput="triggerUpdate()"></textarea></div></div>
+                        </div>
+                    </details>
+                    <hr class="divider">
+                    <div class="grid-4">
+                        <div class="form-group"><label>Fecha <span class="link-btn" id="lbtn_fecha_${id}" onclick="toggleLink(${id}, 'fecha')">🔗</span></label><input type="date" id="m_t${id}_fecha" data-linked="true"></div>
+                        <div class="form-group"><label>Folio BIT <span class="link-btn" id="lbtn_folio_${id}" onclick="toggleLink(${id}, 'folio')">🔗</span></label><input type="text" id="m_t${id}_folio" data-linked="true"></div>
+                        <div class="form-group"><label>Vientos</label><input type="text" id="m_t${id}_winds" oninput="triggerUpdate()"></div>
+                        <div class="form-group"><label>Aterrizaje</label><div style="display:flex; gap:6px; margin-top:2px;"><select id="m_t${id}_dn" onchange="triggerUpdate()"><option value="">D/N</option><option value="D">Diurno (D)</option><option value="N">Nocturno (N)</option></select><select id="m_t${id}_pnp" onchange="triggerUpdate()"><option value="">APP</option><option value="P">P</option><option value="NP">NP</option></select></div></div>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function addLeg(defaultOrigin = '') {
+            const id = nextLegId++;
+            const index = legIds.push(id);
+            el('tramos-container').insertAdjacentHTML('beforeend', getLegHTML(id, index, defaultOrigin));
+
+            const dLink = el(`m_t${id}_desde`), dBtn = el(`lbtn_desde_${id}`);
+            if (index === 1) {
+                dLink.dataset.linked = "false";
+                dLink.classList.remove('inherited-input');
+                dBtn.style.display = "none";
+            } else {
+                dLink.dataset.linked = "true"; dLink.readOnly = true; dLink.classList.add('inherited-input');
+            }
+            ['fecha', 'folio'].forEach(f => {
+                const field = el(`m_t${id}_${f}`);
+                field.dataset.linked = "true"; field.readOnly = true; field.classList.add('inherited-input');
+            });
+            triggerUpdate();
+        }
+
+        function removeLeg(id) {
+            if (!confirm("¿Eliminar tramo? Actualizará continuidad.")) return;
+            legIds = legIds.filter(l => l !== id);
+            el(`leg_card_${id}`).remove();
+            legIds.forEach((lId, i) => {
+                el(`leg_card_${lId}`).querySelector('.card-header span').innerHTML = `🛫 ${ordinals[i + 1] || (i + 1) + '°'} TRAMO (Leg #${i + 1})`;
+            });
+            if (legIds.length > 0) {
+                const fId = legIds[0], dLink = el(`m_t${fId}_desde`), dBtn = el(`lbtn_desde_${fId}`);
+                dLink.dataset.linked = "false"; dLink.readOnly = false; dLink.classList.remove('inherited-input');
+                dBtn.style.display = "none";
+            }
+            triggerUpdate();
+        }
+
+        function resetSecTime(dateKey, type) {
+            secManualState[dateKey] = secManualState[dateKey] || {};
+            if (type === 'hinicio') secManualState[dateKey].hinicioManual = false;
+            if (type === 'htermino') secManualState[dateKey].hterminoManual = false;
+            triggerUpdate();
+        }
+
+        function updateAll() {
+            let totalAirMins = 0, totalBlockMins = 0, totalFuelUsed = 0, globalRefuel = 0;
+            const pilotStats = {}, paxArray = [], legs = [];
+            const gDate = val('m_fecha_gen'), gFolio = val('m_folio_gen');
+            const legsByDate = {};
+
+            legIds.forEach((id, i) => {
+                const fechaEl = el(`m_t${id}_fecha`), folioEl = el(`m_t${id}_folio`), desdeEl = el(`m_t${id}_desde`);
+                if (fechaEl.dataset.linked === "true") fechaEl.value = gDate;
+                if (folioEl.dataset.linked === "true") folioEl.value = gFolio;
+                if (i > 0 && desdeEl.dataset.linked === "true") desdeEl.value = val(`m_t${legIds[i - 1]}_dest`);
+
+                const legDate = fechaEl.value || gDate || new Date().toISOString().split('T')[0];
+                const desde = val(`m_t${id}_desde`).toUpperCase(), dest = val(`m_t${id}_dest`).toUpperCase();
+                const tOut = val(`m_t${id}_time_out`), tOff = val(`m_t${id}_time_off`);
+                const tOn = val(`m_t${id}_time_on`), tIn = val(`m_t${id}_time_in`);
+
+                const bDiff = tOut && tIn ? timeDiffMins(tOut, tIn) : 0;
+                const aDiff = tOff && tOn ? timeDiffMins(tOff, tOn) : 0;
+
+                const hBot = el(`m_t${id}_horo_bot`), hTop = el(`m_t${id}_horo_top`);
+                if (i === 0) { hBot.readOnly = false; }
+                else {
+                    const prevTop = parseFloat(val(`m_t${legIds[i - 1]}_horo_top`));
+                    hBot.readOnly = true;
+                    hBot.value = !isNaN(prevTop) ? formatDec(prevTop) : '';
+                }
+                const valBot = parseFloat(hBot.value);
+                if (hTop.dataset.manual !== "true" && !isNaN(valBot) && aDiff > 0) hTop.value = formatDec(valBot + (aDiff / 60));
+                const valTop = parseFloat(hTop.value);
+                const horoDiff = !isNaN(valBot) && !isNaN(valTop) ? formatDec(valTop - valBot) : '';
+
+                const refuelTotal = getLegRefuelTotal(id);
+                globalRefuel += refuelTotal;
+                const fOn = el(`m_t${id}_fuel_on`), fOff = el(`m_t${id}_fuel_off`);
+                if (i > 0 && (fOn.dataset.manual !== 'true' || fOn.value === '')) {
+                    const prevOff = parseFloat(val(`m_t${legIds[i - 1]}_fuel_off`));
+                    const prevRefuel = getLegRefuelTotal(legIds[i - 1]);
+                    if (!isNaN(prevOff)) { fOn.value = formatDec(prevOff + prevRefuel); fOn.dataset.manual = 'false'; }
+                    else { fOn.value = ''; }
+                }
+                const valOn = parseFloat(fOn.value), valOff = parseFloat(fOff.value);
+                const fuelDiff = (!isNaN(valOn) && !isNaN(valOff)) ? Math.max(0, valOn - valOff) : null;
+                if (fuelDiff) totalFuelUsed += fuelDiff;
+
+                const bStr = bDiff > 0 ? `${minsToTime(bDiff)} (${formatDec(bDiff / 60)})` : '';
+                const aStr = aDiff > 0 ? `${minsToTime(aDiff)} (${formatDec(aDiff / 60)})` : '';
+                setTxt(`ui_t${id}_block_diff`, bStr || '--:--');
+                setTxt(`ui_t${id}_air_diff`, aStr || '--:--');
+                totalBlockMins += bDiff; totalAirMins += aDiff;
+
+                const lPax = parseInt(val(`m_t${id}_pax`)) || 0;
+                paxArray.push(`(${lPax})`);
+                const pf = val(`m_t${id}_pf`).trim().toUpperCase() || "SIN NOMBRE";
+                const pm = val(`m_t${id}_pm`).trim().toUpperCase();
+
+                const leg = {
+                    id, index: i + 1, fecha: legDate, folio: folioEl.value, desde, dest,
+                    dist: val(`m_t${id}_dist`), winds: val(`m_t${id}_winds`).trim(),
+                    pax: lPax, pf, pm, dn: val(`m_t${id}_dn`), pnp: val(`m_t${id}_pnp`),
+                    tOut, tOff, tOn, tIn, bDiff, aDiff,
+                    horoBot: hBot.value, horoTop: hTop.value, horoDiff,
+                    fuelOn: fOn.value, fuelOff: fOff.value, fuelDiff: fuelDiff !== null ? formatDec(fuelDiff) : '',
+                    fDiff: fuelDiff || 0, refuelTotal
+                };
+                legs.push(leg);
+                (legsByDate[legDate] = legsByDate[legDate] || []).push(leg);
+
+                const initPilot = () => ({ pf_time: 0, pf_air: 0, landings: 0, pm_time: 0, pm_air: 0 });
+                if (!pilotStats[pf]) pilotStats[pf] = initPilot();
+                pilotStats[pf].pf_time += bDiff; pilotStats[pf].pf_air += aDiff;
+                if (bDiff > 0 || aDiff > 0) pilotStats[pf].landings += 1;
+                if (pm) {
+                    if (!pilotStats[pm]) pilotStats[pm] = initPilot();
+                    pilotStats[pm].pm_time += bDiff; pilotStats[pm].pm_air += aDiff;
+                }
+            });
+
+            let activeDates = Object.keys(legsByDate).sort();
+            if (activeDates.length === 0 && gDate) activeDates = [gDate];
+            if (activeDates.length === 0) activeDates = [new Date().toISOString().split('T')[0]];
+
+            const dailyStats = [];
+            let totalDutyMinsAllDays = 0;
+            const globalEndEl = el('duty_end');
+            const picIni = val('m_pic_ini').trim().toUpperCase(), sicIni = val('m_sic_ini').trim().toUpperCase();
+
+            activeDates.forEach((dateKey, index) => {
+                const dayLegs = legsByDate[dateKey] || [];
+                if (dayLegs.length === 0) return;
+                let startDuty = "", endDuty = "", dayBlock = 0, dayAir = 0, dayFuelUsed = 0;
+                const dayPax = [];
+                const firstLeg = dayLegs[0], lastLeg = dayLegs[dayLegs.length - 1];
+                const p1 = { block: 0, air: 0, dep: 0, pf_block: 0, pf_air: 0 };
+                const p2 = { block: 0, air: 0, dep: 0, pf_block: 0, pf_air: 0 };
+
+                dayLegs.forEach(leg => {
+                    dayBlock += leg.bDiff; dayAir += leg.aDiff; dayFuelUsed += leg.fDiff;
+                    dayPax.push(`(${leg.pax})`);
+                    if (picIni) {
+                        if (leg.pf === picIni) { p1.block += leg.bDiff; p1.air += leg.aDiff; p1.pf_block += leg.bDiff; p1.pf_air += leg.aDiff; if (leg.bDiff > 0) p1.dep++; }
+                        else if (leg.pm === picIni) { p1.block += leg.bDiff; p1.air += leg.aDiff; }
+                    }
+                    if (sicIni) {
+                        if (leg.pf === sicIni) { p2.block += leg.bDiff; p2.air += leg.aDiff; p2.pf_block += leg.bDiff; p2.pf_air += leg.aDiff; if (leg.bDiff > 0) p2.dep++; }
+                        else if (leg.pm === sicIni) { p2.block += leg.bDiff; p2.air += leg.aDiff; }
+                    }
+                });
+
+                if (index === 0) {
+                    startDuty = val('duty_start');
+                    if (globalEndEl.dataset.manual === "true" && globalEndEl.value.length === 5) { endDuty = globalEndEl.value; }
+                    else if (lastLeg.tIn) { endDuty = addMins(lastLeg.tIn, 30); globalEndEl.value = endDuty; }
+                } else {
+                    if (firstLeg.tOff) startDuty = addMins(firstLeg.tOff, -60);
+                    if (lastLeg.tIn) endDuty = addMins(lastLeg.tIn, 30);
+                }
+
+                const dur = (startDuty && endDuty) ? timeDiffMins(startDuty, endDuty) : 0;
+                totalDutyMinsAllDays += dur;
+                dailyStats.push({ date: dateKey, start: startDuty, end: endDuty, duration: dur, block: dayBlock, air: dayAir, fuelUsed: dayFuelUsed, pax: dayPax.join(' '), p1, p2, hIni: firstLeg.horoBot || '--', hFin: lastLeg.horoTop || '--' });
+            });
+
+            el('ui_duty_table').innerHTML = dailyStats.map(dp => `<tr><td style="padding:6px; text-align:left; border-bottom:1px solid rgba(255,255,255,0.05);">${dp.date}</td><td style="border-bottom:1px solid rgba(255,255,255,0.05);">${dp.start || '--:--'}</td><td style="border-bottom:1px solid rgba(255,255,255,0.05);">${dp.end || '--:--'}</td><td style="border-bottom:1px solid rgba(255,255,255,0.05); font-weight:bold; color:var(--accent);">${dp.duration > 0 ? `${minsToTime(dp.duration)} (${formatDec(dp.duration / 60)}h)` : '--:--'}</td><td style="border-bottom:1px solid rgba(255,255,255,0.05); color:var(--text-muted);">${dp.block > 0 ? `${minsToTime(dp.block)} (${formatDec(dp.block / 60)}h)` : '--:--'}</td><td style="border-bottom:1px solid rgba(255,255,255,0.05); color:var(--text-muted);">${dp.air > 0 ? `${minsToTime(dp.air)} (${formatDec(dp.air / 60)}h)` : '--:--'}</td></tr>`).join('');
+            setTxt('sum_duty_hhmm', minsToTime(totalDutyMinsAllDays));
+            setTxt('sum_duty_dec', `${formatDec(totalDutyMinsAllDays / 60)} hrs`);
+
+            renderSecurityForms(activeDates, legsByDate);
+
+            const initialFuel = legs.length > 0 ? parseFloat(legs[0].fuelOn) || 0 : 0;
+            const finalFuel = legs.length > 0 ? (parseFloat(legs[legs.length - 1].fuelOff) || 0) + getLegRefuelTotal(legs[legs.length - 1].id) : 0;
+
+            setTxt('sum_fuel_init', formatDec(initialFuel));
+            setTxt('sum_fuel_final', formatDec(finalFuel));
+            setTxt('sum_fuel_refuel', `+${formatDec(globalRefuel)}`);
+            setTxt('sum_fuel_used', `-${formatDec(totalFuelUsed)}`);
+            setTxt('sum_air_hhmm', minsToTime(totalAirMins)); setTxt('sum_air_dec', `${formatDec(totalAirMins / 60)} hrs`);
+            setTxt('sum_block_hhmm', minsToTime(totalBlockMins)); setTxt('sum_block_dec', `${formatDec(totalBlockMins / 60)} hrs`);
+            setTxt('sum_pax_legs', paxArray.join(' ') || "(0)");
+
+            el('sum_pilots_container').innerHTML = Object.entries(pilotStats).filter(([_, d]) => d.pf_time > 0 || d.pm_time > 0).map(([p, d]) => `<div style="background:rgba(255,255,255,0.05); border:1px solid var(--accent); padding:6px 10px; border-radius:6px; flex:1; min-width:160px; text-align:center;"><span style="display:block; font-size:0.75rem; font-weight:bold; color:var(--text-main); border-bottom:1px solid var(--border-color); padding-bottom:3px; margin-bottom:4px;">${p}</span><div style="display:flex; justify-content:space-between; font-size:0.65rem;"><span style="color:var(--text-muted); text-align:left;">PF: ${minsToTime(d.pf_time)}<br><span style="color:var(--accent); font-size:0.6rem;">(Air: ${minsToTime(d.pf_air)})</span></span><span style="color:var(--text-muted); text-align:right;">PM: ${minsToTime(d.pm_time)}<br><span style="color:var(--accent); font-size:0.6rem;">(Air: ${minsToTime(d.pm_air)})</span></span></div></div>`).join('') || "<span style='color:var(--text-muted); font-size:0.8rem;'>Sin horas registradas</span>";
+
+            lastCalc = {
+                legs, dailyStats, activeDates,
+                totals: { air: totalAirMins, block: totalBlockMins, duty: totalDutyMinsAllDays, initialFuel, finalFuel, refuel: globalRefuel, used: totalFuelUsed }
+            };
+            autoSave();
+        }
+
+        const PDF_GRID = {
+            hLineWidth: () => 0.6, vLineWidth: () => 0.6,
+            hLineColor: () => '#000', vLineColor: () => '#000',
+            paddingLeft: () => 3, paddingRight: () => 3, paddingTop: () => 2, paddingBottom: () => 2
+        };
+        const PDF_FILL_HEAD = '#e6e6e6';
+        const PDF_FILL_TITLE = '#222222';
+
+        const pdfHeadCell = text => ({ text, bold: true, fillColor: PDF_FILL_HEAD, alignment: 'center', fontSize: 6.5 });
+        const pdfSpanRow = (text, span, extra = {}) => [{ text, colSpan: span, ...extra }, ...Array.from({ length: span - 1 }, () => ({}))];
+        const pdfHm = mins => mins > 0 ? `${minsToTime(mins)} (${formatDec(mins / 60)})` : '--';
+
+        function pdfHeader(title, fecha = val('m_fecha_gen')) {
+            return {
+                table: {
+                    widths: ['*', '*', '*', '*'],
+                    body: [
+                        [{ text: 'AEROCARDAL', bold: true, fontSize: 12, italics: true, colSpan: 2 }, {}, { text: title, bold: true, fontSize: 10, alignment: 'center', colSpan: 2 }, {}],
+                        [`FECHA: ${fecha}`, `P.O.V.: N° ${val('m_pov')}`, { text: `MATERIAL: ${val('m_material')}`, bold: true }, { text: `MATRICULA: ${val('m_matricula')}`, bold: true }],
+                        pdfSpanRow(`FOLIO BIT: ${val('m_folio_gen')}`, 4, { bold: true, fillColor: PDF_FILL_HEAD })
+                    ]
+                },
+                layout: PDF_GRID,
+                margin: [0, 0, 0, 6]
+            };
+        }
+
+        function pdfLegTable(leg) {
+            const ord = ordinals[leg.index] || `${leg.index}°`;
+            const dnText = leg.dn === 'D' ? 'DIURNO' : (leg.dn === 'N' ? 'NOCTURNO' : '');
+            const pnpText = leg.pnp === 'P' ? 'PRECISIÓN' : (leg.pnp === 'NP' ? 'NO PRECISIÓN' : '');
+            const fuelLines = [`ON: ${leg.fuelOn}`, `OFF: ${leg.fuelOff}`, `USD: ${leg.fuelDiff}`];
+            if (leg.refuelTotal > 0) fuelLines.push(`REFUEL: +${formatDec(leg.refuelTotal)}`);
+            const windsTxt = leg.winds ? `   WINDS: ${leg.winds}` : '';
+
+            return {
+                table: {
+                    widths: ['*', '*', '*', '*', '*', '*'],
+                    body: [
+                        pdfSpanRow(`${ord} TRAMO`, 6, { bold: true, color: '#fff', fillColor: PDF_FILL_TITLE, alignment: 'center' }),
+                        ['FECHA / TRAMO', 'HORÓMETRO', 'BLOCK TIME', 'AIR TIME', 'COMBUSTIBLE', 'ATERRIZAJE'].map(pdfHeadCell),
+                        [
+                            { stack: [`Fecha: ${leg.fecha}`, `Folio BIT: ${leg.folio}`, `Destino: ${leg.dest}`, `Desde: ${leg.desde}`, `Distancia: ${leg.dist}`] },
+                            { stack: [`Inicial: ${leg.horoBot}`, `Final: ${leg.horoTop}`, `Diferencia: ${leg.horoDiff}`] },
+                            { stack: [`Salida calzos: ${leg.tOut}`, `Llegada calzos: ${leg.tIn}`, { text: `BLOCK: ${pdfHm(leg.bDiff)}`, bold: true }] },
+                            { stack: [`Despegue: ${leg.tOff}`, `Aterrizaje: ${leg.tOn}`, { text: `AIR: ${pdfHm(leg.aDiff)}`, bold: true }] },
+                            { stack: fuelLines },
+                            { stack: [{ text: dnText, bold: true }, { text: pnpText, bold: true }] }
+                        ],
+                        pdfSpanRow(`PAX: ${leg.pax}     PF: ${leg.pf}     PM: ${leg.pm}${windsTxt}`, 6, { bold: true })
+                    ]
+                },
+                layout: PDF_GRID,
+                fontSize: 7.5,
+                margin: [0, 0, 0, 6]
+            };
+        }
+
+        function pdfLegExtras(leg) {
+            const id = leg.id, idx = leg.index;
+            const prmPairs = [['fl', 'FL'], ['mach', 'N° MACH'], ['isa', 'ISA'], ['oat', 'OAT'], ['gspd', 'GSPD'], ['ff', 'FF L/R'], ['n1', 'N1'], ['n2', 'N2'], ['oilt', 'OIL T°'], ['oilp', 'OIL P'], ['itt', 'ITT'], ['obs', 'OBS']];
+            const prm = Object.fromEntries(prmPairs.map(([k]) => [k, val(`m_t${id}_${k}`).trim()]));
+            const hasPrm = prmPairs.some(([k]) => prm[k]);
+            const wps = [1, 2, 3, 4].map(w => ({ wp: val(`m_t${id}_wp${w}`).trim(), cp: val(`m_t${id}_cp${w}`).trim(), cr: val(`m_t${id}_cr${w}`).trim() }));
+            const hasFuel = wps.some(w => w.wp || w.cp || w.cr);
+            const meteo = val(`m_t${id}_meteo`).trim(), atc = val(`m_t${id}_atc`).trim();
+            const nodes = [];
+
+            if (hasPrm) {
+                const labels = prmPairs.map(([, label]) => pdfHeadCell(label));
+                const values = prmPairs.map(([k]) => ({ text: prm[k], bold: true, alignment: 'center' }));
+                nodes.push({
+                    table: {
+                        widths: ['*', '*', '*', '*', '*', '*'],
+                        body: [
+                            pdfSpanRow(`PARÁMETROS TRAMO N° ${idx}`, 6, { bold: true, color: '#fff', fillColor: '#555555', alignment: 'center' }),
+                            labels.slice(0, 6), values.slice(0, 6), labels.slice(6), values.slice(6)
+                        ]
+                    },
+                    layout: PDF_GRID, fontSize: 7.5, margin: [0, 0, 0, 4]
+                });
+            }
+
+            if (hasFuel) {
+                nodes.push({
+                    table: {
+                        widths: ['*', '*', '*', '*', '*'],
+                        body: [
+                            [pdfHeadCell('ID WP'), ...wps.map(w => ({ text: w.wp, bold: true, alignment: 'center' }))],
+                            [pdfHeadCell('Plan'), ...wps.map(w => ({ text: w.cp, alignment: 'center' }))],
+                            [pdfHeadCell('Real'), ...wps.map(w => ({ text: w.cr, alignment: 'center' }))]
+                        ]
+                    },
+                    layout: PDF_GRID, fontSize: 7.5, margin: [0, 0, 0, 4]
+                });
+            }
+
+            [[`METEOROLOGÍA TRAMO N° ${idx}`, meteo], [`AUTORIZACIÓN ATC TRAMO N° ${idx}`, atc]].forEach(([title, text]) => {
+                if (!text) return;
+                nodes.push({
+                    table: {
+                        widths: ['*'],
+                        body: [
+                            [{ text: title, bold: true, color: '#fff', fillColor: '#555555', fontSize: 7.5 }],
+                            [{ text, fontSize: 8 }]
+                        ]
+                    },
+                    layout: PDF_GRID, margin: [0, 0, 0, 4]
+                });
+            });
+            return nodes;
+        }
+
+        function pdfBalance(calc) {
+            const first = calc.legs[0], last = calc.legs[calc.legs.length - 1];
+            const t = calc.totals;
+            return {
+                table: {
+                    widths: ['*', '*', '*', '*', '*', '*'],
+                    body: [
+                        pdfSpanRow('BALANCE GENERAL OPERACIONAL', 6, { bold: true, fillColor: '#e0e0e0', alignment: 'center', fontSize: 9 }),
+                        ['TOTAL TRAMOS', 'HORÓMETRO INICIAL', 'HORÓMETRO FINAL', 'COMBUSTIBLE INICIAL', 'COMBUSTIBLE FINAL', 'TOTAL RECARGADO'].map(pdfHeadCell),
+                        [`${calc.legs.length} TRAMOS`, first.horoBot || '--', last.horoTop || '--', formatDec(t.initialFuel), formatDec(t.finalFuel), formatDec(t.refuel)]
+                            .map(text => ({ text, bold: true, alignment: 'center' }))
+                    ]
+                },
+                layout: PDF_GRID,
+                margin: [0, 6, 0, 0]
+            };
+        }
+
+        function pdfLibro(calc) {
+            const rows = calc.dailyStats.map(ds => [
+                { text: ds.date.substring(5), bold: true, alignment: 'center' },
+                { text: ds.hIni, alignment: 'center' },
+                { text: ds.hFin, alignment: 'center' },
+                { text: `${ds.start || '--'} - ${ds.end || '--'}`, alignment: 'center' },
+                { text: pdfHm(ds.duration), bold: true, alignment: 'center' },
+                { text: pdfHm(ds.block), bold: true, alignment: 'center' },
+                { text: pdfHm(ds.air), bold: true, alignment: 'center' },
+                { text: formatDec(ds.fuelUsed), bold: true, alignment: 'center' },
+                { text: ds.pax, alignment: 'center' }
+            ]);
+            if (calc.dailyStats.length > 1) {
+                const sum = key => calc.dailyStats.reduce((s, ds) => s + ds[key], 0);
+                const totalPax = calc.dailyStats.map(ds => ds.pax).join(' ');
+                rows.push(pdfSpanRow('TOTAL ACUMULADO', 4, { bold: true, fillColor: PDF_FILL_HEAD, alignment: 'center' }).concat([
+                    { text: pdfHm(sum('duration')), bold: true, alignment: 'center', fillColor: PDF_FILL_HEAD },
+                    { text: pdfHm(sum('block')), bold: true, alignment: 'center', fillColor: PDF_FILL_HEAD },
+                    { text: pdfHm(sum('air')), bold: true, alignment: 'center', fillColor: PDF_FILL_HEAD },
+                    { text: formatDec(sum('fuelUsed')), bold: true, alignment: 'center', fillColor: PDF_FILL_HEAD },
+                    { text: totalPax, alignment: 'center', fillColor: PDF_FILL_HEAD }
+                ]));
+            }
+            return {
+                stack: [
+                    { table: {
+                        widths: ['*', '*', '*', '*', '*', '*', '*', '*', '*'],
+                        body: [
+                            pdfSpanRow('CONSOLIDADO LIBRO DE VUELO', 9, { bold: true, fillColor: '#e0e0e0', alignment: 'center', fontSize: 9 }),
+                            ['FECHA', 'HORO INICIAL', 'HORO FINAL', 'DUTY INICIO - TÉRMINO', 'DUTY TOTAL HH:MM (HH.H)', 'BLOCK TOTAL HH:MM (HH.H)', 'AIR TOTAL HH:MM (HH.H)', 'FUEL USADO', 'PAX POR TRAMO'].map(pdfHeadCell),
+                            ...rows
+                        ]
+                    }, layout: PDF_GRID, margin: [0, 8, 0, 0] }
+                ]
+            };
+        }
+
+        function pdfPilotos(calc) {
+            const picIni = val('m_pic_ini').toUpperCase() || 'CAP';
+            const sicIni = val('m_sic_ini').toUpperCase() || 'FO';
+            const pfCell = (block, air) => ({ text: `${pdfHm(block)}\nAIR: ${pdfHm(air)}`, alignment: 'center' });
+            const rows = calc.dailyStats.map(ds => [
+                { text: ds.date.substring(5), bold: true, alignment: 'center' },
+                { text: pdfHm(ds.p1.block), alignment: 'center' },
+                { text: pdfHm(ds.p2.block), alignment: 'center' },
+                { text: pdfHm(ds.p1.air), alignment: 'center' },
+                { text: pdfHm(ds.p2.air), alignment: 'center' },
+                pfCell(ds.p1.pf_block, ds.p1.pf_air),
+                pfCell(ds.p2.pf_block, ds.p2.pf_air),
+                { text: String(ds.p1.dep), alignment: 'center' },
+                { text: String(ds.p2.dep), alignment: 'center' }
+            ]);
+            if (calc.dailyStats.length > 1) {
+                const sum = (p, key) => calc.dailyStats.reduce((s, ds) => s + ds[p][key], 0);
+                rows.push([
+                    { text: 'TOTAL', bold: true, alignment: 'center', fillColor: PDF_FILL_HEAD },
+                    { text: pdfHm(sum('p1', 'block')), bold: true, alignment: 'center', fillColor: PDF_FILL_HEAD },
+                    { text: pdfHm(sum('p2', 'block')), bold: true, alignment: 'center', fillColor: PDF_FILL_HEAD },
+                    { text: pdfHm(sum('p1', 'air')), bold: true, alignment: 'center', fillColor: PDF_FILL_HEAD },
+                    { text: pdfHm(sum('p2', 'air')), bold: true, alignment: 'center', fillColor: PDF_FILL_HEAD },
+                    { ...pfCell(sum('p1', 'pf_block'), sum('p1', 'pf_air')), bold: true, fillColor: PDF_FILL_HEAD },
+                    { ...pfCell(sum('p2', 'pf_block'), sum('p2', 'pf_air')), bold: true, fillColor: PDF_FILL_HEAD },
+                    { text: String(sum('p1', 'dep')), bold: true, alignment: 'center', fillColor: PDF_FILL_HEAD },
+                    { text: String(sum('p2', 'dep')), bold: true, alignment: 'center', fillColor: PDF_FILL_HEAD }
+                ]);
+            }
+            return {
+                table: {
+                    headerRows: 2,
+                    widths: ['*', '*', '*', '*', '*', '*', '*', '*', '*'],
+                    body: [
+                        pdfSpanRow('CONSOLIDADO BITÁCORA PILOTOS', 9, { bold: true, fillColor: '#e0e0e0', alignment: 'center', fontSize: 9 }),
+                        ['FECHA', 'BLOCK TOTAL CAP', 'BLOCK TOTAL FO', 'AIR TOTAL CAP', 'AIR TOTAL FO', 'HORAS PF CAP', 'HORAS PF FO', 'DEP CAP', 'DEP FO'].map(pdfHeadCell),
+                        ...rows
+                    ]
+                },
+                layout: PDF_GRID,
+                margin: [0, 8, 0, 0],
+                fontSize: 7.5
+            };
+        }
+    </script>
+</body>
+</html>
