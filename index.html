@@ -1,4 +1,4 @@
-<index>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -1104,6 +1104,112 @@
                 margin: [0, 8, 0, 0],
                 fontSize: 7.5
             };
+        }
+
+        function pdfSms() {
+            const sinObs = el('m_sms_sin_obs')?.checked;
+            const roman = ['I', 'II', 'III', 'IV', 'V'];
+            let n = 0;
+            const blocks = smsData.map((cat, c) => ({
+                title: cat.cat.replace(/^[IVX]+\.\s*/, ''),
+                roman: roman[c],
+                items: cat.items.map(item => {
+                    n++;
+                    return { item, n, checked: !!el(`m_sms_${n}`)?.checked };
+                })
+            }));
+
+            const tickCell = checked => sinObs
+                ? { canvas: [{ type: 'line', x1: 3, y1: 5, x2: 15, y2: 5, lineWidth: 0.8 }] }
+                : { text: checked ? 'X' : '', bold: true, alignment: 'center' };
+
+            const sideBody = list => list.flatMap(b => [
+                [{ text: b.roman, bold: true, alignment: 'center', fillColor: PDF_FILL_HEAD }, { text: b.title, bold: true, fillColor: PDF_FILL_HEAD }, { text: 'SI', bold: true, alignment: 'center', fillColor: PDF_FILL_HEAD }],
+                ...b.items.map(it => [{ text: String(it.n), alignment: 'center' }, { text: it.item }, tickCell(it.checked)])
+            ]);
+            const sideTable = list => ({ width: '*', table: { widths: [14, '*', 16], body: sideBody(list) }, layout: PDF_GRID, fontSize: 7 });
+
+            const tripulacion = [formatNameForSMS(capitanActual.nombre), formatNameForSMS(foActual.nombre)].filter(Boolean).join(' / ');
+
+            return {
+                stack: [
+                    pdfHeader('ÍNDICE DE SEGURIDAD OPERACIONAL (SMS)'),
+                    { table: { widths: ['*'], body: [[{ text: `TRIPULACIÓN: ${tripulacion}`, bold: true }]] }, layout: PDF_GRID, margin: [0, 0, 0, 6] },
+                    { columns: [sideTable(blocks.slice(0, 3)), sideTable(blocks.slice(3))], columnGap: 6 },
+                    { table: { widths: ['*'], heights: [150], body: [[{ stack: [{ text: 'Observaciones:', bold: true }, { text: val('m_sms_obs') }] }]] }, layout: PDF_GRID, margin: [0, 8, 0, 8] },
+                    { text: `Nombre y firma comandante vuelo: ${capitanActual.nombre || '______________________'}`, margin: [0, 4, 0, 0] }
+                ],
+                pageBreak: 'before'
+            };
+        }
+
+        function pdfSecurity(dateKey) {
+            const field = name => val(`m_sec_${name}_${dateKey}`);
+            const info = [
+                [{ text: `ESTACIONAMIENTO: ${field('est')}`, colSpan: 2 }, {}, { text: `ORIGEN: ${field('origen')}` }, { text: `DESTINO: ${field('destino')}` }],
+                [{ text: `H. INICIO: ${field('hinicio')}`, colSpan: 2 }, {}, { text: `H. TÉRMINO: ${field('htermino')}` }, { text: `ALERTA: ${field('alerta')}` }]
+            ];
+            const items = secData.map(item => {
+                const idx = item.text.indexOf(':');
+                const title = idx > -1 ? item.text.slice(0, idx + 1) : item.text;
+                const desc = idx > -1 ? item.text.slice(idx + 1).trim() : '';
+                const checked = !!el(`m_sec_${dateKey}_${item.id}`)?.checked;
+                return [
+                    { text: [{ text: `${item.id}. ${title} `, bold: true }, desc], alignment: 'justify' },
+                    { text: checked ? 'X' : '', bold: true, alignment: 'center', fontSize: 9 }
+                ];
+            });
+            return {
+                stack: [
+                    pdfHeader('INSPECCIÓN DE SEGURIDAD DE AERONAVES', dateKey),
+                    { table: { widths: ['*', '*', '*', '*'], body: info }, layout: PDF_GRID, margin: [0, 0, 0, 6] },
+                    { table: { widths: ['*', 24], body: items }, layout: PDF_GRID, fontSize: 7.5 },
+                    {
+                        table: {
+                            widths: ['*', '*', '*', '*'],
+                            heights: [14, 28],
+                            body: [
+                                [{ text: 'III. COMANDANTE DE LA AERONAVE: NOMBRE Y APELLIDOS', bold: true, fontSize: 7 }, { text: 'RUT', bold: true, fontSize: 7, alignment: 'center' }, { text: 'LICENCIA', bold: true, fontSize: 7, alignment: 'center' }, { text: 'FIRMA', bold: true, fontSize: 7, alignment: 'center' }],
+                                [{ text: capitanActual.nombre, bold: true, alignment: 'center' }, { text: capitanActual.rut, bold: true, alignment: 'center' }, { text: capitanActual.licencia, bold: true, alignment: 'center' }, '']
+                            ]
+                        },
+                        layout: PDF_GRID, margin: [0, 6, 0, 0]
+                    }
+                ],
+                pageBreak: 'before'
+            };
+        }
+
+        function buildPdfDefinition() {
+            const calc = lastCalc;
+            return {
+                pageSize: 'LETTER',
+                pageMargins: [17, 17, 17, 28],
+                defaultStyle: { fontSize: 8 },
+                footer: (currentPage, pageCount) => ({ text: `${currentPage} / ${pageCount}`, alignment: 'right', fontSize: 7, margin: [17, 0, 17, 0] }),
+                content: [
+                    pdfHeader('PLANIFICACIÓN OPERACIONAL'),
+                    ...calc.legs.map(leg => pdfLegTable(leg)),
+                    ...calc.legs.flatMap(leg => pdfLegExtras(leg)),
+                    pdfBalance(calc),
+                    pdfLibro(calc),
+                    pdfPilotos(calc),
+                    pdfSms(),
+                    ...calc.activeDates.map(dateKey => pdfSecurity(dateKey))
+                ]
+            };
+        }
+
+        function generarBlobPDF() {
+            updateAll();
+            const docDefinition = buildPdfDefinition();
+            return new Promise((resolve, reject) => {
+                try {
+                    pdfMake.createPdf(docDefinition).getBlob(resolve);
+                } catch (e) {
+                    reject(e);
+                }
+            });
         }
     </script>
 </body>
