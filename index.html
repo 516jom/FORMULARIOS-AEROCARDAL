@@ -509,7 +509,7 @@
         }
 
         async function generarBlobPDF() {
-            triggerUpdate(); 
+            updateAll(); // Sincronización inmediata para que el layout de impresión tenga todos los datos
             const printDiv = el('print-layout');
             
             printDiv.style.display = 'block';
