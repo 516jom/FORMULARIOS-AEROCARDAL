@@ -1,9 +1,13 @@
-<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Planificación Operacional - Aerocardal (Grayscale Edition)</title>
+    <title>Planificación Operacional - Aerocardal</title>
+    
+    <!-- Librerías Externas Requeridas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer onload="initDrive()"></script>
+
     <style>
         /* =======================================================
            VARIABLES Y ESTILOS TEMA OSCURO (ESCALA DE GRISES)
@@ -25,12 +29,11 @@
         h1 { margin: 0; font-size: 1.2rem; font-weight: 700; color: var(--accent); letter-spacing: 1px;}
         .subtitle { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; font-weight: bold; }
 
-        .container { padding: 1rem 1rem 110px 1rem; max-width: 900px; margin: 0 auto; }
+        .container { padding: 1rem 1rem 150px 1rem; max-width: 900px; margin: 0 auto; }
         .card { background: var(--bg-card); margin-bottom: 1.2rem; border-radius: 10px; border: 1px solid var(--border-color); overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
         .card-header { padding: 0.85rem 1rem; font-size: 1rem; font-weight: 600; background-color: rgba(255,255,255,0.05); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
         .card-content { padding: 1rem; }
 
-        /* Estilos Acordeón */
         details.card summary, details.param-section summary { padding: 0.85rem 1rem; font-size: 1rem; font-weight: 600; background-color: rgba(255,255,255,0.05); cursor: pointer; user-select: none; outline: none; border-bottom: 1px solid transparent; transition: background 0.2s;}
         details.card summary::-webkit-details-marker, details.param-section summary::-webkit-details-marker { display:none; }
         details.card summary .arrow::after, details.param-section summary .arrow::after { content: "▼"; float: right; font-size: 0.8rem; color: var(--text-muted); margin-top: 3px; margin-left: 8px;}
@@ -57,8 +60,7 @@
         
         .time-input { text-align: center; font-family: monospace; font-size: 1.2rem !important; font-weight: bold; color: var(--accent) !important; letter-spacing: 2px;}
         .inherited-input { background-color: rgba(255, 255, 255, 0.05) !important; color: var(--accent) !important; font-weight: bold; border: 1px solid rgba(255, 255, 255, 0.3) !important; cursor: not-allowed; }
-        .readonly-strict { background-color: rgba(255, 255, 255, 0.02) !important; color: var(--text-muted) !important; border: 1px solid var(--border-color) !important; cursor: not-allowed; }
-
+        
         .link-btn { cursor: pointer; font-size: 1rem; user-select: none; transition: transform 0.2s; }
         .link-btn:active { transform: scale(0.9); }
 
@@ -72,92 +74,95 @@
         .btn { padding: 9px 14px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 0.9rem;}
         .btn-danger { background-color: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 5px 10px; font-size: 0.75rem;}
         .btn-success { background-color: rgba(255, 255, 255, 0.1); border: 1px solid var(--success); color: var(--success); padding: 4px 8px; font-size: 0.75rem;}
-        .btn-outline { background-color: var(--accent); color: var(--bg-main); width: 100%; padding: 12px; font-size: 1rem; margin-top: 10px;}
-
+        .btn-outline { background-color: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 10px 16px; font-size: 0.9rem;}
+        
         .summary-box { background: var(--bg-input); border: 1px solid var(--border-color); padding: 0.85rem; border-radius: 8px; }
         .summary-title { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; text-transform: uppercase;}
         .summary-value { font-size: 1.6rem; font-weight: bold; font-family: monospace; color: var(--text-main); }
         .summary-sub { font-size: 0.8rem; color: var(--accent); margin-top: 2px;}
 
         hr.divider { border: 0; border-top: 1px solid var(--border-color); margin: 12px 0; }
-        .fab-container { position: fixed; bottom: 0; left: 0; width: 100%; padding: 0.8rem 1rem; background: rgba(17, 17, 17, 0.95); backdrop-filter: blur(5px); border-top: 1px solid var(--border-color); text-align: center; z-index: 100; }
-        .btn-print { background-color: var(--accent); color: #000; border: none; padding: 14px 28px; font-size: 1.05rem; font-weight: bold; border-radius: 30px; width: 100%; max-width: 420px; box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2); }
+        .fab-container { position: fixed; bottom: 0; left: 0; width: 100%; padding: 0.8rem 1rem; background: rgba(17, 17, 17, 0.95); backdrop-filter: blur(5px); border-top: 1px solid var(--border-color); text-align: center; z-index: 100; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;}
+        .btn-print { background-color: var(--accent); color: #000; border: none; padding: 10px 24px; font-size: 0.9rem; font-weight: bold; border-radius: 6px; }
 
-        /* Estilos Checkboxes SMS / Seg */
         .checkbox-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; font-size: 0.8rem; line-height: 1.3; }
         .checkbox-item input[type="checkbox"] { flex-shrink: 0; margin-top: 2px; width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer;}
         .form-category-title { font-size: 0.75rem; font-weight: bold; color: var(--accent); margin: 15px 0 8px 0; background: rgba(255,255,255,0.05); padding: 6px; border-radius: 4px; border-left: 3px solid var(--accent);}
         .signature-block { margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border-color); font-size: 0.85rem; color: var(--text-muted); }
 
+        /* Pantalla de Carga Overlay PWA Ready */
+        #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: none; justify-content: center; align-items: center; flex-direction: column; color: var(--accent); backdrop-filter: blur(4px); }
+        .spinner { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--accent); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
         /* =======================================================
-           ESTILOS DE IMPRESIÓN HOMOGÉNEOS (TAMAÑO 8PX UNIFORME)
+           ESTILOS DE IMPRESIÓN (TAMAÑO CARTA + 6MM) - PARA HTML2PDF Y NATIVO
            ======================================================= */
         @media print {
             @page { size: letter portrait; margin: 6mm; }
-
             body { background-color: white; color: black; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin:0;}
             #mobile-ui, header, .fab-container { display: none !important; }
-            #print-layout { display: block; font-family: Arial, sans-serif; width: 100%; font-size: 8px; line-height: 1.15; }
-            
-            .page-break { page-break-before: always; padding-top: 5px; }
-
-            .print-table { width: 100%; border-collapse: collapse; border: 1px solid black; margin-bottom: 4px; page-break-inside: avoid; table-layout: fixed;}
-            .print-table th, .print-table td, .tramo-grid td { border: 1px solid black; padding: 2px 3px; vertical-align: middle; font-size: 8px; }
-            .header-cell { background-color: #f0f0f0; font-weight: bold; text-align: center; font-size: 8px;}
-            
-            .tramo-title-gray { background-color: #555555 !important; color: white !important; text-align: center; font-weight: bold; padding: 2px; font-size: 8.5px; border: 1px solid black;}
-            .tramo-title-darkgray { background-color: #222222 !important; color: white !important; text-align: center; font-weight: bold; padding: 3px; font-size: 9px; border: 1px solid black;}
-            
-            .summary-title-pdf { background-color: #e0e0e0 !important; color: black !important; text-align: center; font-weight: bold; padding: 3px; font-size: 9px; border: 1px solid black; }
-            .summary-total-bg { background-color: #f2f2f2 !important; color: black !important; font-weight: bold; }
-
-            .tramo-grid { width: 100%; border-collapse: collapse; }
-            .tramo-grid td { padding: 1px 2px; text-align: center; font-size: 8px;}
-            .text-left { text-align: left !important; }
-            .text-center { text-align: center !important; }
-            .bold { font-weight: bold; }
-            
-            .logo-text { font-size: 10px; font-weight: bold; font-style: italic; letter-spacing: -0.5px;}
-            .main-title { font-size: 9.5px; font-weight: bold; text-align: center; }
-            .gray-bg { background-color: #e6e6e6 !important; }
-            
-            .cell-data { height: 14px; font-weight: bold; text-align: center; font-size: 8px;}
-            .no-border-x { border-left: none !important; border-right: none !important; }
-            .no-border-t { border-top: none !important; }
-            .no-border-b { border-bottom: none !important; }
-
-            .print-form-table { width: 100%; border-collapse: collapse; border: 1px solid black; }
-            .print-form-table td, .print-form-table th { border: 1px solid black; font-size: 8px; }
-            .sms-cat-row { background-color: #f0f0f0 !important; font-weight: bold; text-align: center; }
-            .tick-cell { text-align: center; font-weight: bold; font-size: 10px; }
-            
-            .strike-cell { position: relative; }
-            .strike-cell::after {
-                content: "";
-                position: absolute;
-                left: 15%;
-                right: 15%;
-                top: 50%;
-                border-top: 1.2px solid black;
-            }
+            #print-layout { display: block !important; font-family: Arial, sans-serif; width: 100%; font-size: 8.5px; line-height: 1.2; }
         }
+
+        #print-layout { font-family: Arial, sans-serif; font-size: 8.5px; line-height: 1.2; background: white; color: black; }
+        .page-break { page-break-before: always; padding-top: 5px; clear: both;}
+        .print-table { width: 100%; border-collapse: collapse; border: 1px solid black; margin-bottom: 4px; page-break-inside: avoid; table-layout: fixed;}
+        .print-table th, .print-table td, .tramo-grid td { border: 1px solid black; padding: 2px 4px; vertical-align: middle; }
+        .header-cell { background-color: #f0f0f0; font-weight: bold; text-align: center; font-size: 8px;}
+        .tramo-title-gray { background-color: #555555 !important; color: white !important; text-align: center; font-weight: bold; padding: 3px; letter-spacing: 0.5px; font-size: 9.5px; border: 1px solid black;}
+        .tramo-title-darkgray { background-color: #222222 !important; color: white !important; text-align: center; font-weight: bold; padding: 4px; letter-spacing: 1px; font-size: 10px; border: 1px solid black;}
+        .summary-title-pdf { background-color: #e0e0e0 !important; color: black !important; text-align: center; font-weight: bold; padding: 4px; letter-spacing: 1px; font-size: 10.5px; border: 1px solid black; }
+        .summary-total-bg { background-color: #f2f2f2 !important; color: black !important; font-weight: bold; }
+        .tramo-grid { width: 100%; border-collapse: collapse; }
+        .tramo-grid td { padding: 1.5px 3px; text-align: center;}
+        .text-left { text-align: left !important; }
+        .text-center { text-align: center !important; }
+        .bold { font-weight: bold; }
+        .logo-text { font-size: 13px; font-weight: bold; font-style: italic; letter-spacing: -0.5px;}
+        .main-title { font-size: 11px; font-weight: bold; text-align: center; }
+        .gray-bg { background-color: #e6e6e6 !important; }
+        .cell-data { height: 16px; font-weight: bold; text-align: center; font-size: 9px;}
+        .no-border-x { border-left: none !important; border-right: none !important; }
+        .no-border-t { border-top: none !important; }
+        .no-border-b { border-bottom: none !important; }
+        .print-form-table { width: 100%; border-collapse: collapse; border: 1px solid black; }
+        .print-form-table td, .print-form-table th { border: 1px solid black; }
+        .sms-cat-row { background-color: #f0f0f0 !important; font-weight: bold; text-align: center; }
+        .tick-cell { text-align: center; font-weight: bold; }
+        .strike-cell { position: relative; }
+        .strike-cell::after { content: ""; position: absolute; left: 15%; right: 15%; top: 50%; border-top: 1.2px solid black; }
     </style>
 </head>
 <body>
 
+    <!-- Overlay de Carga y Acciones PDF / Drive -->
+    <div id="loading-overlay">
+        <div id="loading-spinner" class="spinner"></div>
+        <div id="loading-text" style="font-weight: bold; font-size: 1.1rem; text-align: center; margin-bottom: 20px;">Procesando...</div>
+        
+        <button id="btn-open-pdf" class="btn btn-outline" style="display:none; background-color: var(--success); color: #000; font-weight: bold; padding: 15px 30px; border-radius: 30px; font-size: 1.1rem; border: none; box-shadow: 0 4px 12px rgba(255,255,255,0.2);">
+            📂 VER PDF EN DRIVE
+        </button>
+        
+        <button id="btn-close-overlay" class="btn btn-danger" style="display:none; margin-top: 20px; border: none; text-decoration: underline;" onclick="cerrarOverlay()">
+            Volver a la app
+        </button>
+    </div>
+
     <header>
         <h1>AEROCARDAL - PLANIFICACIÓN OPERACIONAL</h1>
-        <div class="subtitle">VERSIÓN 5.1 (FUENTES HOMOGÉNEAS 8PX + GOOGLE DRIVE)</div>
+        <div class="subtitle">VERSIÓN 6.0 (CLOUD SYNC)</div>
     </header>
 
     <main id="mobile-ui" class="container">
         <!-- CABECERA GENERAL -->
         <div class="card">
-            <div class="card-header"><span>📋 CABECERA DEL VUELO (HERENCIA GLOBAL)</span></div>
+            <div class="card-header"><span>📋 CABECERA DEL VUELO (OBLIGATORIA PARA CLOUD)</span></div>
             <div class="card-content grid-3">
                 <div class="form-group"><label style="color:var(--accent);">Fecha del Vuelo</label><input type="date" id="m_fecha_gen" onchange="triggerUpdate()"></div>
                 <div class="form-group"><label style="color:var(--accent);">Folio BIT</label><input type="text" id="m_folio_gen" placeholder="Folio Único..." oninput="triggerUpdate()"></div>
-                <div class="form-group"><label>P.O.V. N°</label><input type="text" id="m_pov" oninput="triggerUpdate()"></div>
+                <div class="form-group"><label style="color:#4285F4; text-shadow: 0 0 5px rgba(66,133,244,0.5);">P.O.V. N° (Carpeta)</label><input type="text" id="m_pov" oninput="triggerUpdate()" placeholder="Ej: 1234"></div>
                 
                 <div class="form-group">
                     <label style="color:var(--accent);">Matrícula (3 últimas letras)</label>
@@ -188,7 +193,7 @@
         
         <!-- DUTY PERIOD -->
         <div class="card">
-            <div class="card-header"><span>🕒 PERIODO DE SERVICIO (DUTY PERIOD - DÍA 1)</span></div>
+            <div class="card-header"><span>🕒 PERIODO DE SERVICIO (DUTY PERIOD)</span></div>
             <div class="card-content grid-2">
                 <div class="form-group">
                     <label style="color:var(--accent);">Inicio Duty Period</label>
@@ -197,27 +202,22 @@
                 <div class="form-group">
                     <label style="color:var(--text-muted);">Término Duty Period (Editable)</label>
                     <input type="text" class="time-input" id="duty_end" placeholder="--:--" maxlength="5" inputmode="numeric" oninput="this.dataset.manual = (this.value !== '') ? 'true' : 'false'; formatTime(this)" onblur="validateTime(this)">
-                    <small style="color:var(--text-muted); font-size:0.65rem;">Sugerido: Último BLOCK IN + 30 min</small>
                 </div>
             </div>
         </div>
 
         <!-- TRAMOS DINÁMICOS -->
         <div id="tramos-container"></div>
-        <button class="btn btn-outline" onclick="addLeg()">+ AGREGAR TRAMO</button>
+        <button class="btn btn-outline" style="width: 100%; border-style: dashed;" onclick="addLeg()">+ AGREGAR TRAMO</button>
         
-        <!-- FORMULARIOS ADJUNTOS (DESPLEGABLES) -->
+        <!-- FORMULARIOS ADJUNTOS -->
         <hr class="divider" style="margin: 20px 0;">
-        
         <details class="card" style="border-color: var(--accent);">
             <summary style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="flex:1;">📝 FORMULARIO: ÍNDICE DE SEGURIDAD OPERACIONAL (SMS) <span class="arrow"></span></span>
+                <span style="flex:1;">📝 FORMULARIO: ÍNDICE DE SEGURIDAD (SMS) <span class="arrow"></span></span>
                 <div style="display:flex; align-items:center; gap:12px; padding-left:10px; border-left:1px solid var(--border-color);" onclick="event.stopPropagation();">
                     <label style="font-size:0.75rem; color:var(--accent); display:flex; align-items:center; gap:5px; margin:0; cursor:pointer;">
                         <input type="checkbox" id="m_sms_sin_obs" checked onchange="toggleSinObservaciones()"> <span>Vuelo sin obs.</span>
-                    </label>
-                    <label style="font-size:0.75rem; color:var(--accent); display:flex; align-items:center; gap:5px; margin:0; cursor:pointer;">
-                        <input type="checkbox" id="m_inc_sms" checked onchange="triggerUpdate()"> Imprimir PDF
                     </label>
                 </div>
             </summary>
@@ -240,24 +240,16 @@
         <div class="card" style="border-color: var(--accent); margin-top: 1.2rem;">
             <div class="card-header"><span style="color:var(--accent);">⏱️ RESUMEN GENERAL OPERACIONAL</span></div>
             <div class="card-content">
-                
-                <!-- TABLA DESGLOSE DUTY PERIOD, BLOCK Y AIR -->
                 <div class="summary-title" style="color: var(--accent); margin-bottom: 4px;">🏁 DESGLOSE DIARIO (DUTY, BLOCK, AIR)</div>
                 <div style="overflow-x: auto;">
                     <table style="width:100%; border-collapse:collapse; margin-bottom:12px; font-size:0.8rem; text-align:center; background:var(--bg-input); border:1px solid var(--border-color); border-radius:8px;">
                         <thead>
                             <tr style="background:rgba(255,255,255,0.05); border-bottom:1px solid var(--border-color);">
-                                <th style="padding:8px; text-align:left;">Fecha</th>
-                                <th>Inicio</th>
-                                <th>Término</th>
-                                <th style="color:var(--accent);">Duty</th>
-                                <th style="color:var(--text-muted);">Block</th>
-                                <th style="color:var(--text-muted);">Air</th>
+                                <th style="padding:8px; text-align:left;">Fecha</th><th>Inicio</th><th>Término</th>
+                                <th style="color:var(--accent);">Duty</th><th style="color:var(--text-muted);">Block</th><th style="color:var(--text-muted);">Air</th>
                             </tr>
                         </thead>
-                        <tbody id="ui_duty_table">
-                            <!-- Javascript genera filas -->
-                        </tbody>
+                        <tbody id="ui_duty_table"></tbody>
                     </table>
                 </div>
 
@@ -284,51 +276,270 @@
         </div>
     </main>
 
-    <!-- Botón Flotante y Controles de Datos -->
-    <div class="fab-container" style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
-        <button class="btn btn-danger" style="width:auto; margin:0;" onclick="clearAllData()">🗑️ Limpiar Todo</button>
-        
-        <button class="btn btn-outline" style="width:auto; margin:0; border-color:var(--success); color:var(--success);" onclick="authAndSaveToDrive()">☁️ Guardar en Drive</button>
-        <button class="btn btn-outline" style="width:auto; margin:0; border-color:var(--warning); color:var(--warning);" onclick="authAndLoadFromDrive()">☁️ Leer de Drive</button>
-        <button class="btn-print" style="width:auto; margin:0;" onclick="window.print()">🖨️ PDF</button>
+    <!-- Botones de Acción (FAB) - ACTUALIZADOS PARA GOOGLE DRIVE -->
+    <div class="fab-container">
+        <button class="btn btn-danger" style="width:auto; margin:0;" onclick="clearAllData()">🗑️ Limpiar</button>
+        <button class="btn btn-outline" style="width:auto; margin:0; border-color:var(--warning); color:var(--warning);" onclick="ensureAuth(accionLeer)">📂 Leer</button>
+        <button class="btn btn-outline" style="width:auto; margin:0; border-color:var(--success); color:var(--success);" onclick="ensureAuth(accionGuardar)">💾 Guardar</button>
+        <button class="btn-print" style="width:auto; margin:0;" onclick="ensureAuth(accionGenerarPDF)">📄 Generar PDF</button>
     </div>
 
     <!-- LAYOUT DE IMPRESIÓN (PDF) -->
     <div id="print-layout">
-        
-        <!-- OPERACIONAL -->
         <div id="print_op_container" style="text-transform: uppercase;">
-            <table class="print-table" style="border-bottom: none; margin-bottom: 0;">
+            <table class="print-table" style="border-bottom: none;">
                 <tr>
-                    <td colspan="2" style="font-size: 10px; font-weight: bold; font-style: italic; width: 50%;">AEROCARDAL</td>
-                    <td colspan="2" style="font-size: 9.5px; font-weight: bold; text-align: center; width: 50%;">PLANIFICACIÓN OPERACIONAL</td>
+                    <td colspan="2" class="no-border-x" style="width: 30%;"><div class="logo-text">AEROCARDAL</div></td>
+                    <td colspan="2" class="no-border-x" style="vertical-align: bottom; padding-bottom: 4px;"><div class="main-title">PLANIFICACIÓN OPERACIONAL</div></td>
+                    <td colspan="1" style="border-left: none; width: 20%;"></td>
                 </tr>
                 <tr>
-                    <td style="width: 20%;">FECHA: <span id="p_fecha_gen"></span></td>
-                    <td style="width: 30%;">P.O.V.: N° <span id="p_pov"></span></td>
+                    <td style="width: 25%;">FECHA: <span id="p_fecha_gen"></span></td>
+                    <td style="width: 20%;">P.O.V.: N° <span id="p_pov"></span></td>
                     <td style="width: 25%;">MATERIAL: <span id="p_material" class="bold"></span></td>
-                    <td style="width: 25%;">MATRICULA: <span id="p_matricula" class="bold"></span></td>
+                    <td colspan="2">MATRICULA: <span id="p_matricula" class="bold"></span></td>
                 </tr>
-                <tr>
-                    <td colspan="4" class="gray-bg">FOLIO BIT: <span id="p_folio_gen" class="bold"></span></td>
-                </tr>
+                <tr><td colspan="5" class="gray-bg">FOLIO BIT: <span id="p_folio_gen" class="bold"></span></td></tr>
             </table>
 
             <div id="print-tramos-container"></div>
             <div id="print-params-container" style="margin-top: 15px;"></div>
-
-            <!-- CONTENEDOR DEL RESUMEN PDF -->
             <div id="p_resumen_operacional_container"></div>
-
         </div>
-        
-        <!-- CONTENEDOR DE PDF DE INSPECCIONES DE SEGURIDAD DINÁMICAS -->
         <div id="print-sec-forms-wrapper"></div>
     </div>
 
     <!-- SCRIPT PRINCIPAL -->
     <script>
-        // DOM Helpers
+        // =======================================================
+        // INTEGRACIÓN NATIVA CON GOOGLE DRIVE API V3
+        // =======================================================
+        const GOOGLE_CLIENT_ID = '520674997135-nqt9gjl00t89lkfstqglk4iecfan44em.apps.googleusercontent.com'; 
+        const DRIVE_API_URL = 'https://www.googleapis.com/drive/v3/files';
+        let tokenClient;
+        let accessToken = null;
+        let pendingAction = null;
+
+        function initDrive() {
+            if (!window.google) return;
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: GOOGLE_CLIENT_ID,
+                scope: 'https://www.googleapis.com/auth/drive.file',
+                callback: (tokenResponse) => {
+                    if (tokenResponse && tokenResponse.access_token) {
+                        accessToken = tokenResponse.access_token;
+                        if (pendingAction) {
+                            pendingAction();
+                            pendingAction = null;
+                        }
+                    }
+                }
+            });
+        }
+
+        function ensureAuth(actionCallback) {
+            if (!GOOGLE_CLIENT_ID) {
+                alert("⚠️ Falta el CLIENT_ID."); return;
+            }
+            if (!val('m_pov')) {
+                alert("⚠️ Por favor, ingresa el P.O.V. N° en la cabecera antes de operar en la nube.");
+                return;
+            }
+            if (!accessToken) {
+                pendingAction = actionCallback;
+                tokenClient.requestAccessToken({prompt: ''}); 
+            } else {
+                actionCallback();
+            }
+        }
+
+        // --- MANEJO DE UI CARGA / MODAL ---
+        function mostrarCargando(texto) {
+            el('loading-spinner').style.display = 'block';
+            el('btn-open-pdf').style.display = 'none';
+            el('btn-close-overlay').style.display = 'none';
+            el('loading-text').innerText = texto;
+            el('loading-overlay').style.display = 'flex';
+        }
+
+        function ocultarCargando() { el('loading-overlay').style.display = 'none'; }
+        function cerrarOverlay() { ocultarCargando(); }
+
+        function mostrarModalPDF(link) {
+            el('loading-spinner').style.display = 'none';
+            el('loading-text').innerText = "✅ ¡Documento listo en Google Drive!";
+            const btn = el('btn-open-pdf');
+            btn.style.display = 'block';
+            btn.onclick = () => window.open(link, '_blank');
+            el('btn-close-overlay').style.display = 'block';
+        }
+
+        // --- FUNCIONES DRIVE (CARPETAS Y ARCHIVOS) ---
+        async function getOrCreateFolder(povName) {
+            const folderName = `POV_${povName}`;
+            const query = encodeURIComponent(`name='${folderName}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+            let res = await fetch(`${DRIVE_API_URL}?q=${query}&fields=files(id, name)`, { headers: { 'Authorization': 'Bearer ' + accessToken } });
+            let data = await res.json();
+            
+            if (data.files && data.files.length > 0) {
+                return data.files[0].id;
+            } else {
+                let createRes = await fetch(DRIVE_API_URL, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: folderName, mimeType: 'application/vnd.google-apps.folder' })
+                });
+                let createData = await createRes.json();
+                return createData.id;
+            }
+        }
+
+        async function findFileInFolder(filename, folderId) {
+            const query = encodeURIComponent(`name='${filename}' and '${folderId}' in parents and trashed=false`);
+            let res = await fetch(`${DRIVE_API_URL}?q=${query}&fields=files(id, name, webViewLink)`, { headers: { 'Authorization': 'Bearer ' + accessToken } });
+            let data = await res.json();
+            return (data.files && data.files.length > 0) ? data.files[0] : null;
+        }
+
+        async function uploadFileRaw(blob, filename, folderId, existingFileId = null) {
+            const metadata = { name: filename };
+            if (!existingFileId) metadata.parents = [folderId];
+            
+            const boundary = '-------314159265358979323846';
+            const delimiter = "\r\n--" + boundary + "\r\n";
+            const close_delim = "\r\n--" + boundary + "--";
+
+            const reader = new FileReader();
+            return new Promise((resolve, reject) => {
+                reader.onload = async function() {
+                    const base64Data = reader.result.split(',')[1];
+                    const multipartRequestBody =
+                        delimiter +
+                        'Content-Type: application/json\r\n\r\n' +
+                        JSON.stringify(metadata) +
+                        delimiter +
+                        'Content-Type: ' + blob.type + '\r\n' +
+                        'Content-Transfer-Encoding: base64\r\n\r\n' +
+                        base64Data +
+                        close_delim;
+
+                    const url = existingFileId ? 
+                        `https://www.googleapis.com/upload/drive/v3/files/${existingFileId}?uploadType=multipart` : 
+                        `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart`;
+                    
+                    try {
+                        let res = await fetch(url, {
+                            method: existingFileId ? 'PATCH' : 'POST',
+                            headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'multipart/related; boundary=' + boundary },
+                            body: multipartRequestBody
+                        });
+                        if (!res.ok) throw new Error("Error en la subida a Drive");
+                        resolve(await res.json());
+                    } catch(e) { reject(e); }
+                };
+                reader.onerror = () => reject(new Error("Error leyendo el archivo"));
+                reader.readAsDataURL(blob);
+            });
+        }
+
+        // --- ACCIONES DE LOS BOTONES ---
+        async function accionGuardar() {
+            mostrarCargando("Guardando progreso en Drive...");
+            try {
+                let pov = val('m_pov');
+                let folderId = await getOrCreateFolder(pov);
+                let file = await findFileInFolder('Progreso.json', folderId);
+                let dataBlob = new Blob([getAllData()], { type: "application/json" });
+                await uploadFileRaw(dataBlob, 'Progreso.json', folderId, file ? file.id : null);
+                alert("✅ Progreso guardado exitosamente en la carpeta de Drive.");
+            } catch(e) {
+                alert("❌ Error: " + e.message); accessToken = null;
+            } finally { ocultarCargando(); }
+        }
+
+        async function accionLeer() {
+            mostrarCargando("Buscando progreso en Drive...");
+            try {
+                let pov = val('m_pov');
+                let folderId = await getOrCreateFolder(pov);
+                let file = await findFileInFolder('Progreso.json', folderId);
+                if (!file) {
+                    alert("⚠️ No se encontró ningún progreso guardado para este POV.");
+                    ocultarCargando();
+                    return;
+                }
+                let res = await fetch(`${DRIVE_API_URL}/${file.id}?alt=media`, { headers: { 'Authorization': 'Bearer ' + accessToken } });
+                let content = await res.json();
+                loadDataIntoApp(content);
+                alert("✅ Progreso recuperado.");
+            } catch(e) {
+                alert("❌ Error: " + e.message); accessToken = null;
+            } finally { ocultarCargando(); }
+        }
+
+        async function accionGenerarPDF() {
+            mostrarCargando("Renderizando documento PDF...\n(Espera unos segundos)");
+            
+            // Timeout ligero para que se dibuje el loader antes de congelar UI
+            setTimeout(async () => {
+                try {
+                    let pov = val('m_pov');
+                    let pdfBlob = await generarBlobPDF();
+                    
+                    mostrarCargando("Subiendo a Google Drive...");
+                    let folderId = await getOrCreateFolder(pov);
+                    let dateStr = val('m_fecha_gen') || new Date().toISOString().split('T')[0];
+                    let filename = `Planificacion_POV_${pov}_${dateStr}.pdf`;
+                    
+                    let existingFile = await findFileInFolder(filename, folderId);
+                    let uploadRes = await uploadFileRaw(pdfBlob, filename, folderId, existingFile ? existingFile.id : null);
+                    
+                    // Extraer link webViewLink haciendo GET al archivo
+                    let finalRes = await fetch(`${DRIVE_API_URL}/${uploadRes.id}?fields=webViewLink`, { headers: { 'Authorization': 'Bearer ' + accessToken } });
+                    let finalData = await finalRes.json();
+                    
+                    mostrarModalPDF(finalData.webViewLink);
+                    
+                } catch(e) {
+                    alert("❌ Error: " + e.message);
+                    accessToken = null;
+                    ocultarCargando();
+                }
+            }, 300);
+        }
+
+        async function generarBlobPDF() {
+            triggerUpdate(); 
+            const printDiv = el('print-layout');
+            
+            printDiv.style.display = 'block';
+            printDiv.style.position = 'absolute';
+            printDiv.style.left = '-99999px';
+            printDiv.style.top = '0';
+            printDiv.style.width = '800px';
+
+            const opt = {
+                margin: 6,
+                filename: 'temp.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, logging: false },
+                jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
+            };
+
+            try {
+                return await html2pdf().set(opt).from(printDiv).outputPdf('blob');
+            } finally {
+                printDiv.style.display = 'none';
+                printDiv.style.position = '';
+                printDiv.style.left = '';
+                printDiv.style.top = '';
+                printDiv.style.width = '';
+            }
+        }
+
+        // =======================================================
+        // CÓDIGO OPERACIONAL ORIGINAL
+        // =======================================================
         const el = id => document.getElementById(id);
         const val = id => el(id)?.value || '';
         const setVal = (id, v) => { if(el(id)) el(id).value = v; };
@@ -341,9 +552,6 @@
         const ordinals = ["", "PRIMER", "SEGUNDO", "TERCER", "CUARTO", "QUINTO", "SEXTO", "SÉPTIMO", "OCTAVO"];
         const formatDec = val => Number(val || 0).toFixed(1);
 
-        // =======================================================
-        // BBDD AERONAVES
-        // =======================================================
         const aeronavesDB = [
             { trigram: "AOA", matricula: "CC-AOA", material: "G-150" },
             { trigram: "CWK", matricula: "CC-CWK", material: "G-150" },
@@ -362,38 +570,19 @@
             const fullMatInput = el('m_matricula');
             const msgDiv = el('ui_mat_msg');
 
-            if (!suffix) {
-                matInput.value = '';
-                if(fullMatInput) fullMatInput.value = '';
-                if(msgDiv) msgDiv.innerHTML = '&nbsp;';
-                triggerUpdate();
-                return;
-            }
+            if (!suffix) { matInput.value = ''; if(fullMatInput) fullMatInput.value = ''; if(msgDiv) msgDiv.innerHTML = '&nbsp;'; triggerUpdate(); return; }
 
             const matches = aeronavesDB.filter(a => a.trigram.toUpperCase() === suffix || a.matricula.toUpperCase().endsWith(suffix) || a.matricula.toUpperCase() === suffix);
 
-            if (matches.length === 1) {
-                matInput.value = matches[0].material;
-                if(fullMatInput) fullMatInput.value = matches[0].matricula;
-                if(msgDiv) msgDiv.innerHTML = `✅ ${matches[0].matricula}`;
-            } else if (matches.length > 1) {
-                matInput.value = '';
-                if(fullMatInput) fullMatInput.value = '';
-                if(msgDiv) msgDiv.innerHTML = `⚠️ Coincidencias múltiples (${matches.map(m=>m.matricula).join(', ')})`;
-            } else {
-                matInput.value = '';
-                if(fullMatInput) fullMatInput.value = '';
-                if(msgDiv) msgDiv.innerHTML = `❌ Matrícula no encontrada`;
-            }
+            if (matches.length === 1) { matInput.value = matches[0].material; if(fullMatInput) fullMatInput.value = matches[0].matricula; if(msgDiv) msgDiv.innerHTML = `✅ ${matches[0].matricula}`; } 
+            else if (matches.length > 1) { matInput.value = ''; if(fullMatInput) fullMatInput.value = ''; if(msgDiv) msgDiv.innerHTML = `⚠️ Múltiples (${matches.map(m=>m.matricula).join(', ')})`; } 
+            else { matInput.value = ''; if(fullMatInput) fullMatInput.value = ''; if(msgDiv) msgDiv.innerHTML = `❌ No encontrada`; }
             triggerUpdate();
         }
 
-        // =======================================================
-        // BBDD PILOTOS
-        // =======================================================
         const pilotosDB = {
           "JA": { "nombre": "José Arellano G.", "rut": "8.621.855-0", "licencia": "1641" },
-          "SS": { "nombre": "Sebastian Saez X.", "rut": "99.999.999-9", "licencia": "3535" },
+          "SS": { "nombre": "Sebastian Saez X.", "rut": "99.999.999-9", "licencia": "9999" },
           "FC": { "nombre": "Felipe Casampere G.", "rut": "15.781.258-0", "licencia": "2114" },
           "AC": { "nombre": "Alfredo Castro C.", "rut": "7.155.617-4", "licencia": "920" },
           "RE": { "nombre": "Ricardo Espinosa U.", "rut": "6.827.727-2", "licencia": "674" },
@@ -402,14 +591,14 @@
           "EI": { "nombre": "Esteban Inostroza L.", "rut": "12.120.521-1", "licencia": "1256" },
           "AK": { "nombre": "Alexander Kaufmann R.", "rut": "6.926.596-0", "licencia": "4185" },
           "EM": { "nombre": "Enrique Mancini A.", "rut": "19.310.398-7", "licencia": "4148" },
-          "NM": { "nombre": "Nicolás Mohr S.", "rut": "18239044-5", "licencia": "2064" },
+          "NM": { "nombre": "Nicolás Mohr S.", "rut": "18239044-5", "licencia": "8888" },
           "CM": { "nombre": "Claudio Muñoz P.", "rut": "7.999.795-1", "licencia": "921" },
           "FE": { "nombre": "Francisco Esquivel C.", "rut": "88.888.888-8", "licencia": "1899" },
           "JO": { "nombre": "José Oyarzún M.", "rut": "16.239.897-0", "licencia": "2387" },
-          "FCH":{ "nombre": "Fernando Chacana X.", "rut": "66.666.666-6", "licencia": "2604" },
+          "FCH":{ "nombre": "Fernando  Chacana X.", "rut": "66.666.666-6", "licencia": "2604" },
           "MS": { "nombre": "Mauricio Solano P.", "rut": "14.322.271-3", "licencia": "1657" },
           "CV": { "nombre": "Cristhian Vázquez F.", "rut": "15.549.870-6", "licencia": "3435" },
-          "MV": { "nombre": "Matías Vega C.", "rut": "77.777.777-7", "licencia": "2420" },
+          "MV": { "nombre": "Matías Vega C.", "rut": "77.777.777-7", "licencia": "7777" },
           "KW": { "nombre": "Klaus Wobbe S.", "rut": "14.103.915-6", "licencia": "1741" },
           "CB": { "nombre": "Cristobal Briones B.", "rut": "10.345.076-4", "licencia": "2740" }
         };
@@ -427,38 +616,21 @@
         function lookupPilots() {
             const picIni = val('m_pic_ini').toUpperCase();
             const sicIni = val('m_sic_ini').toUpperCase();
-
-            if (pilotosDB[picIni]) {
-                capitanActual = pilotosDB[picIni];
-                setTxt('ui_pic_name', `👤 ${capitanActual.nombre}`);
-            } else {
-                capitanActual = { nombre: "", rut: "", licencia: "" };
-                setTxt('ui_pic_name', picIni ? 'No encontrado' : '&nbsp;');
-            }
-
-            if (pilotosDB[sicIni]) {
-                foActual = pilotosDB[sicIni];
-                setTxt('ui_sic_name', `👤 ${foActual.nombre}`);
-            } else {
-                foActual = { nombre: "" };
-                setTxt('ui_sic_name', sicIni ? 'No encontrado' : '&nbsp;');
-            }
-
-            updateFormFooters();
-            triggerUpdate();
+            if (pilotosDB[picIni]) { capitanActual = pilotosDB[picIni]; setTxt('ui_pic_name', `👤 ${capitanActual.nombre}`); } 
+            else { capitanActual = { nombre: "", rut: "", licencia: "" }; setTxt('ui_pic_name', picIni ? 'No encontrado' : '&nbsp;'); }
+            if (pilotosDB[sicIni]) { foActual = pilotosDB[sicIni]; setTxt('ui_sic_name', `👤 ${foActual.nombre}`); } 
+            else { foActual = { nombre: "" }; setTxt('ui_sic_name', sicIni ? 'No encontrado' : '&nbsp;'); }
+            updateFormFooters(); triggerUpdate();
         }
 
         function updateFormFooters() {
             const nom = capitanActual.nombre || "______________________";
             const rut = capitanActual.rut || "______________________";
             const lic = capitanActual.licencia || "______________________";
-
             setTxt('sms_ui_nombre', nom);
-
             document.querySelectorAll('[id^="sec_ui_nombre_"]').forEach(el => el.textContent = nom);
             document.querySelectorAll('[id^="sec_ui_rut_"]').forEach(el => el.textContent = rut);
             document.querySelectorAll('[id^="sec_ui_licencia_"]').forEach(el => el.textContent = lic);
-
             const nPIC = formatNameForSMS(capitanActual.nombre);
             const nSIC = formatNameForSMS(foActual.nombre);
             let tripulacionStr = nPIC;
@@ -471,10 +643,7 @@
             const isChecked = el('m_sms_sin_obs')?.checked;
             for(let i = 1; i <= 47; i++) {
                 const cb = el(`m_sms_${i}`);
-                if(cb) {
-                    if(isChecked) cb.checked = false;
-                    cb.disabled = isChecked;
-                }
+                if(cb) { if(isChecked) cb.checked = false; cb.disabled = isChecked; }
             }
             triggerUpdate();
         }
@@ -483,30 +652,19 @@
             const isChecked = el(`m_sec_sin_obs_${dateKey}`)?.checked;
             secManualState[dateKey] = secManualState[dateKey] || {};
             secManualState[dateKey].sinObs = isChecked;
-            
             ['A','B','C','D','E','F','G','H','I','J','K'].forEach(id => {
                 const cb = el(`m_sec_${dateKey}_${id}`);
-                if(cb) {
-                    cb.checked = isChecked;
-                    cb.disabled = isChecked;
-                    secManualState[dateKey][id] = isChecked;
-                }
+                if(cb) { cb.checked = isChecked; cb.disabled = isChecked; secManualState[dateKey][id] = isChecked; }
             });
             triggerUpdate();
         }
 
         function handleSecCheckboxChange(dateKey, id) {
             const cb = el(`m_sec_${dateKey}_${id}`);
-            if(cb) {
-                secManualState[dateKey] = secManualState[dateKey] || {};
-                secManualState[dateKey][id] = cb.checked;
-            }
+            if(cb) { secManualState[dateKey] = secManualState[dateKey] || {}; secManualState[dateKey][id] = cb.checked; }
             triggerUpdate();
         }
 
-        // =======================================================
-        // CONSTRUCCIÓN DINÁMICA DE FORMULARIOS SMS / SEGURIDAD
-        // =======================================================
         const smsData = [
             { cat: "I. OPERACIONES DE DESPEGUE - ATERRIZAJE Y EN TIERRA", items: ["Colisión en tierra", "Casi colisión en tierra", "Pérdida de control en tierra", "Salida de la pista", "Incursión en la pista", "Aterrizaje antes de la pista/Después de la pista", "Contacto anormal con la pista", "Incidente derivado de evacuación", "Incidente por: gestión de tránsito aéreo/Comunicaciones(fallas o degradadas)/Vigilancia", "Despegue interrumpido después de alcanzar potencia de despegue", "Aproximación no estabilizada a menos de 500 pies", "Se lleva a cabo una aproximación frustrada a menos de 1000 pies encima del nivel del terreno", "Los procedimientos o el equipo de seguridad operacional son inadecuados o tienen defecto", "Deficiencias graves en la documentación operacional", "Modo incorrecto de cargar combustible, carga o mercancías peligrosas", "Condiciones de superficie peligrosa (Hielo, nieve fundente, frenado deficiente)", "Choque con ave, o daño por objetos extraños (FOD)", "Algunos tripulantes o pasajeros están gravemente enfermos, lesionados, incapacitados o mueren", "Pasajeros violentos, armados o intoxicados, o cuando sea necesario inmovilizar"] },
             { cat: "II. OPERACIONES EN EL AIRE", items: ["Alerta TCAS/pérdida de separación/casi colisión en el aire", "Colisión en el aire", "Vuelo controlado contra/hacia el terreno (CFIT)", "Pérdida de control en vuelo (Incluye pérdida de sustentación)", "Incidente por gestión de combustible (Aterriza con combustible de reserva o menos)", "Incidente por: Gestión de tránsito aéreo/comunicación-navegación vigilancia", "Incidente por: Configuración de la aeronave (manual-automática)en cualquier fase del vuelo", "Se declara emergencia (la que sea)", "Error de navegación con una desviación importante en la derrota", "Se produce una desviación vertical de más de 500 pies", "Se exceden los parámetros que limitan la configuración de la aeronave", "Desviación importante de los SOP", "Activación del GPWS/TAWS", "Suceso RA del TCAS/ACAS"] },
@@ -530,104 +688,42 @@
         ];
 
         function buildForms() {
-            // SMS UI
-            let smsHtml = '';
-            let globalIndex = 1;
+            let smsHtml = ''; let globalIndex = 1;
             smsData.forEach(cat => {
                 smsHtml += `<div class="form-category-title">${cat.cat}</div>`;
-                cat.items.forEach(item => {
-                    smsHtml += `<label class="checkbox-item"><input type="checkbox" id="m_sms_${globalIndex}" onchange="triggerUpdate()"> <span>${globalIndex}. ${item}</span></label>`;
-                    globalIndex++;
-                });
+                cat.items.forEach(item => { smsHtml += `<label class="checkbox-item"><input type="checkbox" id="m_sms_${globalIndex}" onchange="triggerUpdate()"> <span>${globalIndex}. ${item}</span></label>`; globalIndex++; });
             });
             el('sms_form_container').innerHTML = smsHtml;
 
-            // SMS PDF
             let pSmsHtml = `
             <div id="print_sms_container" class="page-break" style="font-family: Arial, sans-serif; box-sizing: border-box;">
-                <table class="print-table" style="border-bottom: none; margin-bottom: 0;">
-                    <tr>
-                        <td colspan="2" style="font-size: 10px; font-weight: bold; font-style: italic; width: 50%;">AEROCARDAL</td>
-                        <td colspan="2" style="font-size: 9.5px; font-weight: bold; text-align: center; width: 50%;">ÍNDICE DE SEGURIDAD OPERACIONAL (SMS)</td>
-                    </tr>
-                    <tr>
-                        <td style="width: 20%;">FECHA: <span id="sms_p_fecha"></span></td>
-                        <td style="width: 30%;">P.O.V.: N° <span id="sms_p_pov"></span></td>
-                        <td style="width: 25%;">MATERIAL: <span id="sms_p_material" class="bold"></span></td>
-                        <td style="width: 25%;">MATRICULA: <span id="sms_p_matricula" class="bold"></span></td>
-                    </tr>
-                    <tr>
-                        <td colspan="4" class="gray-bg">TRIPULACIÓN: <span id="sms_p_tripulacion" class="bold"></span></td>
-                    </tr>
+                <table class="print-table" style="border-bottom: none;">
+                    <tr><td colspan="2" class="no-border-x" style="width: 30%;"><div class="logo-text">AEROCARDAL</div></td><td colspan="2" class="no-border-x" style="vertical-align: bottom; padding-bottom: 4px;"><div class="main-title">ÍNDICE DE SEGURIDAD OPERACIONAL (SMS)</div></td><td colspan="1" style="border-left: none; width: 20%;"></td></tr>
+                    <tr><td style="width: 25%;">FECHA: <span id="sms_p_fecha"></span></td><td style="width: 20%;">P.O.V.: N° <span id="sms_p_pov"></span></td><td style="width: 25%;">MATERIAL: <span id="sms_p_material" class="bold"></span></td><td colspan="2">MATRICULA: <span id="sms_p_matricula" class="bold"></span></td></tr>
+                    <tr><td colspan="5" class="gray-bg">TRIPULACIÓN: <span id="sms_p_tripulacion" class="bold"></span></td></tr>
                 </table>
-
                 <table style="width:100%; border-collapse: collapse; border: none; table-layout: fixed; margin-top: 4px;">
-                    <tr>
-                        <td style="width: 50%; vertical-align: top; padding-right: 4px; border: none;">
-                            <table class="print-form-table" style="width:100%; margin:0;">
+                    <tr><td style="width: 50%; vertical-align: top; padding-right: 4px; border: none;"><table class="print-form-table" style="width:100%; margin:0; font-size: 10px;">
             `;
-            
-            globalIndex = 1;
-            const roman = ["I", "II", "III", "IV", "V"];
-            
-            const leftCatsIndices = [0, 1, 2]; 
-            leftCatsIndices.forEach(cIdx => {
+            globalIndex = 1; const roman = ["I", "II", "III", "IV", "V"];
+            [0, 1, 2].forEach(cIdx => {
                 let cat = smsData[cIdx];
-                pSmsHtml += `<tr class="sms-cat-row"><td style="width:20px; padding:2px;">${roman[cIdx]}</td><td style="padding:2px;">${cat.cat.substring(4).trim()}</td><td style="width:25px; padding:2px;">SI</td></tr>`;
-                
-                let startIdx = 1;
-                for(let prev=0; prev<cIdx; prev++) startIdx += smsData[prev].items.length;
-                
-                cat.items.forEach((item, itemIdx) => {
-                    let realIdx = startIdx + itemIdx;
-                    pSmsHtml += `<tr><td style="text-align:center; padding:1px 2px;">${realIdx}</td><td style="padding:1px 2px;">${item}</td><td class="tick-cell" id="p_sms_${realIdx}" style="padding:1px 2px;"></td></tr>`;
-                });
+                pSmsHtml += `<tr class="sms-cat-row"><td style="width:25px; padding:3px;">${roman[cIdx]}</td><td style="padding:3px;">${cat.cat.substring(4).trim()}</td><td style="width:30px; padding:3px;">SI</td></tr>`;
+                let startIdx = 1; for(let prev=0; prev<cIdx; prev++) startIdx += smsData[prev].items.length;
+                cat.items.forEach((item, itemIdx) => { let realIdx = startIdx + itemIdx; pSmsHtml += `<tr><td style="text-align:center; padding:2px 4px;">${realIdx}</td><td style="padding:2px 4px;">${item}</td><td class="tick-cell" id="p_sms_${realIdx}" style="padding:2px 4px; font-size:14px;"></td></tr>`; });
             });
-            
-            pSmsHtml += `
-                            </table>
-                        </td>
-                        <td style="width: 50%; vertical-align: top; padding-left: 4px; border: none;">
-                            <table class="print-form-table" style="width:100%; margin-bottom:4px;">
-            `;
-            
-            const rightCatsIndices = [3, 4];
-            rightCatsIndices.forEach(cIdx => {
+            pSmsHtml += `</table></td><td style="width: 50%; vertical-align: top; padding-left: 4px; border: none;"><table class="print-form-table" style="width:100%; margin-bottom:5px; font-size: 10px;">`;
+            [3, 4].forEach(cIdx => {
                 let cat = smsData[cIdx];
-                pSmsHtml += `<tr class="sms-cat-row"><td style="width:20px; padding:2px;">${roman[cIdx]}</td><td style="padding:2px;">${cat.cat.substring(4).trim()}</td><td style="width:25px; padding:2px;">SI</td></tr>`;
-                
-                let startIdx = 1;
-                for(let prev=0; prev<cIdx; prev++) startIdx += smsData[prev].items.length;
-                
-                cat.items.forEach((item, itemIdx) => {
-                    let realIdx = startIdx + itemIdx;
-                    pSmsHtml += `<tr><td style="text-align:center; padding:1px 2px;">${realIdx}</td><td style="padding:1px 2px;">${item}</td><td class="tick-cell" id="p_sms_${realIdx}" style="padding:1px 2px;"></td></tr>`;
-                });
+                pSmsHtml += `<tr class="sms-cat-row"><td style="width:25px; padding:3px;">${roman[cIdx]}</td><td style="padding:3px;">${cat.cat.substring(4).trim()}</td><td style="width:30px; padding:3px;">SI</td></tr>`;
+                let startIdx = 1; for(let prev=0; prev<cIdx; prev++) startIdx += smsData[prev].items.length;
+                cat.items.forEach((item, itemIdx) => { let realIdx = startIdx + itemIdx; pSmsHtml += `<tr><td style="text-align:center; padding:2px 4px;">${realIdx}</td><td style="padding:2px 4px;">${item}</td><td class="tick-cell" id="p_sms_${realIdx}" style="padding:2px 4px; font-size:14px;"></td></tr>`; });
             });
-            
-            pSmsHtml += `
-                            </table>
-                            <div style="border: 1px solid black; padding: 4px; font-size:8px; height: 180px; margin-bottom: 4px;">
-                                <b>Observaciones:</b><br><span id="p_sms_obs"></span>
-                            </div>
-                            <div style="font-size:8px; padding-top: 2px;">
-                                <b>Nombre y firma comandante Vuelo:</b> <span id="sms_p_nombre" style="border-bottom: 1px solid black; display:inline-block; width:220px; height:12px;"></span>
-                            </div>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-            `;
+            pSmsHtml += `</table><div style="border: 1px solid black; padding: 6px; font-size:11px; height: 185px; margin-bottom: 5px;"><b>Observaciones:</b><br><span id="p_sms_obs"></span></div><div style="font-size:11px; padding-top: 2px;"><b>Nombre y firma:</b> <span id="sms_p_nombre" style="border-bottom: 1px solid black; display:inline-block; width:220px; height:14px;"></span></div></td></tr></table></div>`;
             el('print-layout').insertAdjacentHTML('beforeend', pSmsHtml);
         }
 
-        // =======================================================
-        // CONTROL Y ACTUALIZACIÓN
-        // =======================================================
-        function triggerUpdate() {
-            if (updateRAF) cancelAnimationFrame(updateRAF);
-            updateRAF = requestAnimationFrame(updateAll);
-        }
+        function triggerUpdate() { if (updateRAF) cancelAnimationFrame(updateRAF); updateRAF = requestAnimationFrame(updateAll); }
 
         function formatTime(input) {
             let v = input.value.replace(/\D/g, '').substring(0, 4);
@@ -638,66 +734,28 @@
         function validateTime(input) {
             if (!input.value) return triggerUpdate();
             let [h, m] = input.value.split(':').map(Number);
-            if (input.value.includes(':')) {
-                h = Math.min(h || 0, 23);
-                m = Math.min(m || 0, 59);
-                input.value = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-            } else { input.value = ""; }
+            if (input.value.includes(':')) { h = Math.min(h || 0, 23); m = Math.min(m || 0, 59); input.value = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`; } 
+            else { input.value = ""; }
             triggerUpdate();
         }
 
-        const timeToMins = t => {
-            if (!t || !t.includes(':')) return null;
-            const [h, m] = t.split(':').map(Number);
-            return (isNaN(h) || isNaN(m)) ? null : h * 60 + m;
-        };
-
-        const minsToTime = m => {
-            if (m === null || isNaN(m)) return "--:--";
-            m = (m % 1440 + 1440) % 1440; 
-            return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
-        };
-
-        const timeDiffMins = (start, end) => {
-            const s = timeToMins(start), e = timeToMins(end);
-            if (s === null || e === null) return 0;
-            return e - s < 0 ? (e - s) + 1440 : e - s;
-        };
-
-        const addMins = (t, mins) => {
-            if (!t || !t.includes(':')) return "";
-            let [h, m] = t.split(':').map(Number);
-            let total = h * 60 + m + mins;
-            total = ((total % 1440) + 1440) % 1440;
-            return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
-        };
+        const timeToMins = t => { if (!t || !t.includes(':')) return null; const [h, m] = t.split(':').map(Number); return (isNaN(h) || isNaN(m)) ? null : h * 60 + m; };
+        const minsToTime = m => { if (m === null || isNaN(m)) return "--:--"; m = (m % 1440 + 1440) % 1440; return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`; };
+        const timeDiffMins = (start, end) => { const s = timeToMins(start), e = timeToMins(end); if (s === null || e === null) return 0; return e - s < 0 ? (e - s) + 1440 : e - s; };
+        const addMins = (t, mins) => { if (!t || !t.includes(':')) return ""; let [h, m] = t.split(':').map(Number); let total = h * 60 + m + mins; total = ((total % 1440) + 1440) % 1440; return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`; };
 
         function toggleLink(id, field) {
             const input = el(`m_t${id}_${field}`), btn = el(`lbtn_${field}_${id}`);
             const isLinked = input.dataset.linked === "true";
-            input.dataset.linked = !isLinked;
-            input.readOnly = !isLinked;
+            input.dataset.linked = !isLinked; input.readOnly = !isLinked;
             input.classList.toggle('inherited-input', !isLinked);
-            btn.textContent = isLinked ? "🔓" : "🔗";
-            btn.title = isLinked ? "Restablecer herencia" : "Desvincular y editar manualmente";
+            btn.textContent = isLinked ? "🔓" : "🔗"; btn.title = isLinked ? "Restablecer herencia" : "Desvincular";
             if(isLinked) triggerUpdate();
         }
 
-        function addRefuelRecord(id) {
-            (refuelData[id] = refuelData[id] || []).push({ id: Date.now(), amount: '', time: '' });
-            renderRefuels(id);
-        }
-
-        function removeRefuelRecord(legId, recordId) {
-            refuelData[legId] = refuelData[legId].filter(r => r.id !== recordId);
-            renderRefuels(legId);
-        }
-
-        function updateRefuelRecord(legId, recordId, field, value) {
-            const rec = refuelData[legId].find(r => r.id === recordId);
-            if(rec) rec[field] = value;
-            triggerUpdate();
-        }
+        function addRefuelRecord(id) { (refuelData[id] = refuelData[id] || []).push({ id: Date.now(), amount: '', time: '' }); renderRefuels(id); }
+        function removeRefuelRecord(legId, recordId) { refuelData[legId] = refuelData[legId].filter(r => r.id !== recordId); renderRefuels(legId); }
+        function updateRefuelRecord(legId, recordId, field, value) { const rec = refuelData[legId].find(r => r.id === recordId); if(rec) rec[field] = value; triggerUpdate(); }
 
         function renderRefuels(id) {
             const container = el(`refuel_container_${id}`);
@@ -717,10 +775,7 @@
             refuelData[id] = [];
             return `
             <div class="card" id="leg_card_${id}">
-                <div class="card-header">
-                    <span>🛫 ${ordinals[index] || index + '°'} TRAMO (Leg #${index})</span>
-                    ${index > 1 ? `<button class="btn btn-danger" onclick="removeLeg(${id})">Eliminar</button>` : ''}
-                </div>
+                <div class="card-header"><span>🛫 ${ordinals[index] || index + '°'} TRAMO (Leg #${index})</span>${index > 1 ? `<button class="btn btn-danger" onclick="removeLeg(${id})">Eliminar</button>` : ''}</div>
                 <div class="card-content">
                     <div class="grid-4" style="margin-bottom: 8px;">
                         <div class="form-group"><label>Desde <span class="link-btn" id="lbtn_desde_${id}" onclick="toggleLink(${id}, 'desde')">🔗</span></label><input type="text" id="m_t${id}_desde" data-linked="true" value="${defaultOrigin}" style="text-transform: uppercase;" oninput="triggerUpdate()"></div>
@@ -728,7 +783,6 @@
                         <div class="form-group"><label>PF</label><input type="text" id="m_t${id}_pf" placeholder="Ej: RE" oninput="triggerUpdate()"></div>
                         <div class="form-group"><label>PM</label><input type="text" id="m_t${id}_pm" placeholder="Ej: EI" oninput="triggerUpdate()"></div>
                     </div>
-
                     <div class="time-sequence-box">
                         <div style="font-size:0.72rem; color:var(--text-main); margin-bottom:8px; font-weight:bold;">SECUENCIA HORARIA (ESTRICTA 24H)</div>
                         <div class="time-sequence-grid">
@@ -738,85 +792,37 @@
                             <div class="time-step"><label>4. BLOCK IN</label><span>Llegada Calzos</span><input type="text" class="time-input" placeholder="HH:MM" maxlength="5" inputmode="numeric" id="m_t${id}_time_in" oninput="formatTime(this)" onblur="validateTime(this)"></div>
                         </div>
                         <div style="margin-top:8px; padding:6px; background:rgba(255,255,255,0.05); border-radius:6px; font-size:0.75rem; text-align:center; border: 1px dashed rgba(255,255,255,0.2);">
-                            <span style="color:var(--text-muted);">BLOCK TIME:</span> <strong id="ui_t${id}_block_diff" style="color:var(--text-main);">--:--</strong> &nbsp;|&nbsp;
-                            <span style="color:var(--text-muted);">AIR TIME:</span> <strong id="ui_t${id}_air_diff" style="color:var(--text-main);">--:--</strong>
+                            <span style="color:var(--text-muted);">BLOCK TIME:</span> <strong id="ui_t${id}_block_diff" style="color:var(--text-main);">--:--</strong> &nbsp;|&nbsp; <span style="color:var(--text-muted);">AIR TIME:</span> <strong id="ui_t${id}_air_diff" style="color:var(--text-main);">--:--</strong>
                         </div>
                     </div>
-
                     <div class="grid-2">
-                        <div>
-                            <label style="font-size:0.7rem; color:var(--text-muted); font-weight:bold;">HORÓMETRO (INICIAL / FINAL)</label>
-                            <div style="display:flex; gap:5px; margin-top:4px;">
-                                <input type="number" step="0.1" id="m_t${id}_horo_bot" placeholder="Inicial" oninput="triggerUpdate()">
-                                <input type="number" step="0.1" id="m_t${id}_horo_top" placeholder="Final" oninput="this.dataset.manual = (this.value !== '') ? 'true' : 'false'; triggerUpdate()">
-                            </div>
-                        </div>
-                        <div>
-                            <label style="font-size:0.7rem; color:var(--text-muted); font-weight:bold;">DATOS EXTRA</label>
-                            <div style="display:flex; gap:5px; margin-top:4px;">
-                                <input type="number" id="m_t${id}_pax" placeholder="PAX" oninput="triggerUpdate()">
-                                <input type="text" id="m_t${id}_dist" placeholder="Dist" oninput="triggerUpdate()">
-                            </div>
-                        </div>
+                        <div><label style="font-size:0.7rem; color:var(--text-muted); font-weight:bold;">HORÓMETRO</label><div style="display:flex; gap:5px; margin-top:4px;"><input type="number" step="0.1" id="m_t${id}_horo_bot" placeholder="Inicial" oninput="triggerUpdate()"><input type="number" step="0.1" id="m_t${id}_horo_top" placeholder="Final" oninput="this.dataset.manual = (this.value !== '') ? 'true' : 'false'; triggerUpdate()"></div></div>
+                        <div><label style="font-size:0.7rem; color:var(--text-muted); font-weight:bold;">DATOS EXTRA</label><div style="display:flex; gap:5px; margin-top:4px;"><input type="number" id="m_t${id}_pax" placeholder="PAX" oninput="triggerUpdate()"><input type="text" id="m_t${id}_dist" placeholder="Dist" oninput="triggerUpdate()"></div></div>
                     </div>
-
                     <div style="margin-top:12px; padding:10px; border:1px solid var(--border-color); border-radius:8px; background:rgba(0,0,0,0.2);">
                         <label style="font-size:0.75rem; color:var(--text-main); font-weight:bold; margin-bottom:8px; display:block;">COMBUSTIBLE PRINCIPAL (1 DECIMAL)</label>
                         <div class="grid-3">
                             <div><label style="font-size:0.65rem; color:var(--text-muted);">1. FUEL ON</label><input type="number" step="0.1" id="m_t${id}_fuel_on" oninput="this.dataset.manual=(this.value !== '') ? 'true' : 'false'; triggerUpdate()"></div>
                             <div><label style="font-size:0.65rem; color:var(--text-muted);">2. FUEL OFF</label><input type="number" step="0.1" id="m_t${id}_fuel_off" oninput="triggerUpdate()"></div>
-                            <div style="background:rgba(255,255,255,0.03); padding:6px; border-radius:6px; border: 1px dashed var(--border-color);">
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                                    <span style="font-size:0.65rem; color:var(--success);">3. REFUEL POST-TRAMO</span>
-                                    <button class="btn btn-success" onclick="addRefuelRecord(${id})">+ Añadir</button>
-                                </div>
-                                <div id="refuel_container_${id}" style="display:flex; flex-direction:column; gap:4px;"></div>
-                            </div>
+                            <div style="background:rgba(255,255,255,0.03); padding:6px; border-radius:6px; border: 1px dashed var(--border-color);"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;"><span style="font-size:0.65rem; color:var(--success);">3. REFUEL</span><button class="btn btn-success" onclick="addRefuelRecord(${id})">+ Añadir</button></div><div id="refuel_container_${id}" style="display:flex; flex-direction:column; gap:4px;"></div></div>
                         </div>
                     </div>
-
                     <details class="param-section" style="background: rgba(255,255,255,0.02); border: 1px dashed var(--border-color); border-radius: 8px; margin-top: 15px;">
-                        <summary style="display:flex; justify-content:space-between; align-items:center; padding: 12px; cursor:pointer; outline:none; user-select:none;">
-                            <div style="font-size: 0.8rem; color: var(--text-main); font-weight: bold; flex:1;">⚙️ PARÁMETROS DE VUELO Y WAYPOINTS <span class="arrow"></span></div>
-                            <label style="display:flex; align-items:center; gap:5px; font-size:0.75rem; color:var(--text-main); cursor:pointer; margin:0; padding-left:10px; border-left:1px solid var(--border-color);" onclick="event.stopPropagation();">
-                                <input type="checkbox" id="m_t${id}_show_params" onchange="triggerUpdate()"> Imprimir en PDF
-                            </label>
-                        </summary>
+                        <summary style="display:flex; justify-content:space-between; align-items:center; padding: 12px;"><div style="font-size: 0.8rem; font-weight: bold; flex:1;">⚙️ PARÁMETROS DE VUELO Y WAYPOINTS <span class="arrow"></span></div></summary>
                         <div style="padding: 0 12px 12px 12px;">
-                            <div class="grid-6">
-                                ${['fl','mach','isa','oat','gspd','ff','n1','n2','oilt','oilp','itt','obs'].map(f => `<div class="form-group"><label>${f.toUpperCase()}</label><input type="text" id="m_t${id}_${f}" oninput="triggerUpdate()"></div>`).join('')}
-                            </div>
-                            
+                            <div class="grid-6">${['fl','mach','isa','oat','gspd','ff','n1','n2','oilt','oilp','itt','obs'].map(f => `<div class="form-group"><label>${f.toUpperCase()}</label><input type="text" id="m_t${id}_${f}" oninput="triggerUpdate()"></div>`).join('')}</div>
                             <div style="font-size: 0.75rem; color: var(--text-main); font-weight: bold; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; margin: 10px 0;">🛢️ COMBUSTIBLE WAYPOINTS</div>
-                            <div class="grid-4">
-                                ${[1,2,3,4].map(w => `
-                                <div style="background:rgba(0,0,0,0.2); padding:5px; border-radius:4px;">
-                                    <div class="form-group"><label>WP ${w} (ID)</label><input type="text" id="m_t${id}_wp${w}" oninput="triggerUpdate()"></div>
-                                    <div class="form-group"><label>Plan</label><input type="text" id="m_t${id}_cp${w}" oninput="triggerUpdate()"></div>
-                                    <div class="form-group"><label>Real</label><input type="text" id="m_t${id}_cr${w}" oninput="triggerUpdate()"></div>
-                                </div>`).join('')}
-                            </div>
-
-                            <div class="grid-2" style="margin-top:10px;">
-                                <div class="form-group"><label>METEOROLOGÍA</label><textarea id="m_t${id}_meteo" oninput="triggerUpdate()"></textarea></div>
-                                <div class="form-group"><label>AUTORIZACIÓN ATC</label><textarea id="m_t${id}_atc" oninput="triggerUpdate()"></textarea></div>
-                            </div>
+                            <div class="grid-4">${[1,2,3,4].map(w => `<div style="background:rgba(0,0,0,0.2); padding:5px; border-radius:4px;"><div class="form-group"><label>WP ${w}</label><input type="text" id="m_t${id}_wp${w}" oninput="triggerUpdate()"></div><div class="form-group"><label>Plan</label><input type="text" id="m_t${id}_cp${w}" oninput="triggerUpdate()"></div><div class="form-group"><label>Real</label><input type="text" id="m_t${id}_cr${w}" oninput="triggerUpdate()"></div></div>`).join('')}</div>
+                            <div class="grid-2" style="margin-top:10px;"><div class="form-group"><label>METEOROLOGÍA</label><textarea id="m_t${id}_meteo" oninput="triggerUpdate()"></textarea></div><div class="form-group"><label>AUTORIZACIÓN ATC</label><textarea id="m_t${id}_atc" oninput="triggerUpdate()"></textarea></div></div>
                         </div>
                     </details>
-
                     <input type="hidden" id="m_t${id}_horo_diff"><input type="hidden" id="m_t${id}_block_diff"><input type="hidden" id="m_t${id}_air_diff"><input type="hidden" id="m_t${id}_fuel_diff">
-
                     <hr class="divider">
                     <div class="grid-4">
                         <div class="form-group"><label>Fecha <span class="link-btn" id="lbtn_fecha_${id}" onclick="toggleLink(${id}, 'fecha')">🔗</span></label><input type="date" id="m_t${id}_fecha" data-linked="true"></div>
                         <div class="form-group"><label>Folio BIT <span class="link-btn" id="lbtn_folio_${id}" onclick="toggleLink(${id}, 'folio')">🔗</span></label><input type="text" id="m_t${id}_folio" data-linked="true"></div>
                         <div class="form-group"><label>Vientos</label><input type="text" id="m_t${id}_winds" oninput="triggerUpdate()"></div>
-                        <div class="form-group"><label>Aterrizaje</label>
-                            <div style="display:flex; gap:6px; margin-top:2px;">
-                                <select id="m_t${id}_dn" onchange="triggerUpdate()"><option value="">D/N</option><option value="D">Diurno (D)</option><option value="N">Nocturno (N)</option></select>
-                                <select id="m_t${id}_pnp" onchange="triggerUpdate()"><option value="">APP</option><option value="P">P</option><option value="NP">NP</option></select>
-                            </div>
-                        </div>
+                        <div class="form-group"><label>Aterrizaje</label><div style="display:flex; gap:6px; margin-top:2px;"><select id="m_t${id}_dn" onchange="triggerUpdate()"><option value="">D/N</option><option value="D">Diurno (D)</option><option value="N">Nocturno (N)</option></select><select id="m_t${id}_pnp" onchange="triggerUpdate()"><option value="">APP</option><option value="P">P</option><option value="NP">NP</option></select></div></div>
                     </div>
                 </div>
             </div>`;
@@ -826,63 +832,16 @@
             return `
             <table class="print-table" id="print_leg_${id}">
                 <tr><td colspan="6" class="tramo-title-darkgray">${ordinals[index] || index + '°'} TRAMO</td></tr>
-                <tr class="header-cell">
-                    <td class="col-fecha">FECHA <span id="p_t${id}_fecha" style="font-weight:normal;"></span><br><span style="font-size:6.5px; font-weight:normal;">FOLIO: <span id="p_t${id}_folio"></span></span></td>
-                    <td class="col-horo">HOROMETRO</td><td class="col-block">BLOCK TIME</td>
-                    <td class="col-air">AIR TIME</td><td class="col-fuel">COMBUSTIBLE</td><td class="col-land">ATERRIZAJE</td>
-                </tr>
+                <tr class="header-cell"><td class="col-fecha">FECHA <span id="p_t${id}_fecha" style="font-weight:normal;"></span><br><span style="font-size:6px; font-weight:normal;">FOLIO: <span id="p_t${id}_folio"></span></span></td><td class="col-horo">HOROMETRO</td><td class="col-block">BLOCK TIME</td><td class="col-air">AIR TIME</td><td class="col-fuel">COMBUSTIBLE</td><td class="col-land">ATERRIZAJE</td></tr>
                 <tr>
-                    <td style="padding:0; vertical-align:top;">
-                        <table class="tramo-grid" style="border:none;">
-                            <tr><td class="text-left no-border-t no-border-x">DESTINO: <span id="p_t${id}_dest" class="bold"></span></td></tr>
-                            <tr><td class="text-left no-border-x">DESDE: <span id="p_t${id}_desde" class="bold"></span></td></tr>
-                            <tr><td class="text-left no-border-b no-border-x">DISTANCIA: <span id="p_t${id}_dist" class="bold"></span></td></tr>
-                        </table>
-                    </td>
-                    <td style="padding:0; vertical-align:top;">
-                        <table class="tramo-grid" style="border:none; height:100%;">
-                            <tr><td class="no-border-t no-border-x" style="height:33.3%;"><span id="p_t${id}_horo_top" class="bold"></span></td></tr>
-                            <tr><td class="no-border-x" style="height:33.3%;"><span id="p_t${id}_horo_bot" class="bold"></span></td></tr>
-                            <tr><td class="no-border-b no-border-x" style="height:33.3%;"><span id="p_t${id}_horo_diff" class="bold"></span></td></tr>
-                        </table>
-                    </td>
-                    <td style="padding:0; vertical-align:top;">
-                        <table class="tramo-grid" style="border:none; height:100%;">
-                            <tr><td class="no-border-t no-border-x" style="height:33.3%;"><span id="p_t${id}_time_in" class="bold"></span></td></tr>
-                            <tr><td class="no-border-x" style="height:33.3%;"><span id="p_t${id}_time_out" class="bold"></span></td></tr>
-                            <tr><td class="no-border-b no-border-x" style="height:33.3%;"><span id="p_t${id}_block_diff" class="bold"></span></td></tr>
-                        </table>
-                    </td>
-                    <td style="padding:0; vertical-align:top;">
-                        <table class="tramo-grid" style="border:none; height:100%;">
-                            <tr><td class="no-border-t no-border-x" style="height:33.3%;"><span id="p_t${id}_time_on" class="bold"></span></td></tr>
-                            <tr><td class="no-border-x" style="height:33.3%;"><span id="p_t${id}_time_off" class="bold"></span></td></tr>
-                            <tr><td class="no-border-b no-border-x" style="height:33.3%;"><span id="p_t${id}_air_diff" class="bold"></span></td></tr>
-                        </table>
-                    </td>
-                    <td style="padding:0; vertical-align:top;">
-                        <table class="tramo-grid" style="border:none; height:100%;">
-                            <tr><td class="no-border-t no-border-x text-left" style="height:33.3%;">ON: <span id="p_t${id}_fuel_on" class="bold" style="float:right;"></span></td></tr>
-                            <tr><td class="no-border-x text-left" style="height:33.3%;">OFF: <span id="p_t${id}_fuel_off" class="bold" style="float:right;"></span></td></tr>
-                            <tr><td class="no-border-b no-border-x text-left" style="height:33.3%;">USD: <span id="p_t${id}_fuel_diff" class="bold" style="float:right;"></span></td></tr>
-                        </table>
-                    </td>
-                    <td style="padding:0; vertical-align:top;">
-                        <table class="tramo-grid" style="border:none; height:100%;">
-                            <tr><td class="no-border-t no-border-x text-center bold" style="height:50%;" id="p_t${id}_dn_text"></td></tr>
-                            <tr><td class="no-border-x text-center" style="background:#f0f0f0; font-size:6.5px;">APP. IFR</td></tr>
-                            <tr><td class="no-border-b no-border-x text-center bold" style="height:50%;" id="p_t${id}_pnp_text"></td></tr>
-                        </table>
-                    </td>
+                    <td style="padding:0; vertical-align:top;"><table class="tramo-grid" style="border:none;"><tr><td class="text-left no-border-t no-border-x">Destino: <span id="p_t${id}_dest" class="bold"></span></td></tr><tr><td class="text-left no-border-x">Desde: <span id="p_t${id}_desde" class="bold"></span></td></tr><tr><td class="text-left no-border-b no-border-x">Distancia: <span id="p_t${id}_dist" class="bold"></span></td></tr></table></td>
+                    <td style="padding:0; vertical-align:top;"><table class="tramo-grid" style="border:none; height:100%;"><tr><td class="no-border-t no-border-x" style="height:33.3%;"><span id="p_t${id}_horo_top" class="bold" style="font-size:10px;"></span></td></tr><tr><td class="no-border-x" style="height:33.3%;"><span id="p_t${id}_horo_bot" class="bold" style="font-size:10px;"></span></td></tr><tr><td class="no-border-b no-border-x" style="height:33.3%;"><span id="p_t${id}_horo_diff" class="bold" style="font-size:10px;"></span></td></tr></table></td>
+                    <td style="padding:0; vertical-align:top;"><table class="tramo-grid" style="border:none; height:100%;"><tr><td class="no-border-t no-border-x" style="height:33.3%;"><span id="p_t${id}_time_in" class="bold" style="font-size:10px;"></span></td></tr><tr><td class="no-border-x" style="height:33.3%;"><span id="p_t${id}_time_out" class="bold" style="font-size:10px;"></span></td></tr><tr><td class="no-border-b no-border-x" style="height:33.3%;"><span id="p_t${id}_block_diff" class="bold" style="font-size:10px;"></span></td></tr></table></td>
+                    <td style="padding:0; vertical-align:top;"><table class="tramo-grid" style="border:none; height:100%;"><tr><td class="no-border-t no-border-x" style="height:33.3%;"><span id="p_t${id}_time_on" class="bold" style="font-size:10px;"></span></td></tr><tr><td class="no-border-x" style="height:33.3%;"><span id="p_t${id}_time_off" class="bold" style="font-size:10px;"></span></td></tr><tr><td class="no-border-b no-border-x" style="height:33.3%;"><span id="p_t${id}_air_diff" class="bold" style="font-size:10px;"></span></td></tr></table></td>
+                    <td style="padding:0; vertical-align:top;"><table class="tramo-grid" style="border:none; height:100%;"><tr><td class="no-border-t no-border-x text-left" style="height:33.3%; font-size:7.5px;">ON: <span id="p_t${id}_fuel_on" class="bold" style="float:right; font-size:9px;"></span></td></tr><tr><td class="no-border-x text-left" style="height:33.3%; font-size:7.5px;">OFF: <span id="p_t${id}_fuel_off" class="bold" style="float:right; font-size:9px;"></span></td></tr><tr><td class="no-border-b no-border-x text-left" style="height:33.3%; font-size:7.5px;">USD: <span id="p_t${id}_fuel_diff" class="bold" style="float:right; font-size:9px;"></span></td></tr></table></td>
+                    <td style="padding:0; vertical-align:top;"><table class="tramo-grid" style="border:none; height:100%;"><tr><td class="no-border-t no-border-x text-center bold" style="height:50%; font-size:7.5px;" id="p_t${id}_dn_text"></td></tr><tr><td class="no-border-x text-center" style="background:#f0f0f0; font-size:6.5px;">APP. IFR</td></tr><tr><td class="no-border-b no-border-x text-center bold" style="height:50%; font-size:7.5px;" id="p_t${id}_pnp_text"></td></tr></table></td>
                 </tr>
-                <tr>
-                    <td colspan="6" style="padding: 2px 4px;">
-                        <span style="display:inline-block; width:15%;">PAX: <span id="p_t${id}_pax" class="bold"></span></span>
-                        <span style="display:inline-block; width:20%;">PF: <span id="p_t${id}_pf" class="bold"></span></span>
-                        <span style="display:inline-block; width:20%;">PM: <span id="p_t${id}_pm" class="bold"></span></span>
-                        <span style="display:inline-block; width:40%;" id="p_t${id}_winds_wrapper">WINDS: <span id="p_t${id}_winds" class="bold"></span></span>
-                    </td>
-                </tr>
+                <tr><td colspan="6" style="padding: 2px 4px;"><span style="display:inline-block; width:15%;">PAX: <span id="p_t${id}_pax" class="bold"></span></span><span style="display:inline-block; width:20%;">PF: <span id="p_t${id}_pf" class="bold"></span></span><span style="display:inline-block; width:20%;">PM: <span id="p_t${id}_pm" class="bold"></span></span><span style="display:inline-block; width:40%;" id="p_t${id}_winds_wrapper">WINDS: <span id="p_t${id}_winds" class="bold"></span></span></td></tr>
             </table>`;
         }
 
@@ -891,49 +850,19 @@
             <div id="p_t${id}_params_wrapper" style="display:none;">
                 <table class="print-table" id="p_t${id}_tbl_params">
                     <tr><td colspan="6" class="tramo-title-gray">PARÁMETROS TRAMO N° ${index}</td></tr>
-                    <tr class="gray-bg" style="font-weight:bold; text-align:left;">
-                        <td style="width:16.6%;">FL:</td><td style="width:16.6%;">N° MACH:</td><td style="width:16.6%;">ISA:</td>
-                        <td style="width:16.6%;">OAT:</td><td style="width:16.6%;">GSPD:</td><td style="width:16.6%;">FF L/R:</td>
-                    </tr>
-                    <tr>
-                        <td class="cell-data"><span id="p_t${id}_fl"></span></td><td class="cell-data"><span id="p_t${id}_mach"></span></td>
-                        <td class="cell-data"><span id="p_t${id}_isa"></span></td><td class="cell-data"><span id="p_t${id}_oat"></span></td>
-                        <td class="cell-data"><span id="p_t${id}_gspd"></span></td><td class="cell-data"><span id="p_t${id}_ff"></span></td>
-                    </tr>
-                    <tr class="gray-bg" style="font-weight:bold; text-align:left;">
-                        <td>N1 (L/R):</td><td>N2 (L/R):</td><td>OIL T°:</td><td>OIL P:</td><td>ITT:</td><td>OBS:</td>
-                    </tr>
-                    <tr>
-                        <td class="cell-data"><span id="p_t${id}_n1"></span></td><td class="cell-data"><span id="p_t${id}_n2"></span></td>
-                        <td class="cell-data"><span id="p_t${id}_oilt"></span></td><td class="cell-data"><span id="p_t${id}_oilp"></span></td>
-                        <td class="cell-data"><span id="p_t${id}_itt"></span></td><td class="cell-data"><span id="p_t${id}_obs"></span></td>
-                    </tr>
+                    <tr class="gray-bg" style="font-size:7px; font-weight:bold; text-align:left;"><td style="width:16.6%;">FL:</td><td style="width:16.6%;">N° MACH:</td><td style="width:16.6%;">ISA:</td><td style="width:16.6%;">OAT:</td><td style="width:16.6%;">GSPD:</td><td style="width:16.6%;">FF L/R:</td></tr>
+                    <tr><td class="cell-data"><span id="p_t${id}_fl"></span></td><td class="cell-data"><span id="p_t${id}_mach"></span></td><td class="cell-data"><span id="p_t${id}_isa"></span></td><td class="cell-data"><span id="p_t${id}_oat"></span></td><td class="cell-data"><span id="p_t${id}_gspd"></span></td><td class="cell-data"><span id="p_t${id}_ff"></span></td></tr>
+                    <tr class="gray-bg" style="font-size:7px; font-weight:bold; text-align:left;"><td>N1:</td><td>N2:</td><td>OIL T°:</td><td>OIL P:</td><td>ITT:</td><td>OBS:</td></tr>
+                    <tr><td class="cell-data"><span id="p_t${id}_n1"></span></td><td class="cell-data"><span id="p_t${id}_n2"></span></td><td class="cell-data"><span id="p_t${id}_oilt"></span></td><td class="cell-data"><span id="p_t${id}_oilp"></span></td><td class="cell-data"><span id="p_t${id}_itt"></span></td><td class="cell-data"><span id="p_t${id}_obs"></span></td></tr>
                 </table>
-
                 <table class="print-table" id="p_t${id}_tbl_fuel">
                     <tr><td colspan="5" class="tramo-title-gray">COMBUSTIBLE TRAMO N° ${index}</td></tr>
-                    <tr class="gray-bg" style="font-weight:bold; text-align:left;">
-                        <td style="width:20%;">ID del Punto (Waypoint)</td>
-                        ${[1,2,3,4].map(w => `<td style="width:20%;" class="text-center"><span id="p_t${id}_wp${w}"></span></td>`).join('')}
-                    </tr>
-                    <tr>
-                        <td class="gray-bg" style="font-weight:bold;">Combustible Plan</td>
-                        ${[1,2,3,4].map(w => `<td class="cell-data"><span id="p_t${id}_cp${w}"></span></td>`).join('')}
-                    </tr>
-                    <tr>
-                        <td class="gray-bg" style="font-weight:bold;">Combustible Real</td>
-                        ${[1,2,3,4].map(w => `<td class="cell-data"><span id="p_t${id}_cr${w}"></span></td>`).join('')}
-                    </tr>
+                    <tr class="gray-bg" style="font-size:7px; font-weight:bold; text-align:left;"><td style="width:20%;">ID WP</td>${[1,2,3,4].map(w => `<td style="width:20%;" class="text-center"><span id="p_t${id}_wp${w}"></span></td>`).join('')}</tr>
+                    <tr><td class="gray-bg" style="font-size:7px; font-weight:bold;">Plan</td>${[1,2,3,4].map(w => `<td class="cell-data"><span id="p_t${id}_cp${w}"></span></td>`).join('')}</tr>
+                    <tr><td class="gray-bg" style="font-size:7px; font-weight:bold;">Real</td>${[1,2,3,4].map(w => `<td class="cell-data"><span id="p_t${id}_cr${w}"></span></td>`).join('')}</tr>
                 </table>
-
-                <table class="print-table" id="p_t${id}_tbl_meteo">
-                    <tr><td class="tramo-title-gray text-left">METEOROLOGÍA TRAMO N° ${index}</td></tr>
-                    <tr><td style="height:25px; vertical-align:top; text-align:left;"><span id="p_t${id}_meteo"></span></td></tr>
-                </table>
-                <table class="print-table" id="p_t${id}_tbl_atc" style="margin-bottom: 12px;">
-                    <tr><td class="tramo-title-gray text-left">AUTORIZACIÓN ATC TRAMO N° ${index}</td></tr>
-                    <tr><td style="height:25px; vertical-align:top; text-align:left;"><span id="p_t${id}_atc"></span></td></tr>
-                </table>
+                <table class="print-table" id="p_t${id}_tbl_meteo"><tr><td class="tramo-title-gray tramo-title-left">METEOROLOGÍA TRAMO N° ${index}</td></tr><tr><td style="height:25px; vertical-align:top; font-size:8px; text-align:left;"><span id="p_t${id}_meteo"></span></td></tr></table>
+                <table class="print-table" id="p_t${id}_tbl_atc" style="margin-bottom: 12px;"><tr><td class="tramo-title-gray tramo-title-left">AUTORIZACIÓN ATC TRAMO N° ${index}</td></tr><tr><td style="height:25px; vertical-align:top; font-size:8px; text-align:left;"><span id="p_t${id}_atc"></span></td></tr></table>
             </div>`;
         }
 
@@ -951,12 +880,10 @@
                 const dLink = el(`m_t${id}_desde`);
                 if(dLink) { dLink.dataset.linked = "true"; dLink.readOnly = true; dLink.classList.add('inherited-input'); }
             }
-
             ['fecha', 'folio'].forEach(f => {
                 const field = el(`m_t${id}_${f}`);
                 if(field) { field.dataset.linked = "true"; field.readOnly = true; field.classList.add('inherited-input'); }
             });
-
             triggerUpdate();
         }
 
@@ -964,16 +891,13 @@
             if (!confirm("¿Eliminar tramo? Actualizará continuidad.")) return;
             legIds = legIds.filter(l => l !== id);
             el(`leg_card_${id}`).remove();
-            
             const pContLegs = el('print-tramos-container'), pContParams = el('print-params-container');
             pContLegs.innerHTML = ""; pContParams.innerHTML = "";
-
             legIds.forEach((lId, i) => {
                 pContLegs.insertAdjacentHTML('beforeend', getPrintLegHTML(lId, i + 1));
                 pContParams.insertAdjacentHTML('beforeend', getPrintParamsHTML(lId, i + 1));
                 el(`leg_card_${lId}`).querySelector('.card-header span').innerHTML = `🛫 ${ordinals[i + 1] || (i+1) + '°'} TRAMO (Leg #${i+1})`;
             });
-
             if(legIds.length > 0) {
                 const fId = legIds[0], dLink = el(`m_t${fId}_desde`), dBtn = el(`lbtn_desde_${fId}`);
                 if(dLink) { dLink.dataset.linked = "false"; dLink.readOnly = false; dLink.classList.remove('inherited-input'); }
@@ -989,16 +913,11 @@
             triggerUpdate();
         }
 
-        // =======================================================
-        // GESTIÓN Y CÁLCULOS
-        // =======================================================
         function updateAll() {
             let totalAirMins = 0, totalBlockMins = 0, totalPax = 0, totalFuelUsed = 0, globalRefuel = 0;
             const pilotStats = {}, paxArray = [];
             const gDate = val('m_fecha_gen'), gFolio = val('m_folio_gen');
-
-            let legsByDate = {};
-            let legDetails = [];
+            let legsByDate = {}; let legDetails = [];
 
             legIds.forEach((id, i) => {
                 if (el(`m_t${id}_fecha`)?.dataset.linked === "true") setVal(`m_t${id}_fecha`, gDate);
@@ -1006,8 +925,7 @@
                 if (i > 0 && el(`m_t${id}_desde`)?.dataset.linked === "true") setVal(`m_t${id}_desde`, val(`m_t${legIds[i-1]}_dest`));
 
                 const tDate = val(`m_t${id}_fecha`) || gDate || new Date().toISOString().split('T')[0];
-                const desde = val(`m_t${id}_desde`).toUpperCase();
-                const dest = val(`m_t${id}_dest`).toUpperCase();
+                const desde = val(`m_t${id}_desde`).toUpperCase(), dest = val(`m_t${id}_dest`).toUpperCase();
                 const tOut = val(`m_t${id}_time_out`), tOff = val(`m_t${id}_time_off`);
                 const tOn  = val(`m_t${id}_time_on`), tIn = val(`m_t${id}_time_in`);
                 
@@ -1015,13 +933,8 @@
                 const aDiff = tOff && tOn ? timeDiffMins(tOff, tOn) : 0;
 
                 const hBot = el(`m_t${id}_horo_bot`), hTop = el(`m_t${id}_horo_top`);
-                if (i === 0) {
-                    hBot.readOnly = false; hBot.classList.remove('readonly-strict');
-                } else {
-                    const prevTop = parseFloat(val(`m_t${legIds[i-1]}_horo_top`));
-                    hBot.readOnly = true; hBot.classList.add('readonly-strict');
-                    hBot.value = !isNaN(prevTop) ? formatDec(prevTop) : '';
-                }
+                if (i === 0) { hBot.readOnly = false; hBot.classList.remove('readonly-strict'); } 
+                else { const prevTop = parseFloat(val(`m_t${legIds[i-1]}_horo_top`)); hBot.readOnly = true; hBot.classList.add('readonly-strict'); hBot.value = !isNaN(prevTop) ? formatDec(prevTop) : ''; }
 
                 const valBot = parseFloat(hBot.value);
                 if (hTop.dataset.manual !== "true" && !isNaN(valBot) && aDiff > 0) hTop.value = formatDec(valBot + (aDiff / 60));
@@ -1029,61 +942,46 @@
                 const valTop = parseFloat(hTop.value);
                 setVal(`m_t${id}_horo_diff`, !isNaN(valBot) && !isNaN(valTop) ? formatDec(valTop - valBot) : '');
 
-                const tramoRefuel = getLegRefuelTotal(id);
-                globalRefuel += tramoRefuel;
-
+                const tramoRefuel = getLegRefuelTotal(id); globalRefuel += tramoRefuel;
                 const fOn = el(`m_t${id}_fuel_on`), fOff = el(`m_t${id}_fuel_off`);
                 fOn.readOnly = false; fOn.classList.remove('readonly-strict');
                 
                 if (i > 0) {
                     if (fOn.dataset.manual !== 'true' || fOn.value === '') {
                         const prevOff = parseFloat(val(`m_t${legIds[i-1]}_fuel_off`)), prevRefuel = getLegRefuelTotal(legIds[i-1]);
-                        if (!isNaN(prevOff)) {
-                            fOn.value = formatDec(prevOff + prevRefuel);
-                            fOn.dataset.manual = 'false';
-                        } else { fOn.value = ''; }
+                        if (!isNaN(prevOff)) { fOn.value = formatDec(prevOff + prevRefuel); fOn.dataset.manual = 'false'; } else { fOn.value = ''; }
                     }
                 }
-
                 const valOn = parseFloat(fOn.value), valOff = parseFloat(fOff.value);
                 let diffF = (!isNaN(valOn) && !isNaN(valOff)) ? Math.max(0, valOn - valOff) : null;
-                let actualFDiff = diffF !== null ? diffF : 0;
                 setVal(`m_t${id}_fuel_diff`, diffF !== null ? formatDec(diffF) : '');
-                
                 if (diffF) totalFuelUsed += diffF;
 
                 const bStr = bDiff > 0 ? `${minsToTime(bDiff)} (${formatDec(bDiff/60)})` : '';
                 const aStr = aDiff > 0 ? `${minsToTime(aDiff)} (${formatDec(aDiff/60)})` : '';
                 setVal(`m_t${id}_block_diff`, bStr); setVal(`m_t${id}_air_diff`, aStr);
                 setTxt(`ui_t${id}_block_diff`, bStr || '--:--'); setTxt(`ui_t${id}_air_diff`, aStr || '--:--');
-
                 totalBlockMins += bDiff; totalAirMins += aDiff;
 
-                const lPax = parseInt(val(`m_t${id}_pax`)) || 0;
-                totalPax += lPax; paxArray.push(`(${lPax})`);
-                
+                const lPax = parseInt(val(`m_t${id}_pax`)) || 0; totalPax += lPax; paxArray.push(`(${lPax})`);
                 const pf = val(`m_t${id}_pf`).trim().toUpperCase() || "SIN NOMBRE";
                 const pm = val(`m_t${id}_pm`).trim().toUpperCase();
 
                 legDetails.push({ id, date: tDate, desde, dest, tOut, tIn });
                 if(!legsByDate[tDate]) legsByDate[tDate] = [];
-                legsByDate[tDate].push({ id, desde, dest, tOut, tOff, tOn, tIn, bDiff, aDiff, fDiff: actualFDiff, pax: lPax, pf, pm, horoBot: hBot.value, horoTop: hTop.value });
+                legsByDate[tDate].push({ id, desde, dest, tOut, tOff, tOn, tIn, bDiff, aDiff, fDiff: diffF||0, pax: lPax, pf, pm, horoBot: hBot.value, horoTop: hTop.value });
 
                 const initPilot = () => ({ pf_time: 0, pf_air: 0, landings: 0, pm_time: 0, pm_air: 0 });
                 if (!pilotStats[pf]) pilotStats[pf] = initPilot();
                 pilotStats[pf].pf_time += bDiff; pilotStats[pf].pf_air += aDiff;
                 if (bDiff > 0 || aDiff > 0) pilotStats[pf].landings += 1; 
 
-                if (pm) {
-                    if (!pilotStats[pm]) pilotStats[pm] = initPilot();
-                    pilotStats[pm].pm_time += bDiff; pilotStats[pm].pm_air += aDiff;
-                }
+                if (pm) { if (!pilotStats[pm]) pilotStats[pm] = initPilot(); pilotStats[pm].pm_time += bDiff; pilotStats[pm].pm_air += aDiff; }
             });
 
             if(legDetails.length > 1) {
                 for(let idx = 0; idx < legDetails.length - 1; idx++) {
-                    let curr = legDetails[idx];
-                    let next = legDetails[idx+1];
+                    let curr = legDetails[idx], next = legDetails[idx+1];
                     if(curr.date !== next.date && curr.dest && curr.dest !== 'SCEL' && next.desde === curr.dest) {
                         if(!legsByDate[next.date]) legsByDate[next.date] = [];
                     }
@@ -1094,55 +992,27 @@
             if(activeDates.length === 0 && gDate) activeDates = [gDate];
             if(activeDates.length === 0) activeDates = [new Date().toISOString().split('T')[0]];
 
-            // CALCULO INDEPENDIENTE DE DUTY, BLK Y AIR
-            let dailyStats = [];
-            let totalDutyMinsAllDays = 0;
-            let globalEndEl = el('duty_end');
-            
-            let picIni = val('m_pic_ini').trim().toUpperCase();
-            let sicIni = val('m_sic_ini').trim().toUpperCase();
+            let dailyStats = []; let totalDutyMinsAllDays = 0; let globalEndEl = el('duty_end');
+            let picIni = val('m_pic_ini').trim().toUpperCase(), sicIni = val('m_sic_ini').trim().toUpperCase();
 
             activeDates.forEach((dateKey, index) => {
-                let dayLegs = legsByDate[dateKey] || [];
-                if(dayLegs.length === 0) return;
-                
-                let startDuty = "";
-                let endDuty = "";
-                let dayBlock = 0, dayAir = 0, dayFuelUsed = 0;
-                let dayPax = [];
-                let firstLeg = dayLegs[0];
-                let lastLeg = dayLegs[dayLegs.length - 1];
-                
-                let hIni = firstLeg.horoBot || '--';
-                let hFin = lastLeg.horoTop || '--';
-                
+                let dayLegs = legsByDate[dateKey] || []; if(dayLegs.length === 0) return;
+                let startDuty = "", endDuty = "", dayBlock = 0, dayAir = 0, dayFuelUsed = 0, dayPax = [];
+                let firstLeg = dayLegs[0], lastLeg = dayLegs[dayLegs.length - 1];
                 let p1 = { block: 0, air: 0, dep: 0, pf_block: 0, pf_air: 0 };
                 let p2 = { block: 0, air: 0, dep: 0, pf_block: 0, pf_air: 0 };
 
                 dayLegs.forEach(leg => {
-                    dayBlock += (leg.bDiff || 0);
-                    dayAir += (leg.aDiff || 0);
-                    dayFuelUsed += (leg.fDiff || 0);
-                    if (leg.pax > 0 || leg.pax === 0) dayPax.push(`(${leg.pax})`);
-
-                    if (picIni) {
-                        if (leg.pf === picIni) { p1.block += leg.bDiff; p1.air += leg.aDiff; p1.pf_block += leg.bDiff; p1.pf_air += leg.aDiff; if(leg.bDiff>0) p1.dep++; }
-                        else if (leg.pm === picIni) { p1.block += leg.bDiff; p1.air += leg.aDiff; }
-                    }
-                    if (sicIni) {
-                        if (leg.pf === sicIni) { p2.block += leg.bDiff; p2.air += leg.aDiff; p2.pf_block += leg.bDiff; p2.pf_air += leg.aDiff; if(leg.bDiff>0) p2.dep++; }
-                        else if (leg.pm === sicIni) { p2.block += leg.bDiff; p2.air += leg.aDiff; }
-                    }
+                    dayBlock += (leg.bDiff || 0); dayAir += (leg.aDiff || 0); dayFuelUsed += (leg.fDiff || 0);
+                    if (leg.pax >= 0) dayPax.push(`(${leg.pax})`);
+                    if (picIni) { if (leg.pf === picIni) { p1.block += leg.bDiff; p1.air += leg.aDiff; p1.pf_block += leg.bDiff; p1.pf_air += leg.aDiff; if(leg.bDiff>0) p1.dep++; } else if (leg.pm === picIni) { p1.block += leg.bDiff; p1.air += leg.aDiff; } }
+                    if (sicIni) { if (leg.pf === sicIni) { p2.block += leg.bDiff; p2.air += leg.aDiff; p2.pf_block += leg.bDiff; p2.pf_air += leg.aDiff; if(leg.bDiff>0) p2.dep++; } else if (leg.pm === sicIni) { p2.block += leg.bDiff; p2.air += leg.aDiff; } }
                 });
 
                 if (index === 0) {
                     startDuty = val('duty_start');
-                    if (globalEndEl.dataset.manual === "true" && globalEndEl.value.length === 5) {
-                        endDuty = globalEndEl.value;
-                    } else if (lastLeg.tIn) {
-                        endDuty = addMins(lastLeg.tIn, 30);
-                        globalEndEl.value = endDuty; 
-                    }
+                    if (globalEndEl.dataset.manual === "true" && globalEndEl.value.length === 5) { endDuty = globalEndEl.value; } 
+                    else if (lastLeg.tIn) { endDuty = addMins(lastLeg.tIn, 30); globalEndEl.value = endDuty; }
                 } else {
                     if (firstLeg.tOff) startDuty = addMins(firstLeg.tOff, -60);
                     if (lastLeg.tIn) endDuty = addMins(lastLeg.tIn, 30);
@@ -1150,34 +1020,16 @@
                 
                 let dur = (startDuty && endDuty) ? timeDiffMins(startDuty, endDuty) : 0;
                 totalDutyMinsAllDays += dur;
-                
-                dailyStats.push({ 
-                    date: dateKey, start: startDuty, end: endDuty, duration: dur, 
-                    block: dayBlock, air: dayAir, fuelUsed: dayFuelUsed, pax: dayPax.join(' '),
-                    p1, p2, hIni, hFin
-                });
+                dailyStats.push({ date: dateKey, start: startDuty, end: endDuty, duration: dur, block: dayBlock, air: dayAir, fuelUsed: dayFuelUsed, pax: dayPax.join(' '), p1, p2, hIni: firstLeg.horoBot||'--', hFin: lastLeg.horoTop||'--' });
             });
 
-            // Actualización UI Web
             let uiDutyHtml = '';
             dailyStats.forEach(dp => {
-                let durStr = dp.duration > 0 ? `${minsToTime(dp.duration)} (${formatDec(dp.duration/60)}h)` : '--:--';
-                let blkStr = dp.block > 0 ? `${minsToTime(dp.block)} (${formatDec(dp.block/60)}h)` : '--:--';
-                let airStr = dp.air > 0 ? `${minsToTime(dp.air)} (${formatDec(dp.air/60)}h)` : '--:--';
-
-                uiDutyHtml += `<tr>
-                    <td style="padding:6px; text-align:left; border-bottom:1px solid rgba(255,255,255,0.05);">${dp.date}</td>
-                    <td style="border-bottom:1px solid rgba(255,255,255,0.05);">${dp.start || '--:--'}</td>
-                    <td style="border-bottom:1px solid rgba(255,255,255,0.05);">${dp.end || '--:--'}</td>
-                    <td style="border-bottom:1px solid rgba(255,255,255,0.05); font-weight:bold; color:var(--accent);">${durStr}</td>
-                    <td style="border-bottom:1px solid rgba(255,255,255,0.05); color:var(--text-muted);">${blkStr}</td>
-                    <td style="border-bottom:1px solid rgba(255,255,255,0.05); color:var(--text-muted);">${airStr}</td>
-                </tr>`;
+                uiDutyHtml += `<tr><td style="padding:6px; text-align:left; border-bottom:1px solid rgba(255,255,255,0.05);">${dp.date}</td><td style="border-bottom:1px solid rgba(255,255,255,0.05);">${dp.start || '--:--'}</td><td style="border-bottom:1px solid rgba(255,255,255,0.05);">${dp.end || '--:--'}</td><td style="border-bottom:1px solid rgba(255,255,255,0.05); font-weight:bold; color:var(--accent);">${dp.duration > 0 ? `${minsToTime(dp.duration)} (${formatDec(dp.duration/60)}h)` : '--:--'}</td><td style="border-bottom:1px solid rgba(255,255,255,0.05); color:var(--text-muted);">${dp.block > 0 ? `${minsToTime(dp.block)} (${formatDec(dp.block/60)}h)` : '--:--'}</td><td style="border-bottom:1px solid rgba(255,255,255,0.05); color:var(--text-muted);">${dp.air > 0 ? `${minsToTime(dp.air)} (${formatDec(dp.air/60)}h)` : '--:--'}</td></tr>`;
             });
             el('ui_duty_table').innerHTML = uiDutyHtml;
 
-            setTxt('sum_duty_hhmm', minsToTime(totalDutyMinsAllDays)); 
-            setTxt('sum_duty_dec', `${formatDec(totalDutyMinsAllDays/60)} hrs`);
+            setTxt('sum_duty_hhmm', minsToTime(totalDutyMinsAllDays)); setTxt('sum_duty_dec', `${formatDec(totalDutyMinsAllDays/60)} hrs`);
 
             renderSecurityForms(activeDates, legsByDate);
 
@@ -1185,283 +1037,143 @@
             let finalFuel = legIds.length > 0 ? parseFloat(val(`m_t${legIds[legIds.length-1]}_fuel_off`)) || 0 : 0;
             if (legIds.length > 0) finalFuel += getLegRefuelTotal(legIds[legIds.length-1]); 
 
-            const strPaxArray = paxArray.join(' ');
             setTxt('sum_fuel_init', formatDec(initialFuel)); setTxt('sum_fuel_final', formatDec(finalFuel));
             setTxt('sum_fuel_refuel', `+${formatDec(globalRefuel)}`); setTxt('sum_fuel_used', `-${formatDec(totalFuelUsed)}`);
-
             setTxt('sum_air_hhmm', minsToTime(totalAirMins)); setTxt('sum_air_dec', `${formatDec(totalAirMins/60)} hrs`);
             setTxt('sum_block_hhmm', minsToTime(totalBlockMins)); setTxt('sum_block_dec', `${formatDec(totalBlockMins/60)} hrs`);
-            setTxt('sum_pax_legs', strPaxArray || "(0)");
+            setTxt('sum_pax_legs', paxArray.join(' ') || "(0)");
 
-            el('sum_pilots_container').innerHTML = Object.entries(pilotStats)
-                .filter(([_, d]) => d.pf_time > 0 || d.pm_time > 0)
-                .map(([p, d]) => `
-                    <div style="background:rgba(255,255,255,0.05); border:1px solid var(--accent); padding:6px 10px; border-radius:6px; flex:1; min-width:160px; text-align:center;">
-                        <span style="display:block; font-size:0.75rem; font-weight:bold; color:var(--text-main); border-bottom:1px solid var(--border-color); padding-bottom:3px; margin-bottom:4px;">${p}</span>
-                        <div style="display:flex; justify-content:space-between; font-size:0.65rem;">
-                            <span style="color:var(--text-muted); text-align:left;">PF: ${minsToTime(d.pf_time)}<br><span style="color:var(--accent); font-size:0.6rem;">(Air: ${minsToTime(d.pf_air)})</span></span>
-                            <span style="color:var(--text-muted); text-align:right;">PM: ${minsToTime(d.pm_time)}<br><span style="color:var(--accent); font-size:0.6rem;">(Air: ${minsToTime(d.pm_air)})</span></span>
-                        </div>
-                    </div>`).join('') || "<span style='color:var(--text-muted); font-size:0.8rem;'>Sin horas registradas</span>";
+            el('sum_pilots_container').innerHTML = Object.entries(pilotStats).filter(([_, d]) => d.pf_time > 0 || d.pm_time > 0).map(([p, d]) => `<div style="background:rgba(255,255,255,0.05); border:1px solid var(--accent); padding:6px 10px; border-radius:6px; flex:1; min-width:160px; text-align:center;"><span style="display:block; font-size:0.75rem; font-weight:bold; color:var(--text-main); border-bottom:1px solid var(--border-color); padding-bottom:3px; margin-bottom:4px;">${p}</span><div style="display:flex; justify-content:space-between; font-size:0.65rem;"><span style="color:var(--text-muted); text-align:left;">PF: ${minsToTime(d.pf_time)}<br><span style="color:var(--accent); font-size:0.6rem;">(Air: ${minsToTime(d.pf_air)})</span></span><span style="color:var(--text-muted); text-align:right;">PM: ${minsToTime(d.pm_time)}<br><span style="color:var(--accent); font-size:0.6rem;">(Air: ${minsToTime(d.pm_air)})</span></span></div></div>`).join('') || "<span style='color:var(--text-muted); font-size:0.8rem;'>Sin horas registradas</span>";
 
-            syncPrintData(totalAirMins, totalBlockMins, initialFuel, globalRefuel, totalFuelUsed, finalFuel, strPaxArray, activeDates, dailyStats);
+            syncPrintData(totalAirMins, totalBlockMins, initialFuel, globalRefuel, totalFuelUsed, finalFuel, paxArray.join(' '), activeDates, dailyStats);
             autoSave(); 
         }
 
         function renderSecurityForms(activeDates, legsByDate) {
-            const container = el('sec-forms-wrapper');
-            const printContainer = el('print-sec-forms-wrapper');
+            const container = el('sec-forms-wrapper'), printContainer = el('print-sec-forms-wrapper');
             if(!container || !printContainer) return;
 
-            let webHtml = '';
-            let printHtml = '';
+            let webHtml = '', printHtml = '';
 
             activeDates.forEach((dateKey, index) => {
                 secManualState[dateKey] = secManualState[dateKey] || { sinObs: false, hinicioManual: false, hterminoManual: false };
                 let st = secManualState[dateKey];
-
                 let dayLegs = legsByDate[dateKey] || [];
                 let autoHInicio = dayLegs.length > 0 && dayLegs[0].tOut ? dayLegs[0].tOut : '';
                 let autoHTermino = dayLegs.length > 0 && dayLegs[dayLegs.length-1].tIn ? dayLegs[dayLegs.length-1].tIn : '';
                 let autoOrigen = dayLegs.length > 0 ? dayLegs[0].desde : '';
                 let autoDestino = dayLegs.length > 0 ? dayLegs[dayLegs.length-1].dest : '';
-
                 let currentHInicio = st.hinicioManual && st.customHInicio !== undefined ? st.customHInicio : autoHInicio;
                 let currentHTermino = st.hterminoManual && st.customHTermino !== undefined ? st.customHTermino : autoHTermino;
-
                 let defaultEst = (autoOrigen.trim().toUpperCase() === 'SCEL') ? 'AEROCARDAL' : '';
                 let currentEst = st.estacionamiento !== undefined ? st.estacionamiento : defaultEst;
                 let currentAlerta = st.alerta !== undefined ? st.alerta : '';
 
                 webHtml += `
-                <details class="card" style="border-color: var(--accent);" open>
+                <details class="card" style="border-color: var(--accent);">
                     <summary style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="flex:1;">🔎 FORMULARIO: INSPECCIÓN DE SEGURIDAD (${dateKey}) <span class="arrow"></span></span>
+                        <span style="flex:1;">🔎 INSPECCIÓN DE SEGURIDAD (${dateKey}) <span class="arrow"></span></span>
                         <div style="display:flex; align-items:center; gap:12px; padding-left:10px; border-left:1px solid var(--border-color);" onclick="event.stopPropagation();">
-                            <label style="font-size:0.75rem; color:var(--accent); display:flex; align-items:center; gap:5px; margin:0; cursor:pointer;">
-                                <input type="checkbox" id="m_sec_sin_obs_${dateKey}" ${st.sinObs ? 'checked' : ''} onchange="toggleSecSinObs('${dateKey}')"> <span>Inspección sin obs</span>
-                            </label>
-                            <label style="font-size:0.75rem; color:var(--accent); display:flex; align-items:center; gap:5px; margin:0; cursor:pointer;">
-                                <input type="checkbox" id="m_inc_sec_${dateKey}" checked onchange="triggerUpdate()"> Imprimir PDF
-                            </label>
+                            <label style="font-size:0.75rem; color:var(--accent); display:flex; align-items:center; gap:5px; margin:0; cursor:pointer;"><input type="checkbox" id="m_sec_sin_obs_${dateKey}" ${st.sinObs ? 'checked' : ''} onchange="toggleSecSinObs('${dateKey}')"> <span>Sin obs</span></label>
                         </div>
                     </summary>
                     <div class="card-content">
                          <div style="margin-bottom: 12px; padding:10px; background:rgba(255,255,255,0.03); border-radius:6px;">
-                             <div class="grid-3">
-                                 <div class="form-group"><label>Origen Vuelo</label><input type="text" id="m_sec_origen_${dateKey}" value="${autoOrigen}" oninput="triggerUpdate()"></div>
-                                 <div class="form-group"><label>Destino Vuelo</label><input type="text" id="m_sec_destino_${dateKey}" value="${autoDestino}" oninput="triggerUpdate()"></div>
-                                 <div class="form-group"><label>Estacionamiento</label><input type="text" id="m_sec_est_${dateKey}" value="${currentEst}" oninput="secManualState['${dateKey}'].estacionamiento=this.value; triggerUpdate()"></div>
-                             </div>
+                             <div class="grid-3"><div class="form-group"><label>Origen</label><input type="text" id="m_sec_origen_${dateKey}" value="${autoOrigen}" oninput="triggerUpdate()"></div><div class="form-group"><label>Destino</label><input type="text" id="m_sec_destino_${dateKey}" value="${autoDestino}" oninput="triggerUpdate()"></div><div class="form-group"><label>Estacionamiento</label><input type="text" id="m_sec_est_${dateKey}" value="${currentEst}" oninput="secManualState['${dateKey}'].estacionamiento=this.value; triggerUpdate()"></div></div>
                              <div class="grid-3" style="margin-top:5px;">
-                                 <div class="form-group">
-                                     <label style="display:flex; justify-content:space-between;">
-                                         <span>Hora Inicio (Block Out)</span>
-                                         <span style="cursor:pointer; color:var(--success); font-size:0.65rem;" onclick="resetSecTime('${dateKey}', 'hinicio')">🔄 Auto</span>
-                                     </label>
-                                     <input type="text" class="time-input" id="m_sec_hinicio_${dateKey}" value="${currentHInicio}" maxlength="5" inputmode="numeric" oninput="secManualState['${dateKey}'].hinicioManual=true; secManualState['${dateKey}'].customHInicio=this.value; formatTime(this)" onblur="validateTime(this)">
-                                 </div>
-                                 <div class="form-group">
-                                     <label style="display:flex; justify-content:space-between;">
-                                         <span>Hora Término (Block In)</span>
-                                         <span style="cursor:pointer; color:var(--success); font-size:0.65rem;" onclick="resetSecTime('${dateKey}', 'htermino')">🔄 Auto</span>
-                                     </label>
-                                     <input type="text" class="time-input" id="m_sec_htermino_${dateKey}" value="${currentHTermino}" maxlength="5" inputmode="numeric" oninput="secManualState['${dateKey}'].hterminoManual=true; secManualState['${dateKey}'].customHTermino=this.value; formatTime(this)" onblur="validateTime(this)">
-                                 </div>
-                                 <div class="form-group"><label>Estado Alerta</label><input type="text" id="m_sec_alerta_${dateKey}" value="${currentAlerta}" oninput="secManualState['${dateKey}'].alerta=this.value; triggerUpdate()"></div>
+                                 <div class="form-group"><label style="display:flex; justify-content:space-between;"><span>Inicio (Out)</span><span style="cursor:pointer; color:var(--success); font-size:0.65rem;" onclick="resetSecTime('${dateKey}', 'hinicio')">🔄 Auto</span></label><input type="text" class="time-input" id="m_sec_hinicio_${dateKey}" value="${currentHInicio}" maxlength="5" inputmode="numeric" oninput="secManualState['${dateKey}'].hinicioManual=true; secManualState['${dateKey}'].customHInicio=this.value; formatTime(this)" onblur="validateTime(this)"></div>
+                                 <div class="form-group"><label style="display:flex; justify-content:space-between;"><span>Término (In)</span><span style="cursor:pointer; color:var(--success); font-size:0.65rem;" onclick="resetSecTime('${dateKey}', 'htermino')">🔄 Auto</span></label><input type="text" class="time-input" id="m_sec_htermino_${dateKey}" value="${currentHTermino}" maxlength="5" inputmode="numeric" oninput="secManualState['${dateKey}'].hterminoManual=true; secManualState['${dateKey}'].customHTermino=this.value; formatTime(this)" onblur="validateTime(this)"></div>
+                                 <div class="form-group"><label>Alerta</label><input type="text" id="m_sec_alerta_${dateKey}" value="${currentAlerta}" oninput="secManualState['${dateKey}'].alerta=this.value; triggerUpdate()"></div>
                              </div>
                          </div>
-                         <div id="sec_form_container_${dateKey}">
-                `;
-
+                         <div id="sec_form_container_${dateKey}">`;
                 secData.forEach(item => {
                     let isChecked = st[item.id] !== undefined ? st[item.id] : st.sinObs;
                     webHtml += `<label class="checkbox-item"><input type="checkbox" id="m_sec_${dateKey}_${item.id}" ${isChecked ? 'checked' : ''} ${st.sinObs ? 'disabled' : ''} onchange="handleSecCheckboxChange('${dateKey}', '${item.id}')"> <span><b>${item.id}.</b> ${item.text}</span></label>`;
                 });
-
-                webHtml += `
-                         </div>
+                webHtml += `</div>
                          <div class="signature-block">
-                             <div>III. COMANDANTE DE LA AERONAVE:</div>
-                             <div class="grid-3" style="margin-top:8px;">
-                                 <div>Nombre: <strong id="sec_ui_nombre_${dateKey}" style="color:var(--accent);">______________________</strong></div>
-                                 <div>RUT: <strong id="sec_ui_rut_${dateKey}" style="color:var(--accent);">______________________</strong></div>
-                                 <div>Licencia: <strong id="sec_ui_licencia_${dateKey}" style="color:var(--accent);">______________________</strong></div>
-                             </div>
+                             <div>III. COMANDANTE DE LA AERONAVE:</div><div class="grid-3" style="margin-top:8px;"><div>Nombre: <strong id="sec_ui_nombre_${dateKey}" style="color:var(--accent);">______________________</strong></div><div>RUT: <strong id="sec_ui_rut_${dateKey}" style="color:var(--accent);">______________________</strong></div><div>Licencia: <strong id="sec_ui_licencia_${dateKey}" style="color:var(--accent);">______________________</strong></div></div>
                          </div>
                     </div>
-                </details>
-                `;
+                </details>`;
 
-                // Render PDF (Seguridad)
                 let pSecHtml = `
                 <div id="print_sec_container_${dateKey}" class="page-break" style="font-family: Arial, sans-serif; box-sizing: border-box; padding-top: 5px;">
-                    <table class="print-table" style="border-bottom: none; margin-bottom: 0;">
-                        <tr>
-                            <td colspan="2" style="font-size: 10px; font-weight: bold; font-style: italic; width: 50%;">AEROCARDAL</td>
-                            <td colspan="2" style="font-size: 9.5px; font-weight: bold; text-align: center; width: 50%;">INSPECCIÓN DE SEGURIDAD DE AERONAVES</td>
-                        </tr>
-                        <tr>
-                            <td style="width: 20%;">FECHA: <span class="bold">${dateKey}</span></td>
-                            <td style="width: 30%;">P.O.V.: N° <span id="sec_p_vuelo_${dateKey}" class="bold"></span></td>
-                            <td style="width: 25%;">MATERIAL: <span id="sec_p_material_${dateKey}" class="bold"></span></td>
-                            <td style="width: 25%;">MATRICULA: <span id="sec_p_matricula_${dateKey}" class="bold"></span></td>
-                        </tr>
-                        <tr>
-                            <td colspan="2" class="gray-bg">ESTACIONAMIENTO: <span id="sec_p_estacionamiento_${dateKey}" class="bold"></span></td>
-                            <td class="gray-bg">ORIGEN: <span id="sec_p_origen_${dateKey}" class="bold"></span></td>
-                            <td class="gray-bg">DESTINO: <span id="sec_p_destino_${dateKey}" class="bold"></span></td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">H. INICIO: <span id="sec_p_hinicio_${dateKey}" class="bold">${currentHInicio}</span></td>
-                            <td colspan="2">H. TÉRMINO: <span id="sec_p_htermino_${dateKey}" class="bold">${currentHTermino}</span></td>
-                        </tr>
-                        <tr>
-                            <td colspan="4">ESTADO ALERTA: <span id="sec_p_alerta_${dateKey}" class="bold"></span></td>
-                        </tr>
+                    <table class="print-table" style="border-bottom: none;">
+                        <tr><td colspan="2" class="no-border-x" style="width: 30%;"><div class="logo-text">AEROCARDAL</div></td><td colspan="2" class="no-border-x" style="vertical-align: bottom; padding-bottom: 4px;"><div class="main-title">INSPECCIÓN DE SEGURIDAD DE AERONAVES</div></td><td colspan="1" style="border-left: none; width: 20%;"></td></tr>
+                        <tr><td style="width: 25%;">FECHA: <span class="bold">${dateKey}</span></td><td style="width: 20%;">P.O.V.: N° <span id="sec_p_vuelo_${dateKey}" class="bold"></span></td><td style="width: 25%;">MATERIAL: <span id="sec_p_material_${dateKey}" class="bold"></span></td><td colspan="2">MATRICULA: <span id="sec_p_matricula_${dateKey}" class="bold"></span></td></tr>
+                        <tr><td colspan="2" class="gray-bg">ESTACIONAMIENTO: <span id="sec_p_estacionamiento_${dateKey}" class="bold"></span></td><td class="gray-bg">ORIGEN: <span id="sec_p_origen_${dateKey}" class="bold"></span></td><td colspan="2" class="gray-bg">DESTINO: <span id="sec_p_destino_${dateKey}" class="bold"></span></td></tr>
+                        <tr><td colspan="2">H. INICIO: <span id="sec_p_hinicio_${dateKey}" class="bold">${currentHInicio}</span></td><td>H. TÉRMINO: <span id="sec_p_htermino_${dateKey}" class="bold">${currentHTermino}</span></td><td colspan="2">ESTADO ALERTA: <span id="sec_p_alerta_${dateKey}" class="bold"></span></td></tr>
                     </table>
-                    
-                    <table style="width:100%; border-collapse: collapse; border: 1px solid black; margin-top: 4px;">
-                `;
-
+                    <table style="width:100%; border-collapse: collapse; border: 1px solid black; font-size:11px; border-bottom: none; margin-top: 4px;">`;
                 secData.forEach(item => {
                     let splitIdx = item.text.indexOf(':');
-                    let title = splitIdx > -1 ? item.text.substring(0, splitIdx + 1) : item.text;
-                    let desc = splitIdx > -1 ? item.text.substring(splitIdx + 1) : "";
-                    pSecHtml += `
-                        <tr>
-                            <td style="border:1px solid black; padding: 4px; text-align:justify; line-height: 1.2;">
-                                <b>${item.id}. ${title}</b><br>${desc}
-                            </td>
-                            <td style="border:1px solid black; width:30px; text-align:center; font-weight:bold; vertical-align:middle;" id="p_sec_${dateKey}_${item.id}"></td>
-                        </tr>
-                    `;
+                    let title = splitIdx > -1 ? item.text.substring(0, splitIdx + 1) : item.text; let desc = splitIdx > -1 ? item.text.substring(splitIdx + 1) : "";
+                    pSecHtml += `<tr><td style="border:1px solid black; border-bottom: 1px solid black; padding: 6px 6px; text-align:justify; line-height: 1.3;"><b>${item.id}. ${title}</b><br>${desc}</td><td style="border:1px solid black; border-bottom: 1px solid black; width:35px; text-align:center; font-weight:bold; font-size:16px; vertical-align:middle;" id="p_sec_${dateKey}_${item.id}"></td></tr>`;
                 });
-
-                pSecHtml += `
+                pSecHtml += `</table>
+                    <table style="width:100%; border-collapse: collapse; border: 1px solid black; border-top:none; font-size:11px;">
+                        <tr><td style="border:1px solid black; padding:6px; width:40%; vertical-align: top; height: 60px;"><div style="font-weight:bold; margin-bottom:2px;">III. COMANDANTE DE LA AERONAVE:</div><div style="text-align:center; margin-bottom:8px;">NOMBRE Y APELLIDOS</div><div style="text-align:center; font-size:12px;"><span id="sec_p_nombre_${dateKey}" class="bold"></span></div></td><td style="border:1px solid black; padding:6px; width:20%; vertical-align: top;"><div style="text-align:center; margin-bottom:20px;">RUT</div><div style="text-align:center; font-size:12px;"><span id="sec_p_rut_${dateKey}" class="bold"></span></div></td><td style="border:1px solid black; padding:6px; width:20%; vertical-align: top;"><div style="text-align:center; margin-bottom:20px;">LICENCIA</div><div style="text-align:center; font-size:12px;"><span id="sec_p_licencia_${dateKey}" class="bold"></span></div></td><td style="border:1px solid black; padding:6px; width:20%; vertical-align: top;"><div style="text-align:center;">FIRMA</div></td></tr>
                     </table>
-                    <table style="width:100%; border-collapse: collapse; border: 1px solid black; border-top:none;">
-                        <tr>
-                            <td style="border:1px solid black; padding:4px; width:40%; vertical-align: top; height: 50px;">
-                                <div style="font-weight:bold; margin-bottom:2px;">III. COMANDANTE DE LA AERONAVE:</div>
-                                <div style="text-align:center; margin-bottom:6px;">NOMBRE Y APELLIDOS</div>
-                                <div style="text-align:center;"><span id="sec_p_nombre_${dateKey}" class="bold"></span></div>
-                            </td>
-                            <td style="border:1px solid black; padding:4px; width:20%; vertical-align: top;">
-                                <div style="text-align:center; margin-bottom:15px;">RUT</div>
-                                <div style="text-align:center;"><span id="sec_p_rut_${dateKey}" class="bold"></span></div>
-                            </td>
-                            <td style="border:1px solid black; padding:4px; width:20%; vertical-align: top;">
-                                <div style="text-align:center; margin-bottom:15px;">LICENCIA</div>
-                                <div style="text-align:center;"><span id="sec_p_licencia_${dateKey}" class="bold"></span></div>
-                            </td>
-                            <td style="border:1px solid black; padding:4px; width:20%; vertical-align: top;">
-                                <div style="text-align:center;">FIRMA</div>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-                `;
+                </div>`;
                 printHtml += pSecHtml;
             });
-
-            container.innerHTML = webHtml;
-            printContainer.innerHTML = printHtml;
-            updateFormFooters();
+            container.innerHTML = webHtml; printContainer.innerHTML = printHtml; updateFormFooters();
         }
 
         function syncPrintData(air, block, initF, refF, usedF, finF, strPax, activeDates, dailyStats) {
             ['fecha_gen', 'folio_gen', 'pov', 'material', 'matricula'].forEach(f => setTxt(`p_${f}`, val(`m_${f}`)));
-
             const stdFields = ['fecha','folio','dest','desde','dist','pax','pf','pm','winds','time_out','time_off','time_on','time_in','block_diff','air_diff','horo_top','horo_bot','horo_diff','fuel_on','fuel_off','fuel_diff'];
             const prmFields = ['fl','mach','isa','oat','gspd','ff','n1','n2','oilt','oilp','itt','obs'];
             const wpfFields = ['wp1','wp2','wp3','wp4','cp1','cp2','cp3','cp4','cr1','cr2','cr3','cr4'];
 
             legIds.forEach(id => {
-                const showP = el(`m_t${id}_show_params`)?.checked;
+                const showP = val(`m_t${id}_fl`) || val(`m_t${id}_wp1`) || val(`m_t${id}_meteo`); 
                 stdFields.forEach(f => setTxt(`p_t${id}_${f}`, val(`m_t${id}_${f}`)));
-
                 const windsVal = val(`m_t${id}_winds`).trim();
                 if(el(`p_t${id}_winds_wrapper`)) el(`p_t${id}_winds_wrapper`).style.display = windsVal ? "inline-block" : "none";
-
+                
                 const hasPrm = prmFields.some(f => val(`m_t${id}_${f}`).trim() !== "");
                 const hasFuel = wpfFields.some(f => val(`m_t${id}_${f}`).trim() !== "");
-                const hasMet = val(`m_t${id}_meteo`).trim() !== "";
-                const hasAtc = val(`m_t${id}_atc`).trim() !== "";
+                const hasMet = val(`m_t${id}_meteo`).trim() !== "", hasAtc = val(`m_t${id}_atc`).trim() !== "";
 
-                if (showP) {
-                    prmFields.concat(wpfFields).forEach(f => setTxt(`p_t${id}_${f}`, val(`m_t${id}_${f}`)));
-                    setTxt(`p_t${id}_meteo`, val(`m_t${id}_meteo`)); setTxt(`p_t${id}_atc`, val(`m_t${id}_atc`));
-                }
+                prmFields.concat(wpfFields).forEach(f => setTxt(`p_t${id}_${f}`, val(`m_t${id}_${f}`)));
+                setTxt(`p_t${id}_meteo`, val(`m_t${id}_meteo`)); setTxt(`p_t${id}_atc`, val(`m_t${id}_atc`));
 
-                if(el(`p_t${id}_tbl_params`)) el(`p_t${id}_tbl_params`).style.display = showP && hasPrm ? "table" : "none";
-                if(el(`p_t${id}_tbl_fuel`)) el(`p_t${id}_tbl_fuel`).style.display = showP && hasFuel ? "table" : "none";
-                if(el(`p_t${id}_tbl_meteo`)) el(`p_t${id}_tbl_meteo`).style.display = showP && hasMet ? "table" : "none";
-                if(el(`p_t${id}_tbl_atc`)) el(`p_t${id}_tbl_atc`).style.display = showP && hasAtc ? "table" : "none";
-                if(el(`p_t${id}_params_wrapper`)) el(`p_t${id}_params_wrapper`).style.display = showP && (hasPrm||hasFuel||hasMet||hasAtc) ? "block" : "none";
+                if(el(`p_t${id}_tbl_params`)) el(`p_t${id}_tbl_params`).style.display = hasPrm ? "table" : "none";
+                if(el(`p_t${id}_tbl_fuel`)) el(`p_t${id}_tbl_fuel`).style.display = hasFuel ? "table" : "none";
+                if(el(`p_t${id}_tbl_meteo`)) el(`p_t${id}_tbl_meteo`).style.display = hasMet ? "table" : "none";
+                if(el(`p_t${id}_tbl_atc`)) el(`p_t${id}_tbl_atc`).style.display = hasAtc ? "table" : "none";
+                if(el(`p_t${id}_params_wrapper`)) el(`p_t${id}_params_wrapper`).style.display = (hasPrm||hasFuel||hasMet||hasAtc) ? "block" : "none";
 
                 const dnVal = val(`m_t${id}_dn`), pnpVal = val(`m_t${id}_pnp`);
                 setTxt(`p_t${id}_dn_text`, dnVal === 'D' ? 'DIURNO' : (dnVal === 'N' ? 'NOCTURNO' : ''));
                 setTxt(`p_t${id}_pnp_text`, pnpVal === 'P' ? 'PRECISIÓN' : (pnpVal === 'NP' ? 'NO PRECISIÓN' : ''));
             });
 
-            // RESUMEN OPERACIONAL PDF
             let picIni = val('m_pic_ini').trim().toUpperCase() || 'CAP';
             let sicIni = val('m_sic_ini').trim().toUpperCase() || 'FO';
-
             let horoBot = legIds.length ? val(`m_t${legIds[0]}_horo_bot`) || '--' : '--';
             let horoTop = legIds.length ? val(`m_t${legIds[legIds.length-1]}_horo_top`) || '--' : '--';
-            
+
             let headHtml = `
-            <table class="print-table" style="margin-top:10px; border-bottom:none;">
+            <table class="print-table" style="margin-top:15px; border-bottom:none;">
                 <tr><td colspan="6" class="summary-title-pdf">BALANCE GENERAL OPERACIONAL</td></tr>
-                <tr class="gray-bg text-center" style="font-weight:bold;">
-                    <td>TOTAL TRAMOS</td><td>HORÓMETRO INICIAL</td><td>HORÓMETRO FINAL</td>
-                    <td>COMBUSTIBLE INICIAL</td><td>COMBUSTIBLE FINAL</td><td>TOTAL RECARGADO</td>
-                </tr>
-                <tr class="text-center" style="font-weight:bold;">
-                    <td>${legIds.length} TRAMOS</td><td>${horoBot}</td><td>${horoTop}</td>
-                    <td>${formatDec(initF)}</td><td>${formatDec(finF)}</td><td>${formatDec(refF)}</td>
-                </tr>
+                <tr class="gray-bg text-center" style="font-size:7px; font-weight:bold;"><td>TOTAL TRAMOS</td><td>HORÓMETRO INICIAL</td><td>HORÓMETRO FINAL</td><td>COMBUSTIBLE INICIAL</td><td>COMBUSTIBLE FINAL</td><td>TOTAL RECARGADO</td></tr>
+                <tr class="text-center" style="font-size:8px; font-weight:bold;"><td>${legIds.length} TRAMOS</td><td>${horoBot}</td><td>${horoTop}</td><td>${formatDec(initF)}</td><td>${formatDec(finF)}</td><td>${formatDec(refF)}</td></tr>
             </table>`;
 
             let t1Html = `
             <table class="print-table" style="margin-top:0; border-top:none; text-transform:uppercase;">
                 <tr><td colspan="9" class="summary-title-pdf">CONSOLIDADO LIBRO DE VUELO</td></tr>
-                <tr class="gray-bg">
-                    <td class="text-center bold">FECHA</td>
-                    <td class="text-center bold">HORO<br>INICIAL</td>
-                    <td class="text-center bold">HORO<br>FINAL</td>
-                    <td class="text-center bold">DUTY<br>INICIO - TÉRMINO</td>
-                    <td class="text-center bold">DUTY TOTAL<br>HH:MM (HH.H)</td>
-                    <td class="text-center bold">BLOCK TOTAL<br>HH:MM (HH.H)</td>
-                    <td class="text-center bold">AIR TOTAL<br>HH:MM (HH.H)</td>
-                    <td class="text-center bold">FUEL<br>USADO</td>
-                    <td class="text-center bold">PAX<br>POR TRAMO</td>
-                </tr>
-            `;
+                <tr class="gray-bg" style="font-size:7px;"><td class="text-center bold">FECHA</td><td class="text-center bold">HORO<br>INICIAL</td><td class="text-center bold">HORO<br>FINAL</td><td class="text-center bold">DUTY<br>INICIO - TÉRMINO</td><td class="text-center bold">DUTY TOTAL<br>HH:MM (HH.H)</td><td class="text-center bold">BLOCK TOTAL<br>HH:MM (HH.H)</td><td class="text-center bold">AIR TOTAL<br>HH:MM (HH.H)</td><td class="text-center bold">FUEL<br>USADO</td><td class="text-center bold">PAX<br>POR TRAMO</td></tr>`;
 
             let t2Html = `
-            <table class="print-table" style="margin-top:6px; text-transform:uppercase;">
+            <table class="print-table" style="margin-top:8px; text-transform:uppercase;">
                 <tr><td colspan="9" class="summary-title-pdf">CONSOLIDADO BITÁCORA PILOTOS</td></tr>
-                <tr class="gray-bg">
-                    <td class="text-center bold" rowspan="2" style="width:10%; vertical-align:middle;">FECHA</td>
-                    <td class="text-center bold" colspan="2" style="width:20%;">BLOCK TOTAL<br>HH:MM (HH.H)</td>
-                    <td class="text-center bold" colspan="2" style="width:20%;">AIR TOTAL<br>HH:MM (HH.H)</td>
-                    <td class="text-center bold" colspan="2" style="width:30%;">HORAS COMO PF<br>BLK / AIR</td>
-                    <td class="text-center bold" colspan="2" style="width:20%;">DEP / AT</td>
-                </tr>
-                <tr class="gray-bg">
-                    <td class="text-center bold">CAP: ${picIni}</td>
-                    <td class="text-center bold">FO: ${sicIni}</td>
-                    <td class="text-center bold">CAP: ${picIni}</td>
-                    <td class="text-center bold">FO: ${sicIni}</td>
-                    <td class="text-center bold">CAP: ${picIni}</td>
-                    <td class="text-center bold">FO: ${sicIni}</td>
-                    <td class="text-center bold">CAP: ${picIni}</td>
-                    <td class="text-center bold">FO: ${sicIni}</td>
-                </tr>
-            `;
+                <tr class="gray-bg" style="font-size:7px;"><td class="text-center bold" rowspan="2" style="width:10%; vertical-align:middle;">FECHA</td><td class="text-center bold" colspan="2" style="width:20%;">BLOCK TOTAL<br>HH:MM (HH.H)</td><td class="text-center bold" colspan="2" style="width:20%;">AIR TOTAL<br>HH:MM (HH.H)</td><td class="text-center bold" colspan="2" style="width:30%;">HORAS COMO PF<br>BLK / AIR</td><td class="text-center bold" colspan="2" style="width:20%;">DEP / AT</td></tr>
+                <tr class="gray-bg" style="font-size:7px;"><td class="text-center bold">CAP: ${picIni}</td><td class="text-center bold">FO: ${sicIni}</td><td class="text-center bold">CAP: ${picIni}</td><td class="text-center bold">FO: ${sicIni}</td><td class="text-center bold">CAP: ${picIni}</td><td class="text-center bold">FO: ${sicIni}</td><td class="text-center bold">CAP: ${picIni}</td><td class="text-center bold">FO: ${sicIni}</td></tr>`;
 
             let totDuty=0, totBlock=0, totAir=0, totFuel=0, totPax="";
             let totP1Block=0, totP1Air=0, totP1Dep=0, totP1PFBlock=0, totP1PFAir=0;
@@ -1469,66 +1181,28 @@
 
             dailyStats.forEach(ds => {
                 let shortDate = ds.date.length >= 10 ? ds.date.substring(5) : ds.date;
-                
                 let dStr = ds.duration > 0 ? `${minsToTime(ds.duration)} (${formatDec(ds.duration/60)})` : '--:--';
                 let bStr = ds.block > 0 ? `${minsToTime(ds.block)} (${formatDec(ds.block/60)})` : '--:--';
                 let aStr = ds.air > 0 ? `${minsToTime(ds.air)} (${formatDec(ds.air/60)})` : '--:--';
                 
-                t1Html += `
-                <tr>
-                    <td class="text-center bold">${shortDate}</td>
-                    <td class="text-center">${ds.hIni}</td>
-                    <td class="text-center">${ds.hFin}</td>
-                    <td class="text-center">${ds.start||'--'} - ${ds.end||'--'}</td>
-                    <td class="text-center bold">${dStr}</td>
-                    <td class="text-center bold">${bStr}</td>
-                    <td class="text-center bold">${aStr}</td>
-                    <td class="text-center bold">${formatDec(ds.fuelUsed)}</td>
-                    <td class="text-center">${ds.pax}</td>
-                </tr>`;
+                t1Html += `<tr><td class="text-center bold" style="font-size:8px;">${shortDate}</td><td class="text-center" style="font-size:8px;">${ds.hIni}</td><td class="text-center" style="font-size:8px;">${ds.hFin}</td><td class="text-center" style="font-size:8px;">${ds.start||'--'} - ${ds.end||'--'}</td><td class="text-center bold" style="font-size:8px;">${dStr}</td><td class="text-center bold" style="font-size:8px;">${bStr}</td><td class="text-center bold" style="font-size:8px;">${aStr}</td><td class="text-center bold" style="font-size:8px;">${formatDec(ds.fuelUsed)}</td><td class="text-center" style="font-size:8px;">${ds.pax}</td></tr>`;
 
-                totDuty += ds.duration; totBlock += ds.block; totAir += ds.air; totFuel += ds.fuelUsed;
-                totPax += (totPax ? " " : "") + ds.pax;
+                totDuty += ds.duration; totBlock += ds.block; totAir += ds.air; totFuel += ds.fuelUsed; totPax += (totPax ? " " : "") + ds.pax;
 
-                let p1B = ds.p1.block > 0 ? `${minsToTime(ds.p1.block)} (${formatDec(ds.p1.block/60)})` : '--';
-                let p1A = ds.p1.air > 0 ? `${minsToTime(ds.p1.air)} (${formatDec(ds.p1.air/60)})` : '--';
-                let p2B = ds.p2.block > 0 ? `${minsToTime(ds.p2.block)} (${formatDec(ds.p2.block/60)})` : '--';
-                let p2A = ds.p2.air > 0 ? `${minsToTime(ds.p2.air)} (${formatDec(ds.p2.air/60)})` : '--';
+                let p1B = ds.p1.block > 0 ? `${minsToTime(ds.p1.block)} (${formatDec(ds.p1.block/60)})` : '--'; let p1A = ds.p1.air > 0 ? `${minsToTime(ds.p1.air)} (${formatDec(ds.p1.air/60)})` : '--';
+                let p2B = ds.p2.block > 0 ? `${minsToTime(ds.p2.block)} (${formatDec(ds.p2.block/60)})` : '--'; let p2A = ds.p2.air > 0 ? `${minsToTime(ds.p2.air)} (${formatDec(ds.p2.air/60)})` : '--';
                 
                 let p1PFStr = ds.p1.pf_block > 0 || ds.p1.pf_air > 0 ? `${minsToTime(ds.p1.pf_block)} (${formatDec(ds.p1.pf_block/60)})<br><span style="font-size:7px;">AIR: ${minsToTime(ds.p1.pf_air)} (${formatDec(ds.p1.pf_air/60)})</span>` : '--';
                 let p2PFStr = ds.p2.pf_block > 0 || ds.p2.pf_air > 0 ? `${minsToTime(ds.p2.pf_block)} (${formatDec(ds.p2.pf_block/60)})<br><span style="font-size:7px;">AIR: ${minsToTime(ds.p2.pf_air)} (${formatDec(ds.p2.pf_air/60)})</span>` : '--';
 
-                t2Html += `
-                <tr>
-                    <td class="text-center bold">${shortDate}</td>
-                    <td class="text-center">${p1B}</td>
-                    <td class="text-center">${p2B}</td>
-                    <td class="text-center">${p1A}</td>
-                    <td class="text-center">${p2A}</td>
-                    <td class="text-center" style="line-height:1.1;">${p1PFStr}</td>
-                    <td class="text-center" style="line-height:1.1;">${p2PFStr}</td>
-                    <td class="text-center">${ds.p1.dep}</td>
-                    <td class="text-center">${ds.p2.dep}</td>
-                </tr>`;
+                t2Html += `<tr><td class="text-center bold" style="font-size:8px;">${shortDate}</td><td class="text-center" style="font-size:8px;">${p1B}</td><td class="text-center" style="font-size:8px;">${p2B}</td><td class="text-center" style="font-size:8px;">${p1A}</td><td class="text-center" style="font-size:8px;">${p2A}</td><td class="text-center" style="font-size:8px; line-height:1.2;">${p1PFStr}</td><td class="text-center" style="font-size:8px; line-height:1.2;">${p2PFStr}</td><td class="text-center" style="font-size:8px;">${ds.p1.dep}</td><td class="text-center" style="font-size:8px;">${ds.p2.dep}</td></tr>`;
 
-                totP1Block += ds.p1.block; totP1Air += ds.p1.air; totP1Dep += ds.p1.dep;
-                totP1PFBlock += ds.p1.pf_block; totP1PFAir += ds.p1.pf_air;
-                
-                totP2Block += ds.p2.block; totP2Air += ds.p2.air; totP2Dep += ds.p2.dep;
-                totP2PFBlock += ds.p2.pf_block; totP2PFAir += ds.p2.pf_air;
+                totP1Block += ds.p1.block; totP1Air += ds.p1.air; totP1Dep += ds.p1.dep; totP1PFBlock += ds.p1.pf_block; totP1PFAir += ds.p1.pf_air;
+                totP2Block += ds.p2.block; totP2Air += ds.p2.air; totP2Dep += ds.p2.dep; totP2PFBlock += ds.p2.pf_block; totP2PFAir += ds.p2.pf_air;
             });
 
             if (dailyStats.length > 1) {
-                t1Html += `
-                <tr>
-                    <td class="text-center summary-total-bg" colspan="3">TOTAL ACUMULADO</td>
-                    <td class="text-center summary-total-bg">--</td>
-                    <td class="text-center summary-total-bg">${totDuty > 0 ? `${minsToTime(totDuty)} (${formatDec(totDuty/60)})` : '--'}</td>
-                    <td class="text-center summary-total-bg">${totBlock > 0 ? `${minsToTime(totBlock)} (${formatDec(totBlock/60)})` : '--'}</td>
-                    <td class="text-center summary-total-bg">${totAir > 0 ? `${minsToTime(totAir)} (${formatDec(totAir/60)})` : '--'}</td>
-                    <td class="text-center summary-total-bg">${formatDec(totFuel)}</td>
-                    <td class="text-center summary-total-bg">${totPax}</td>
-                </tr>`;
+                t1Html += `<tr><td class="text-center summary-total-bg" style="font-size:8px;" colspan="3">TOTAL ACUMULADO</td><td class="text-center summary-total-bg" style="font-size:8px;">--</td><td class="text-center summary-total-bg" style="font-size:8px;">${totDuty > 0 ? `${minsToTime(totDuty)} (${formatDec(totDuty/60)})` : '--'}</td><td class="text-center summary-total-bg" style="font-size:8px;">${totBlock > 0 ? `${minsToTime(totBlock)} (${formatDec(totBlock/60)})` : '--'}</td><td class="text-center summary-total-bg" style="font-size:8px;">${totAir > 0 ? `${minsToTime(totAir)} (${formatDec(totAir/60)})` : '--'}</td><td class="text-center summary-total-bg" style="font-size:8px;">${formatDec(totFuel)}</td><td class="text-center summary-total-bg" style="font-size:8px;">${totPax}</td></tr>`;
             }
             t1Html += `</table>`;
 
@@ -1536,103 +1210,43 @@
                 let totP1PFStr = totP1PFBlock > 0 || totP1PFAir > 0 ? `${minsToTime(totP1PFBlock)} (${formatDec(totP1PFBlock/60)})<br><span style="font-size:7px;">AIR: ${minsToTime(totP1PFAir)} (${formatDec(totP1PFAir/60)})</span>` : '--';
                 let totP2PFStr = totP2PFBlock > 0 || totP2PFAir > 0 ? `${minsToTime(totP2PFBlock)} (${formatDec(totP2PFBlock/60)})<br><span style="font-size:7px;">AIR: ${minsToTime(totP2PFAir)} (${formatDec(totP2PFAir/60)})</span>` : '--';
 
-                t2Html += `
-                <tr>
-                    <td class="text-center summary-total-bg">TOTAL ACUMULADO</td>
-                    <td class="text-center summary-total-bg">${totP1Block > 0 ? `${minsToTime(totP1Block)} (${formatDec(totP1Block/60)})` : '--'}</td>
-                    <td class="text-center summary-total-bg">${totP2Block > 0 ? `${minsToTime(totP2Block)} (${formatDec(totP2Block/60)})` : '--'}</td>
-                    <td class="text-center summary-total-bg">${totP1Air > 0 ? `${minsToTime(totP1Air)} (${formatDec(totP1Air/60)})` : '--'}</td>
-                    <td class="text-center summary-total-bg">${totP2Air > 0 ? `${minsToTime(totP2Air)} (${formatDec(totP2Air/60)})` : '--'}</td>
-                    <td class="text-center summary-total-bg" style="line-height:1.1;">${totP1PFStr}</td>
-                    <td class="text-center summary-total-bg" style="line-height:1.1;">${totP2PFStr}</td>
-                    <td class="text-center summary-total-bg">${totP1Dep}</td>
-                    <td class="text-center summary-total-bg">${totP2Dep}</td>
-                </tr>`;
+                t2Html += `<tr><td class="text-center summary-total-bg" style="font-size:8px;">TOTAL ACUMULADO</td><td class="text-center summary-total-bg" style="font-size:8px;">${totP1Block > 0 ? `${minsToTime(totP1Block)} (${formatDec(totP1Block/60)})` : '--'}</td><td class="text-center summary-total-bg" style="font-size:8px;">${totP2Block > 0 ? `${minsToTime(totP2Block)} (${formatDec(totP2Block/60)})` : '--'}</td><td class="text-center summary-total-bg" style="font-size:8px;">${totP1Air > 0 ? `${minsToTime(totP1Air)} (${formatDec(totP1Air/60)})` : '--'}</td><td class="text-center summary-total-bg" style="font-size:8px;">${totP2Air > 0 ? `${minsToTime(totP2Air)} (${formatDec(totP2Air/60)})` : '--'}</td><td class="text-center summary-total-bg" style="font-size:8px; line-height:1.2;">${totP1PFStr}</td><td class="text-center summary-total-bg" style="font-size:8px; line-height:1.2;">${totP2PFStr}</td><td class="text-center summary-total-bg" style="font-size:8px;">${totP1Dep}</td><td class="text-center summary-total-bg" style="font-size:8px;">${totP2Dep}</td></tr>`;
             }
             t2Html += `</table>`;
 
             el('p_resumen_operacional_container').innerHTML = headHtml + t1Html + t2Html;
 
-            // EXPORTACIÓN A PDF: SMS Y SEGURIDAD
             const sinObs = el('m_sms_sin_obs')?.checked;
-            setTxt('sms_p_fecha', val('m_fecha_gen'));
-            setTxt('sms_p_pov', val('m_pov'));
-            setTxt('sms_p_matricula', val('m_matricula'));
-            setTxt('sms_p_material', val('m_material'));
+            setTxt('sms_p_fecha', val('m_fecha_gen')); setTxt('sms_p_pov', val('m_pov')); setTxt('sms_p_matricula', val('m_matricula')); setTxt('sms_p_material', val('m_material'));
             
             for(let i=1; i<=47; i++) {
                 const cell = el(`p_sms_${i}`);
-                if(cell) {
-                    if(sinObs) { cell.innerHTML = ""; cell.classList.add('strike-cell'); } 
-                    else { cell.classList.remove('strike-cell'); setTxt(`p_sms_${i}`, el(`m_sms_${i}`)?.checked ? '✓' : ''); }
-                }
+                if(cell) { if(sinObs) { cell.innerHTML = ""; cell.classList.add('strike-cell'); } else { cell.classList.remove('strike-cell'); setTxt(`p_sms_${i}`, el(`m_sms_${i}`)?.checked ? '✓' : ''); } }
             }
             setTxt('p_sms_obs', val('m_sms_obs'));
             
             activeDates.forEach(dateKey => {
-                const printContainer = el(`print_sec_container_${dateKey}`);
-                const incSec = el(`m_inc_sec_${dateKey}`)?.checked;
-                if(printContainer) printContainer.style.display = incSec ? 'block' : 'none';
-
-                setTxt(`sec_p_vuelo_${dateKey}`, val('m_pov'));
-                setTxt(`sec_p_material_${dateKey}`, val('m_material'));
-                setTxt(`sec_p_matricula_${dateKey}`, val('m_matricula'));
-                setTxt(`sec_p_estacionamiento_${dateKey}`, val(`m_sec_est_${dateKey}`));
-                setTxt(`sec_p_origen_${dateKey}`, val(`m_sec_origen_${dateKey}`));
-                setTxt(`sec_p_destino_${dateKey}`, val(`m_sec_destino_${dateKey}`));
-                setTxt(`sec_p_alerta_${dateKey}`, val(`m_sec_alerta_${dateKey}`));
-
-                ['A','B','C','D','E','F','G','H','I','J','K'].forEach(id => {
-                    const cb = el(`m_sec_${dateKey}_${id}`);
-                    setTxt(`p_sec_${dateKey}_${id}`, cb?.checked ? '✓' : '');
-                });
-
-                setTxt(`sec_p_nombre_${dateKey}`, capitanActual.nombre || "");
-                setTxt(`sec_p_rut_${dateKey}`, capitanActual.rut || "");
-                setTxt(`sec_p_licencia_${dateKey}`, capitanActual.licencia || "");
+                setTxt(`sec_p_vuelo_${dateKey}`, val('m_pov')); setTxt(`sec_p_material_${dateKey}`, val('m_material')); setTxt(`sec_p_matricula_${dateKey}`, val('m_matricula'));
+                setTxt(`sec_p_estacionamiento_${dateKey}`, val(`m_sec_est_${dateKey}`)); setTxt(`sec_p_origen_${dateKey}`, val(`m_sec_origen_${dateKey}`)); setTxt(`sec_p_destino_${dateKey}`, val(`m_sec_destino_${dateKey}`)); setTxt(`sec_p_alerta_${dateKey}`, val(`m_sec_alerta_${dateKey}`));
+                ['A','B','C','D','E','F','G','H','I','J','K'].forEach(id => { const cb = el(`m_sec_${dateKey}_${id}`); setTxt(`p_sec_${dateKey}_${id}`, cb?.checked ? '✓' : ''); });
+                setTxt(`sec_p_nombre_${dateKey}`, capitanActual.nombre || ""); setTxt(`sec_p_rut_${dateKey}`, capitanActual.rut || ""); setTxt(`sec_p_licencia_${dateKey}`, capitanActual.licencia || "");
             });
         }
 
-        // =======================================================
-        // HERRAMIENTAS ADICIONALES (GUARDADO Y LIMPIEZA)
-        // =======================================================
         function getAllData() {
-            let data = {
-                globals: {},
-                legs: legIds.length,
-                legData: {},
-                refuelData: refuelData,
-                secManualState: secManualState
-            };
-
-            let globalFields = ['duty_start', 'duty_end', 'm_fecha_gen', 'm_folio_gen', 'm_pov', 'm_material', 'm_matricula', 'm_matricula_suffix', 'm_pic_ini', 'm_sic_ini', 'm_sms_obs', 'm_inc_sms', 'm_sms_sin_obs'];
+            let data = { globals: {}, legs: legIds.length, legData: {}, refuelData: refuelData, secManualState: secManualState };
+            let globalFields = ['duty_start', 'duty_end', 'm_fecha_gen', 'm_folio_gen', 'm_pov', 'm_material', 'm_matricula', 'm_matricula_suffix', 'm_pic_ini', 'm_sic_ini', 'm_sms_obs', 'm_sms_sin_obs'];
             for(let i=1; i<=47; i++) globalFields.push(`m_sms_${i}`);
-
-            globalFields.forEach(id => {
-                let element = el(id);
-                if (element) {
-                    if(element.type === 'checkbox') data.globals[id] = element.checked;
-                    else data.globals[id] = element.value;
-                }
-            });
-
-            legIds.forEach(id => {
-                data.legData[id] = {};
-                let inputs = document.querySelectorAll(`#leg_card_${id} input, #leg_card_${id} select, #leg_card_${id} textarea`);
-                inputs.forEach(input => {
-                    if(input.id) data.legData[id][input.id] = { value: input.value, linked: input.dataset.linked || "false" };
-                });
-            });
-
+            globalFields.forEach(id => { let element = el(id); if (element) { if(element.type === 'checkbox') data.globals[id] = element.checked; else data.globals[id] = element.value; } });
+            legIds.forEach(id => { data.legData[id] = {}; let inputs = document.querySelectorAll(`#leg_card_${id} input, #leg_card_${id} select, #leg_card_${id} textarea`); inputs.forEach(input => { if(input.id) data.legData[id][input.id] = { value: input.value, linked: input.dataset.linked || "false" }; }); });
             return JSON.stringify(data);
         }
 
         function autoSave() { localStorage.setItem('aerocardal_flight_data', getAllData()); }
 
         function clearAllData() {
-            if(!confirm("⚠️ ¿Estás seguro de LIMPIAR TODOS los datos? Perderás el progreso no guardado.")) return;
-            localStorage.removeItem('aerocardal_flight_data');
-            window.location.reload();
+            if(!confirm("⚠️ ¿Estás seguro de LIMPIAR TODOS los datos? Perderás el progreso local.")) return;
+            localStorage.removeItem('aerocardal_flight_data'); window.location.reload();
         }
 
         function loadDataIntoApp(data) {
@@ -1640,202 +1254,48 @@
             if (data.globals) {
                 for (let key in data.globals) {
                     let element = el(key);
-                    if (element) {
-                        if(element.type === 'checkbox') element.checked = (data.globals[key] === true || data.globals[key] === "true");
-                        else setVal(key, data.globals[key]);
-                    }
+                    if (element) { if(element.type === 'checkbox') element.checked = (data.globals[key] === true || data.globals[key] === "true"); else setVal(key, data.globals[key]); }
                 }
             }
             if(data.secManualState) secManualState = data.secManualState;
-
-            el('tramos-container').innerHTML = '';
-            el('print-tramos-container').innerHTML = '';
-            el('print-params-container').innerHTML = '';
+            el('tramos-container').innerHTML = ''; el('print-tramos-container').innerHTML = ''; el('print-params-container').innerHTML = '';
             legIds = []; nextLegId = 1; refuelData = data.refuelData || {};
-
             let legCount = data.legs || 1;
             for(let i=0; i<legCount; i++) {
-                let newId = nextLegId++; legIds.push(newId);
-                let index = legIds.length;
+                let newId = nextLegId++; legIds.push(newId); let index = legIds.length;
                 el('tramos-container').insertAdjacentHTML('beforeend', getLegHTML(newId, index, i === 0 ? 'SCEL' : ''));
                 el('print-tramos-container').insertAdjacentHTML('beforeend', getPrintLegHTML(newId, index));
                 el('print-params-container').insertAdjacentHTML('beforeend', getPrintParamsHTML(newId, index));
                 renderRefuels(newId);
             }
-
             if (data.legData) {
                 let savedIds = Object.keys(data.legData);
                 for(let i=0; i<legIds.length; i++) {
-                    let currentId = legIds[i]; let savedId = savedIds[i];
-                    if(!savedId) continue;
-                    let savedLeg = data.legData[savedId];
+                    let currentId = legIds[i]; let savedId = savedIds[i]; if(!savedId) continue; let savedLeg = data.legData[savedId];
                     for (let inputId in savedLeg) {
-                        let targetId = inputId.replace(`_t${savedId}_`, `_t${currentId}_`);
-                        let element = el(targetId);
+                        let targetId = inputId.replace(`_t${savedId}_`, `_t${currentId}_`); let element = el(targetId);
                         if (element) {
                             element.value = savedLeg[inputId].value;
                             if (savedLeg[inputId].linked) {
                                 element.dataset.linked = savedLeg[inputId].linked;
-                                if(savedLeg[inputId].linked === "false") {
-                                    element.readOnly = false; element.classList.remove('inherited-input');
-                                    let btn = el(`lbtn_${targetId.split('_').pop()}_${currentId}`);
-                                    if(btn) { btn.textContent = "🔓"; btn.title = "Restablecer herencia"; }
-                                } else {
-                                    element.readOnly = true; element.classList.add('inherited-input');
-                                    let btn = el(`lbtn_${targetId.split('_').pop()}_${currentId}`);
-                                    if(btn) { btn.textContent = "🔗"; btn.title = "Desvincular"; }
-                                }
+                                if(savedLeg[inputId].linked === "false") { element.readOnly = false; element.classList.remove('inherited-input'); let btn = el(`lbtn_${targetId.split('_').pop()}_${currentId}`); if(btn) { btn.textContent = "🔓"; btn.title = "Restablecer herencia"; } } 
+                                else { element.readOnly = true; element.classList.add('inherited-input'); let btn = el(`lbtn_${targetId.split('_').pop()}_${currentId}`); if(btn) { btn.textContent = "🔗"; btn.title = "Desvincular"; } }
                             }
                         }
                     }
                 }
             }
-            lookupAircraft();
-            toggleSinObservaciones();
-            lookupPilots(); 
-        }
-
-        // =======================================================
-        // GOOGLE DRIVE INTEGRATION
-        // =======================================================
-        const CLIENT_ID = 'TU_CLIENT_ID_AQUI.apps.googleusercontent.com';
-        const API_KEY = 'TU_API_KEY_AQUI';
-        const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
-        const SCOPES = 'https://www.googleapis.com/auth/drive.file';
-
-        let tokenClient;
-        let gapiInited = false;
-        let gisInited = false;
-
-        function gapiLoaded() { gapi.load('client', intializeGapiClient); }
-        async function intializeGapiClient() {
-            await gapi.client.init({ apiKey: API_KEY, discoveryDocs: [DISCOVERY_DOC] });
-            gapiInited = true;
-        }
-        function gisLoaded() {
-            tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: CLIENT_ID, scope: SCOPES, callback: ''
-            });
-            gisInited = true;
-        }
-
-        function authAndSaveToDrive() {
-            if (!gapiInited || !gisInited) { alert("La API de Google Drive no está configurada o cargada."); return; }
-            tokenClient.callback = async (resp) => {
-                if (resp.error) throw resp;
-                await saveToDrive();
-            };
-            if (gapi.client.getToken() === null) { tokenClient.requestAccessToken({prompt: 'consent'}); }
-            else { tokenClient.requestAccessToken({prompt: ''}); }
-        }
-
-        async function saveToDrive() {
-            const dataStr = getAllData();
-            const dateStr = val('m_fecha_gen') || 'vuelo';
-            const fileName = `Planificacion_${dateStr}.json`;
-            
-            const boundary = '-------314159265358979323846';
-            const delimiter = "\r\n--" + boundary + "\r\n";
-            const close_delim = "\r\n--" + boundary + "--";
-
-            const metadata = { 'name': fileName, 'mimeType': 'application/json' };
-            const multipartRequestBody =
-                delimiter +
-                'Content-Type: application/json\r\n\r\n' +
-                JSON.stringify(metadata) +
-                delimiter +
-                'Content-Type: application/json\r\n\r\n' +
-                dataStr +
-                close_delim;
-            
-            try {
-                let fileId = null;
-                let response = await gapi.client.drive.files.list({
-                    q: `name='${fileName}' and trashed=false`,
-                    fields: 'files(id, name)',
-                    spaces: 'drive'
-                });
-                
-                if(response.result.files && response.result.files.length > 0) {
-                    fileId = response.result.files[0].id;
-                }
-
-                await gapi.client.request({
-                    'path': fileId ? `/upload/drive/v3/files/${fileId}` : '/upload/drive/v3/files',
-                    'method': fileId ? 'PATCH' : 'POST',
-                    'params': {'uploadType': 'multipart'},
-                    'headers': {'Content-Type': 'multipart/related; boundary="' + boundary + '"'},
-                    'body': multipartRequestBody
-                });
-                
-                alert(`✅ Datos guardados correctamente en Google Drive como '${fileName}'.`);
-            } catch(e) {
-                console.error(e);
-                alert("❌ Error al guardar en Drive.");
-            }
-        }
-
-        function authAndLoadFromDrive() {
-            if (!gapiInited || !gisInited) { alert("La API de Google Drive no está configurada o cargada."); return; }
-            tokenClient.callback = async (resp) => {
-                if (resp.error) throw resp;
-                await loadFromDrive();
-            };
-            if (gapi.client.getToken() === null) { tokenClient.requestAccessToken({prompt: 'consent'}); }
-            else { tokenClient.requestAccessToken({prompt: ''}); }
-        }
-
-        async function loadFromDrive() {
-            const dateStr = prompt("Introduce la fecha de la planificación a cargar (ej: 2026-10-30):", val('m_fecha_gen') || "");
-            if (!dateStr) return;
-            const fileName = `Planificacion_${dateStr}.json`;
-
-            try {
-                let response = await gapi.client.drive.files.list({
-                    q: `name='${fileName}' and trashed=false`,
-                    fields: 'files(id, name)',
-                    spaces: 'drive'
-                });
-                if(response.result.files && response.result.files.length > 0) {
-                    let fileId = response.result.files[0].id;
-                    let file = await gapi.client.drive.files.get({
-                        fileId: fileId,
-                        alt: 'media'
-                    });
-                    
-                    let data = typeof file.result === 'string' ? JSON.parse(file.result) : file.result;
-                    loadDataIntoApp(data);
-                    alert(`✅ Datos de '${fileName}' cargados desde Google Drive.`);
-                } else {
-                    alert(`⚠️ No se encontró el archivo '${fileName}' en Drive.`);
-                }
-            } catch(e) {
-                console.error(e);
-                alert("❌ Error al leer desde Drive.");
-            }
+            lookupAircraft(); toggleSinObservaciones(); lookupPilots(); 
         }
 
         window.onload = () => {
             buildForms();
             let saved = localStorage.getItem('aerocardal_flight_data');
             if (saved) {
-                if(confirm("Se encontró un vuelo en progreso guardado localmente. ¿Deseas recuperarlo?")) {
-                    loadDataIntoApp(JSON.parse(saved));
-                } else {
-                    localStorage.removeItem('aerocardal_flight_data');
-                    addLeg('SCEL');
-                    toggleSinObservaciones();
-                    lookupPilots();
-                }
-            } else {
-                addLeg('SCEL');
-                toggleSinObservaciones();
-                lookupPilots();
-            }
+                if(confirm("Se encontró un vuelo en progreso guardado localmente en este iPad. ¿Deseas recuperarlo?")) { loadDataIntoApp(JSON.parse(saved)); } 
+                else { localStorage.removeItem('aerocardal_flight_data'); addLeg('SCEL'); toggleSinObservaciones(); lookupPilots(); }
+            } else { addLeg('SCEL'); toggleSinObservaciones(); lookupPilots(); }
         };
-
     </script>
-    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
-    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
 </body>
 </html>
