@@ -3,13 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Planificación Operacional - Aerocardal</title>
-
-    <script src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.7/build/pdfmake.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.7/build/vfs_fonts.js"></script>
-    <script src="https://accounts.google.com/gsi/client" async defer onload="initDrive()"></script>
-
+    <title>Planificación Operacional - Aerocardal (Grayscale Edition)</title>
     <style>
+        /* =======================================================
+           VARIABLES Y ESTILOS TEMA OSCURO (ESCALA DE GRISES)
+           ======================================================= */
         :root {
             --bg-main: #111111; --bg-card: #1E1E1E; --bg-input: #0A0A0A;
             --border-color: #333333; --border-focus: #777777;
@@ -21,15 +19,18 @@
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
         body { margin: 0; padding: 0; background-color: var(--bg-main); color: var(--text-main); -webkit-font-smoothing: antialiased; }
 
+        #print-layout { display: none; }
+
         header { background-color: var(--bg-card); border-bottom: 1px solid var(--border-color); padding: 0.8rem 1rem; text-align: center; position: sticky; top: 0; z-index: 10; }
         h1 { margin: 0; font-size: 1.2rem; font-weight: 700; color: var(--accent); letter-spacing: 1px;}
         .subtitle { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; font-weight: bold; }
 
-        .container { padding: 1rem 1rem 150px 1rem; max-width: 900px; margin: 0 auto; }
+        .container { padding: 1rem 1rem 110px 1rem; max-width: 900px; margin: 0 auto; }
         .card { background: var(--bg-card); margin-bottom: 1.2rem; border-radius: 10px; border: 1px solid var(--border-color); overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
         .card-header { padding: 0.85rem 1rem; font-size: 1rem; font-weight: 600; background-color: rgba(255,255,255,0.05); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
         .card-content { padding: 1rem; }
 
+        /* Estilos Acordeón (Detalles) */
         details.card summary, details.param-section summary { padding: 0.85rem 1rem; font-size: 1rem; font-weight: 600; background-color: rgba(255,255,255,0.05); cursor: pointer; user-select: none; outline: none; border-bottom: 1px solid transparent; transition: background 0.2s;}
         details.card summary::-webkit-details-marker, details.param-section summary::-webkit-details-marker { display:none; }
         details.card summary .arrow::after, details.param-section summary .arrow::after { content: "▼"; float: right; font-size: 0.8rem; color: var(--text-muted); margin-top: 3px; margin-left: 8px;}
@@ -42,7 +43,7 @@
         .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
         .grid-6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.5rem; }
         @media (max-width: 600px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } .grid-3 { grid-template-columns: 1fr; } .grid-6 {grid-template-columns: repeat(3, 1fr);} }
-
+        
         .form-group { margin-bottom: 0.8rem; }
         .form-group label { display: flex; justify-content: space-between; align-items: center; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.35rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 
@@ -53,10 +54,10 @@
         }
         input:focus, select:focus, textarea:focus { border-color: var(--border-focus); outline: none; box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2); }
         textarea { resize: vertical; min-height: 60px; font-family: inherit; }
-
+        
         .time-input { text-align: center; font-family: monospace; font-size: 1.2rem !important; font-weight: bold; color: var(--accent) !important; letter-spacing: 2px;}
         .inherited-input { background-color: rgba(255, 255, 255, 0.05) !important; color: var(--accent) !important; font-weight: bold; border: 1px solid rgba(255, 255, 255, 0.3) !important; cursor: not-allowed; }
-
+        
         .link-btn { cursor: pointer; font-size: 1rem; user-select: none; transition: transform 0.2s; }
         .link-btn:active { transform: scale(0.9); }
 
@@ -70,7 +71,7 @@
         .btn { padding: 9px 14px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 0.9rem;}
         .btn-danger { background-color: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 5px 10px; font-size: 0.75rem;}
         .btn-success { background-color: rgba(255, 255, 255, 0.1); border: 1px solid var(--success); color: var(--success); padding: 4px 8px; font-size: 0.75rem;}
-        .btn-outline { background-color: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 10px 16px; font-size: 0.9rem;}
+        .btn-outline { background-color: var(--accent); color: var(--bg-main); width: 100%; padding: 12px; font-size: 1rem; margin-top: 10px;}
 
         .summary-box { background: var(--bg-input); border: 1px solid var(--border-color); padding: 0.85rem; border-radius: 8px; }
         .summary-title { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; text-transform: uppercase;}
@@ -78,47 +79,88 @@
         .summary-sub { font-size: 0.8rem; color: var(--accent); margin-top: 2px;}
 
         hr.divider { border: 0; border-top: 1px solid var(--border-color); margin: 12px 0; }
-        .fab-container { position: fixed; bottom: 0; left: 0; width: 100%; padding: 0.8rem 1rem; background: rgba(17, 17, 17, 0.95); backdrop-filter: blur(5px); border-top: 1px solid var(--border-color); text-align: center; z-index: 100; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;}
-        .btn-print { background-color: var(--accent); color: #000; border: none; padding: 10px 24px; font-size: 0.9rem; font-weight: bold; border-radius: 6px; }
+        .fab-container { position: fixed; bottom: 0; left: 0; width: 100%; padding: 0.8rem 1rem; background: rgba(17, 17, 17, 0.95); backdrop-filter: blur(5px); border-top: 1px solid var(--border-color); text-align: center; z-index: 100; }
+        .btn-print { background-color: var(--accent); color: #000; border: none; padding: 14px 28px; font-size: 1.05rem; font-weight: bold; border-radius: 30px; width: 100%; max-width: 420px; box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2); }
 
+        /* Estilos Checkboxes SMS / Seg */
         .checkbox-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; font-size: 0.8rem; line-height: 1.3; }
         .checkbox-item input[type="checkbox"] { flex-shrink: 0; margin-top: 2px; width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer;}
         .form-category-title { font-size: 0.75rem; font-weight: bold; color: var(--accent); margin: 15px 0 8px 0; background: rgba(255,255,255,0.05); padding: 6px; border-radius: 4px; border-left: 3px solid var(--accent);}
         .signature-block { margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border-color); font-size: 0.85rem; color: var(--text-muted); }
 
-        #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: none; justify-content: center; align-items: center; flex-direction: column; color: var(--accent); backdrop-filter: blur(4px); }
-        .spinner { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--accent); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 15px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* =======================================================
+           ESTILOS DE IMPRESIÓN UNIFICADOS (TAMAÑO CARTA + 6MM)
+           ======================================================= */
+        @media print {
+            @page { size: letter portrait; margin: 6mm; }
+
+            body { background-color: white; color: black; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin:0;}
+            #mobile-ui, header, .fab-container { display: none !important; }
+            #print-layout { display: block; font-family: Arial, sans-serif; width: 100%; font-size: 8.5px; line-height: 1.2; }
+            
+            .page-break { page-break-before: always; padding-top: 5px; }
+
+            .print-table { width: 100%; border-collapse: collapse; border: 1px solid black; margin-bottom: 4px; page-break-inside: avoid; table-layout: fixed;}
+            .print-table th, .print-table td, .tramo-grid td { border: 1px solid black; padding: 2px 4px; vertical-align: middle; }
+            .header-cell { background-color: #f0f0f0; font-weight: bold; text-align: center; font-size: 8px;}
+            
+            .tramo-title-gray { background-color: #555555 !important; color: white !important; text-align: center; font-weight: bold; padding: 3px; letter-spacing: 0.5px; font-size: 9.5px; border: 1px solid black;}
+            .tramo-title-darkgray { background-color: #222222 !important; color: white !important; text-align: center; font-weight: bold; padding: 4px; letter-spacing: 1px; font-size: 10px; border: 1px solid black;}
+            
+            /* Estilos Ecológicos para Títulos de Resumen (Ahorro de Tinta) */
+            .summary-title-pdf { background-color: #e0e0e0 !important; color: black !important; text-align: center; font-weight: bold; padding: 4px; letter-spacing: 1px; font-size: 10.5px; border: 1px solid black; }
+            .summary-total-bg { background-color: #f2f2f2 !important; color: black !important; font-weight: bold; }
+
+            .tramo-grid { width: 100%; border-collapse: collapse; }
+            .tramo-grid td { padding: 1.5px 3px; text-align: center;}
+            .text-left { text-align: left !important; }
+            .text-center { text-align: center !important; }
+            .bold { font-weight: bold; }
+            
+            .logo-text { font-size: 13px; font-weight: bold; font-style: italic; letter-spacing: -0.5px;}
+            .main-title { font-size: 11px; font-weight: bold; text-align: center; }
+            .gray-bg { background-color: #e6e6e6 !important; }
+            
+            .cell-data { height: 16px; font-weight: bold; text-align: center; font-size: 9px;}
+            .no-border-x { border-left: none !important; border-right: none !important; }
+            .no-border-t { border-top: none !important; }
+            .no-border-b { border-bottom: none !important; }
+
+            /* Tablas de Formularios en PDF */
+            .print-form-table { width: 100%; border-collapse: collapse; border: 1px solid black; }
+            .print-form-table td, .print-form-table th { border: 1px solid black; }
+            .sms-cat-row { background-color: #f0f0f0 !important; font-weight: bold; text-align: center; }
+            .tick-cell { text-align: center; font-weight: bold; }
+            
+            /* Tachado visual para PDF SMS sin observaciones */
+            .strike-cell { position: relative; }
+            .strike-cell::after {
+                content: "";
+                position: absolute;
+                left: 15%;
+                right: 15%;
+                top: 50%;
+                border-top: 1.2px solid black;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <div id="loading-overlay">
-        <div id="loading-spinner" class="spinner"></div>
-        <div id="loading-text" style="font-weight: bold; font-size: 1.1rem; text-align: center; margin-bottom: 20px; white-space: pre-line;">Procesando...</div>
-
-        <button id="btn-open-pdf" class="btn btn-outline" style="display:none; background-color: var(--success); color: #000; font-weight: bold; padding: 15px 30px; border-radius: 30px; font-size: 1.1rem; border: none; box-shadow: 0 4px 12px rgba(255,255,255,0.2);">
-            📂 VER PDF EN DRIVE
-        </button>
-
-        <button id="btn-close-overlay" class="btn btn-danger" style="display:none; margin-top: 20px; border: none; text-decoration: underline;" onclick="cerrarOverlay()">
-            Volver a la app
-        </button>
-    </div>
-
     <header>
         <h1>AEROCARDAL - PLANIFICACIÓN OPERACIONAL</h1>
-        <div class="subtitle">VERSIÓN 6.0 (1)</div>
+        <div class="subtitle">VERSIÓN 4.9 (OCULTAR TOTALES EN VUELOS DE 1 DÍA)</div>
     </header>
 
     <main id="mobile-ui" class="container">
+        <!-- CABECERA GENERAL -->
         <div class="card">
-            <div class="card-header"><span>📋 CABECERA DEL VUELO (OBLIGATORIA PARA CLOUD)</span></div>
+            <div class="card-header"><span>📋 CABECERA DEL VUELO (HERENCIA GLOBAL)</span></div>
             <div class="card-content grid-3">
                 <div class="form-group"><label style="color:var(--accent);">Fecha del Vuelo</label><input type="date" id="m_fecha_gen" onchange="triggerUpdate()"></div>
                 <div class="form-group"><label style="color:var(--accent);">Folio BIT</label><input type="text" id="m_folio_gen" placeholder="Folio Único..." oninput="triggerUpdate()"></div>
-                <div class="form-group"><label style="color:#4285F4; text-shadow: 0 0 5px rgba(66,133,244,0.5);">P.O.V. N° (Carpeta)</label><input type="text" id="m_pov" oninput="triggerUpdate()" placeholder="Ej: 1234"></div>
-
+                <div class="form-group"><label>P.O.V. N°</label><input type="text" id="m_pov" oninput="triggerUpdate()"></div>
+                
                 <div class="form-group">
                     <label style="color:var(--accent);">Matrícula (3 últimas letras)</label>
                     <div style="display:flex; gap:5px; align-items:center;">
@@ -144,10 +186,11 @@
                     <div id="ui_sic_name" style="font-size:0.65rem; color:var(--text-muted); margin-top:4px; height:12px;"></div>
                 </div>
             </div>
-        </div>
-
+        </div> 
+        
+        <!-- DUTY PERIOD -->
         <div class="card">
-            <div class="card-header"><span>🕒 PERIODO DE SERVICIO (DUTY PERIOD)</span></div>
+            <div class="card-header"><span>🕒 PERIODO DE SERVICIO (DUTY PERIOD - DÍA 1)</span></div>
             <div class="card-content grid-2">
                 <div class="form-group">
                     <label style="color:var(--accent);">Inicio Duty Period</label>
@@ -156,20 +199,27 @@
                 <div class="form-group">
                     <label style="color:var(--text-muted);">Término Duty Period (Editable)</label>
                     <input type="text" class="time-input" id="duty_end" placeholder="--:--" maxlength="5" inputmode="numeric" oninput="this.dataset.manual = (this.value !== '') ? 'true' : 'false'; formatTime(this)" onblur="validateTime(this)">
+                    <small style="color:var(--text-muted); font-size:0.65rem;">Sugerido: Último BLOCK IN + 30 min</small>
                 </div>
             </div>
         </div>
 
+        <!-- TRAMOS DINÁMICOS -->
         <div id="tramos-container"></div>
-        <button class="btn btn-outline" style="width: 100%; border-style: dashed;" onclick="addLeg()">+ AGREGAR TRAMO</button>
-
+        <button class="btn btn-outline" onclick="addLeg()">+ AGREGAR TRAMO</button>
+        
+        <!-- FORMULARIOS ADJUNTOS (DESPLEGABLES) -->
         <hr class="divider" style="margin: 20px 0;">
+        
         <details class="card" style="border-color: var(--accent);">
             <summary style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="flex:1;">📝 FORMULARIO: ÍNDICE DE SEGURIDAD (SMS) <span class="arrow"></span></span>
+                <span style="flex:1;">📝 FORMULARIO: ÍNDICE DE SEGURIDAD OPERACIONAL (SMS) <span class="arrow"></span></span>
                 <div style="display:flex; align-items:center; gap:12px; padding-left:10px; border-left:1px solid var(--border-color);" onclick="event.stopPropagation();">
                     <label style="font-size:0.75rem; color:var(--accent); display:flex; align-items:center; gap:5px; margin:0; cursor:pointer;">
                         <input type="checkbox" id="m_sms_sin_obs" checked onchange="toggleSinObservaciones()"> <span>Vuelo sin obs.</span>
+                    </label>
+                    <label style="font-size:0.75rem; color:var(--accent); display:flex; align-items:center; gap:5px; margin:0; cursor:pointer;">
+                        <input type="checkbox" id="m_inc_sms" checked onchange="triggerUpdate()"> Imprimir PDF
                     </label>
                 </div>
             </summary>
@@ -185,26 +235,36 @@
             </div>
         </details>
 
+        <!-- CONTENEDOR DINÁMICO DE INSPECCIONES DE SEGURIDAD (SOPORTE MULTIDÍA / PERNOCTA) -->
         <div id="sec-forms-wrapper"></div>
 
+        <!-- RESUMEN GENERAL -->
         <div class="card" style="border-color: var(--accent); margin-top: 1.2rem;">
             <div class="card-header"><span style="color:var(--accent);">⏱️ RESUMEN GENERAL OPERACIONAL</span></div>
             <div class="card-content">
+                
+                <!-- TABLA DESGLOSE DUTY PERIOD, BLOCK Y AIR -->
                 <div class="summary-title" style="color: var(--accent); margin-bottom: 4px;">🏁 DESGLOSE DIARIO (DUTY, BLOCK, AIR)</div>
                 <div style="overflow-x: auto;">
                     <table style="width:100%; border-collapse:collapse; margin-bottom:12px; font-size:0.8rem; text-align:center; background:var(--bg-input); border:1px solid var(--border-color); border-radius:8px;">
                         <thead>
                             <tr style="background:rgba(255,255,255,0.05); border-bottom:1px solid var(--border-color);">
-                                <th style="padding:8px; text-align:left;">Fecha</th><th>Inicio</th><th>Término</th>
-                                <th style="color:var(--accent);">Duty</th><th style="color:var(--text-muted);">Block</th><th style="color:var(--text-muted);">Air</th>
+                                <th style="padding:8px; text-align:left;">Fecha</th>
+                                <th>Inicio</th>
+                                <th>Término</th>
+                                <th style="color:var(--accent);">Duty</th>
+                                <th style="color:var(--text-muted);">Block</th>
+                                <th style="color:var(--text-muted);">Air</th>
                             </tr>
                         </thead>
-                        <tbody id="ui_duty_table"></tbody>
+                        <tbody id="ui_duty_table">
+                            <!-- Javascript genera filas -->
+                        </tbody>
                     </table>
                 </div>
 
                 <div class="grid-2">
-                    <div class="summary-box"><div class="summary-title">🏁 DUTY TOTAL ACUMULADO</div><div class="summary-value" id="sum_duty_hhmm">00:00</div><div class="summary-sub" id="sum_duty_dec">0.0 hrs</div></div>
+                    <div class="summary-box summary-duty"><div class="summary-title">🏁 DUTY TOTAL ACUMULADO</div><div class="summary-value" id="sum_duty_hhmm">00:00</div><div class="summary-sub" id="sum_duty_dec">0.0 hrs</div></div>
                     <div class="summary-box"><div class="summary-title">✈️ TOTAL VUELO (AIR TIME)</div><div class="summary-value" id="sum_air_hhmm">00:00</div><div class="summary-sub" id="sum_air_dec">0.0 hrs</div></div>
                     <div class="summary-box"><div class="summary-title">🛑 TOTAL BLOQUE (BLOCK)</div><div class="summary-value" id="sum_block_hhmm">00:00</div><div class="summary-sub" id="sum_block_dec">0.0 hrs</div></div>
                     <div class="summary-box"><div class="summary-title">👥 PAX POR TRAMO</div><div class="summary-value" style="font-size: 1.1rem;" id="sum_pax_legs">(0)</div><div class="summary-sub" style="color:transparent;">-</div></div>
@@ -218,7 +278,7 @@
                     <div class="summary-box"><div class="summary-title">3. RECARGADO</div><div class="summary-value" style="font-size:1.1rem; color:var(--success);" id="sum_fuel_refuel">+0.0</div></div>
                     <div class="summary-box"><div class="summary-title">4. CONSUMIDO</div><div class="summary-value" style="font-size:1.1rem; color:var(--danger);" id="sum_fuel_used">-0.0</div></div>
                 </div>
-
+                
                 <hr class="divider">
                 <div class="summary-title" style="color: var(--text-main);">👨‍✈️ HORAS OP WEB (TODOS LOS PILOTOS REGISTRADOS)</div>
                 <div id="sum_pilots_container" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;"></div>
@@ -226,189 +286,69 @@
         </div>
     </main>
 
-    <div class="fab-container">
-        <button class="btn btn-danger" style="width:auto; margin:0;" onclick="clearAllData()">🗑️ Limpiar</button>
-        <button class="btn btn-outline" style="width:auto; margin:0; border-color:var(--warning); color:var(--warning);" onclick="ensureAuth(accionLeer)">📂 Leer</button>
-        <button class="btn btn-outline" style="width:auto; margin:0; border-color:var(--success); color:var(--success);" onclick="ensureAuth(accionGuardar)">💾 Guardar</button>
-        <button class="btn-print" style="width:auto; margin:0;" onclick="ensureAuth(accionGenerarPDF)">📄 Generar PDF</button>
+    <!-- Botón Flotante y Controles de Datos -->
+    <div class="fab-container" style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+        <button class="btn btn-danger" style="width:auto; margin:0;" onclick="clearAllData()">🗑️ Limpiar Todo</button>
+        <button class="btn btn-outline" style="width:auto; margin:0; border-color:#00aaff; color:#00aaff;" onclick="loadExampleData()">🧪 Ejemplo</button>
+        
+        <button class="btn btn-outline" style="width:auto; margin:0; border-color:var(--success); color:var(--success);" onclick="exportData()">📤 Exportar</button>
+        <label class="btn btn-outline" style="width:auto; margin:0; border-color:var(--warning); color:var(--warning); cursor:pointer;">
+            📥 Importar
+            <input type="file" id="import_file" accept=".json" style="display:none;" onchange="importData(event)">
+        </label>
+        <button class="btn-print" style="width:auto; margin:0;" onclick="window.print()">🖨️ PDF</button>
     </div>
 
+    <!-- LAYOUT DE IMPRESIÓN (PDF) -->
+    <div id="print-layout">
+        
+        <!-- OPERACIONAL - ENVUELTO EN UPPERCASE POR REGLA 5 -->
+        <div id="print_op_container" style="text-transform: uppercase;">
+            <table class="print-table" style="border-bottom: none;">
+                <tr>
+                    <td colspan="2" class="no-border-x" style="width: 30%;"><div class="logo-text">AEROCARDAL</div></td>
+                    <td colspan="2" class="no-border-x" style="vertical-align: bottom; padding-bottom: 4px;"><div class="main-title">PLANIFICACIÓN OPERACIONAL</div></td>
+                    <td colspan="1" style="border-left: none; width: 20%;"></td>
+                </tr>
+                <tr>
+                    <td style="width: 25%;">FECHA: <span id="p_fecha_gen"></span></td>
+                    <td style="width: 20%;">P.O.V.: N° <span id="p_pov"></span></td>
+                    <td style="width: 25%;">MATERIAL: <span id="p_material" class="bold"></span></td>
+                    <td colspan="2">MATRICULA: <span id="p_matricula" class="bold"></span></td>
+                </tr>
+                <tr><td colspan="5" class="gray-bg">FOLIO BIT: <span id="p_folio_gen" class="bold"></span></td></tr>
+            </table>
+
+            <div id="print-tramos-container"></div>
+            <div id="print-params-container" style="margin-top: 15px;"></div>
+
+            <!-- CONTENEDOR NUEVO DEL RESUMEN -->
+            <div id="p_resumen_operacional_container"></div>
+
+        </div>
+        
+        <!-- CONTENEDOR DE PDF DE INSPECCIONES DE SEGURIDAD DINÁMICAS -->
+        <div id="print-sec-forms-wrapper"></div>
+    </div>
+
+    <!-- SCRIPT PRINCIPAL -->
     <script>
-        const GOOGLE_CLIENT_ID = '520674997135-nqt9gjl00t89lkfstqglk4iecfan44em.apps.googleusercontent.com';
-        const DRIVE_API_URL = 'https://www.googleapis.com/drive/v3/files';
-        const DRIVE_UPLOAD_URL = 'https://www.googleapis.com/upload/drive/v3/files';
-        let tokenClient;
-        let accessToken = null;
-        let pendingAction = null;
-
-        function initDrive() {
-            if (!window.google) return;
-            tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: GOOGLE_CLIENT_ID,
-                scope: 'https://www.googleapis.com/auth/drive.file',
-                callback: (tokenResponse) => {
-                    if (tokenResponse && tokenResponse.access_token) {
-                        accessToken = tokenResponse.access_token;
-                        if (pendingAction) {
-                            pendingAction();
-                            pendingAction = null;
-                        }
-                    }
-                }
-            });
-        }
-
-        function ensureAuth(actionCallback) {
-            if (!GOOGLE_CLIENT_ID) {
-                alert("⚠️ Falta el CLIENT_ID."); return;
-            }
-            if (!val('m_pov')) {
-                alert("⚠️ Por favor, ingresa el P.O.V. N° en la cabecera antes de operar en la nube.");
-                return;
-            }
-            if (!tokenClient) {
-                alert("⚠️ Google aún no se ha cargado. Intenta de nuevo en unos segundos.");
-                return;
-            }
-            if (!accessToken) {
-                pendingAction = actionCallback;
-                tokenClient.requestAccessToken({prompt: ''});
-            } else {
-                actionCallback();
-            }
-        }
-
-        function mostrarCargando(texto) {
-            el('loading-spinner').style.display = 'block';
-            el('btn-open-pdf').style.display = 'none';
-            el('btn-close-overlay').style.display = 'none';
-            el('loading-text').innerText = texto;
-            el('loading-overlay').style.display = 'flex';
-        }
-
-        function ocultarCargando() { el('loading-overlay').style.display = 'none'; }
-        function cerrarOverlay() { ocultarCargando(); }
-
-        function mostrarModalPDF(link) {
-            el('loading-spinner').style.display = 'none';
-            el('loading-text').innerText = "✅ ¡Documento listo en Google Drive!";
-            const btn = el('btn-open-pdf');
-            btn.style.display = 'block';
-            btn.onclick = () => window.open(link, '_blank');
-            el('btn-close-overlay').style.display = 'block';
-        }
-
-        const escapeDriveQuery = s => String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-        const driveAuthHeader = () => ({ 'Authorization': 'Bearer ' + accessToken });
-
-        async function driveJson(res) {
-            if (!res.ok) throw new Error("Error de Google Drive (" + res.status + ")");
-            return res.json();
-        }
-
-        async function getOrCreateFolder(povName) {
-            const folderName = `POV_${povName}`;
-            const query = encodeURIComponent(`name='${escapeDriveQuery(folderName)}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
-            const data = await driveJson(await fetch(`${DRIVE_API_URL}?q=${query}&fields=files(id,name)`, { headers: driveAuthHeader() }));
-            if (data.files && data.files.length > 0) return data.files[0].id;
-
-            const created = await driveJson(await fetch(DRIVE_API_URL, {
-                method: 'POST',
-                headers: { ...driveAuthHeader(), 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: folderName, mimeType: 'application/vnd.google-apps.folder' })
-            }));
-            return created.id;
-        }
-
-        async function findFileInFolder(filename, folderId) {
-            const query = encodeURIComponent(`name='${escapeDriveQuery(filename)}' and '${folderId}' in parents and trashed=false`);
-            const data = await driveJson(await fetch(`${DRIVE_API_URL}?q=${query}&fields=files(id,name,webViewLink)`, { headers: driveAuthHeader() }));
-            return (data.files && data.files.length > 0) ? data.files[0] : null;
-        }
-
-        async function uploadFileRaw(blob, filename, folderId, existingFileId = null) {
-            const metadata = existingFileId ? { name: filename } : { name: filename, parents: [folderId] };
-            const boundary = 'aerocardal_boundary_314159265';
-            const body = new Blob([
-                `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n`,
-                JSON.stringify(metadata),
-                `\r\n--${boundary}\r\nContent-Type: ${blob.type || 'application/octet-stream'}\r\n\r\n`,
-                blob,
-                `\r\n--${boundary}--`
-            ]);
-            const url = `${DRIVE_UPLOAD_URL}${existingFileId ? '/' + existingFileId : ''}?uploadType=multipart&fields=id,webViewLink`;
-            return driveJson(await fetch(url, {
-                method: existingFileId ? 'PATCH' : 'POST',
-                headers: { ...driveAuthHeader(), 'Content-Type': `multipart/related; boundary=${boundary}` },
-                body
-            }));
-        }
-
-        async function accionGuardar() {
-            mostrarCargando("Guardando progreso en Drive...");
-            try {
-                const folderId = await getOrCreateFolder(val('m_pov'));
-                const file = await findFileInFolder('Progreso.json', folderId);
-                const dataBlob = new Blob([getAllData()], { type: "application/json" });
-                await uploadFileRaw(dataBlob, 'Progreso.json', folderId, file ? file.id : null);
-                alert("✅ Progreso guardado exitosamente en la carpeta de Drive.");
-            } catch (e) {
-                alert("❌ Error: " + e.message); accessToken = null;
-            } finally { ocultarCargando(); }
-        }
-
-        async function accionLeer() {
-            mostrarCargando("Buscando progreso en Drive...");
-            try {
-                const folderId = await getOrCreateFolder(val('m_pov'));
-                const file = await findFileInFolder('Progreso.json', folderId);
-                if (!file) {
-                    alert("⚠️ No se encontró ningún progreso guardado para este POV.");
-                    return;
-                }
-                const content = await driveJson(await fetch(`${DRIVE_API_URL}/${file.id}?alt=media`, { headers: driveAuthHeader() }));
-                loadDataIntoApp(content);
-                alert("✅ Progreso recuperado.");
-            } catch (e) {
-                alert("❌ Error: " + e.message); accessToken = null;
-            } finally { ocultarCargando(); }
-        }
-
-        async function accionGenerarPDF() {
-            mostrarCargando("Generando documento PDF...\n(Espera unos segundos)");
-            try {
-                const pov = val('m_pov');
-                const pdfBlob = await generarBlobPDF();
-
-                mostrarCargando("Subiendo a Google Drive...");
-                const folderId = await getOrCreateFolder(pov);
-                const dateStr = val('m_fecha_gen') || new Date().toISOString().split('T')[0];
-                const filename = `Planificacion_POV_${pov}_${dateStr}.pdf`;
-                const existing = await findFileInFolder(filename, folderId);
-                const uploaded = await uploadFileRaw(pdfBlob, filename, folderId, existing ? existing.id : null);
-                if (!uploaded.webViewLink) throw new Error("Drive no devolvió el enlace del archivo");
-
-                mostrarModalPDF(uploaded.webViewLink);
-            } catch (e) {
-                alert("❌ Error: " + e.message);
-                accessToken = null;
-                ocultarCargando();
-            }
-        }
-
+        // DOM Helpers
         const el = id => document.getElementById(id);
         const val = id => el(id)?.value || '';
-        const setVal = (id, v) => { if (el(id)) el(id).value = v; };
-        const setTxt = (id, t) => { if (el(id)) el(id).innerHTML = t; };
+        const setVal = (id, v) => { if(el(id)) el(id).value = v; };
+        const setTxt = (id, t) => { if(el(id)) el(id).innerHTML = t; };
 
         let legIds = [], nextLegId = 1, refuelData = {};
         let updateRAF = null;
-        let secManualState = {};
-        let lastCalc = null;
+        let secManualState = {}; 
 
         const ordinals = ["", "PRIMER", "SEGUNDO", "TERCER", "CUARTO", "QUINTO", "SEXTO", "SÉPTIMO", "OCTAVO"];
         const formatDec = val => Number(val || 0).toFixed(1);
 
+        // =======================================================
+        // BBDD AERONAVES
+        // =======================================================
         const aeronavesDB = [
             { trigram: "AOA", matricula: "CC-AOA", material: "G-150" },
             { trigram: "CWK", matricula: "CC-CWK", material: "G-150" },
@@ -427,19 +367,38 @@
             const fullMatInput = el('m_matricula');
             const msgDiv = el('ui_mat_msg');
 
-            if (!suffix) { matInput.value = ''; if (fullMatInput) fullMatInput.value = ''; if (msgDiv) msgDiv.innerHTML = '&nbsp;'; triggerUpdate(); return; }
+            if (!suffix) {
+                matInput.value = '';
+                if(fullMatInput) fullMatInput.value = '';
+                if(msgDiv) msgDiv.innerHTML = '&nbsp;';
+                triggerUpdate();
+                return;
+            }
 
             const matches = aeronavesDB.filter(a => a.trigram.toUpperCase() === suffix || a.matricula.toUpperCase().endsWith(suffix) || a.matricula.toUpperCase() === suffix);
 
-            if (matches.length === 1) { matInput.value = matches[0].material; if (fullMatInput) fullMatInput.value = matches[0].matricula; if (msgDiv) msgDiv.innerHTML = `✅ ${matches[0].matricula}`; }
-            else if (matches.length > 1) { matInput.value = ''; if (fullMatInput) fullMatInput.value = ''; if (msgDiv) msgDiv.innerHTML = `⚠️ Múltiples (${matches.map(m => m.matricula).join(', ')})`; }
-            else { matInput.value = ''; if (fullMatInput) fullMatInput.value = ''; if (msgDiv) msgDiv.innerHTML = `❌ No encontrada`; }
+            if (matches.length === 1) {
+                matInput.value = matches[0].material;
+                if(fullMatInput) fullMatInput.value = matches[0].matricula;
+                if(msgDiv) msgDiv.innerHTML = `✅ ${matches[0].matricula}`;
+            } else if (matches.length > 1) {
+                matInput.value = '';
+                if(fullMatInput) fullMatInput.value = '';
+                if(msgDiv) msgDiv.innerHTML = `⚠️ Coincidencias múltiples (${matches.map(m=>m.matricula).join(', ')})`;
+            } else {
+                matInput.value = '';
+                if(fullMatInput) fullMatInput.value = '';
+                if(msgDiv) msgDiv.innerHTML = `❌ Matrícula no encontrada`;
+            }
             triggerUpdate();
         }
 
+        // =======================================================
+        // BBDD PILOTOS
+        // =======================================================
         const pilotosDB = {
           "JA": { "nombre": "José Arellano G.", "rut": "8.621.855-0", "licencia": "1641" },
-          "SS": { "nombre": "Sebastian Saez X.", "rut": "99.999.999-9", "licencia": "9999" },
+          "SS": { "nombre": "Sebastian Saez X.", "rut": "99.999.999-9", "licencia": "3535" },
           "FC": { "nombre": "Felipe Casampere G.", "rut": "15.781.258-0", "licencia": "2114" },
           "AC": { "nombre": "Alfredo Castro C.", "rut": "7.155.617-4", "licencia": "920" },
           "RE": { "nombre": "Ricardo Espinosa U.", "rut": "6.827.727-2", "licencia": "674" },
@@ -448,14 +407,14 @@
           "EI": { "nombre": "Esteban Inostroza L.", "rut": "12.120.521-1", "licencia": "1256" },
           "AK": { "nombre": "Alexander Kaufmann R.", "rut": "6.926.596-0", "licencia": "4185" },
           "EM": { "nombre": "Enrique Mancini A.", "rut": "19.310.398-7", "licencia": "4148" },
-          "NM": { "nombre": "Nicolás Mohr S.", "rut": "18239044-5", "licencia": "8888" },
+          "NM": { "nombre": "Nicolás Mohr S.", "rut": "18239044-5", "licencia": "2064" },
           "CM": { "nombre": "Claudio Muñoz P.", "rut": "7.999.795-1", "licencia": "921" },
           "FE": { "nombre": "Francisco Esquivel C.", "rut": "88.888.888-8", "licencia": "1899" },
           "JO": { "nombre": "José Oyarzún M.", "rut": "16.239.897-0", "licencia": "2387" },
           "FCH":{ "nombre": "Fernando  Chacana X.", "rut": "66.666.666-6", "licencia": "2604" },
           "MS": { "nombre": "Mauricio Solano P.", "rut": "14.322.271-3", "licencia": "1657" },
           "CV": { "nombre": "Cristhian Vázquez F.", "rut": "15.549.870-6", "licencia": "3435" },
-          "MV": { "nombre": "Matías Vega C.", "rut": "77.777.777-7", "licencia": "7777" },
+          "MV": { "nombre": "Matías Vega C.", "rut": "77.777.777-7", "licencia": "2420" },
           "KW": { "nombre": "Klaus Wobbe S.", "rut": "14.103.915-6", "licencia": "1741" },
           "CB": { "nombre": "Cristobal Briones B.", "rut": "10.345.076-4", "licencia": "2740" }
         };
@@ -464,37 +423,63 @@
         let foActual = { nombre: "" };
 
         function formatNameForSMS(fullName) {
-            if (!fullName) return "";
+            if(!fullName) return "";
             const parts = fullName.split(' ');
-            if (parts.length >= 2) return (parts[0][0] + ". " + parts[1]).toUpperCase();
+            if(parts.length >= 2) return (parts[0][0] + ". " + parts[1]).toUpperCase();
             return fullName.toUpperCase();
         }
 
         function lookupPilots() {
             const picIni = val('m_pic_ini').toUpperCase();
             const sicIni = val('m_sic_ini').toUpperCase();
-            if (pilotosDB[picIni]) { capitanActual = pilotosDB[picIni]; setTxt('ui_pic_name', `👤 ${capitanActual.nombre}`); }
-            else { capitanActual = { nombre: "", rut: "", licencia: "" }; setTxt('ui_pic_name', picIni ? 'No encontrado' : '&nbsp;'); }
-            if (pilotosDB[sicIni]) { foActual = pilotosDB[sicIni]; setTxt('ui_sic_name', `👤 ${foActual.nombre}`); }
-            else { foActual = { nombre: "" }; setTxt('ui_sic_name', sicIni ? 'No encontrado' : '&nbsp;'); }
-            updateFormFooters(); triggerUpdate();
+
+            if (pilotosDB[picIni]) {
+                capitanActual = pilotosDB[picIni];
+                setTxt('ui_pic_name', `👤 ${capitanActual.nombre}`);
+            } else {
+                capitanActual = { nombre: "", rut: "", licencia: "" };
+                setTxt('ui_pic_name', picIni ? 'No encontrado' : '&nbsp;');
+            }
+
+            if (pilotosDB[sicIni]) {
+                foActual = pilotosDB[sicIni];
+                setTxt('ui_sic_name', `👤 ${foActual.nombre}`);
+            } else {
+                foActual = { nombre: "" };
+                setTxt('ui_sic_name', sicIni ? 'No encontrado' : '&nbsp;');
+            }
+
+            updateFormFooters();
+            triggerUpdate();
         }
 
         function updateFormFooters() {
             const nom = capitanActual.nombre || "______________________";
             const rut = capitanActual.rut || "______________________";
             const lic = capitanActual.licencia || "______________________";
+
             setTxt('sms_ui_nombre', nom);
-            document.querySelectorAll('[id^="sec_ui_nombre_"]').forEach(e => e.textContent = nom);
-            document.querySelectorAll('[id^="sec_ui_rut_"]').forEach(e => e.textContent = rut);
-            document.querySelectorAll('[id^="sec_ui_licencia_"]').forEach(e => e.textContent = lic);
+
+            document.querySelectorAll('[id^="sec_ui_nombre_"]').forEach(el => el.textContent = nom);
+            document.querySelectorAll('[id^="sec_ui_rut_"]').forEach(el => el.textContent = rut);
+            document.querySelectorAll('[id^="sec_ui_licencia_"]').forEach(el => el.textContent = lic);
+
+            const nPIC = formatNameForSMS(capitanActual.nombre);
+            const nSIC = formatNameForSMS(foActual.nombre);
+            let tripulacionStr = nPIC;
+            if(nSIC) tripulacionStr += " / " + nSIC;
+            setTxt('sms_p_tripulacion', tripulacionStr || "");
+            setTxt('sms_p_nombre', nom === "______________________" ? "" : nom);
         }
 
         function toggleSinObservaciones() {
             const isChecked = el('m_sms_sin_obs')?.checked;
-            for (let i = 1; i <= 47; i++) {
+            for(let i = 1; i <= 47; i++) {
                 const cb = el(`m_sms_${i}`);
-                if (cb) { if (isChecked) cb.checked = false; cb.disabled = isChecked; }
+                if(cb) {
+                    if(isChecked) cb.checked = false;
+                    cb.disabled = isChecked;
+                }
             }
             triggerUpdate();
         }
@@ -503,66 +488,30 @@
             const isChecked = el(`m_sec_sin_obs_${dateKey}`)?.checked;
             secManualState[dateKey] = secManualState[dateKey] || {};
             secManualState[dateKey].sinObs = isChecked;
+            
             ['A','B','C','D','E','F','G','H','I','J','K'].forEach(id => {
                 const cb = el(`m_sec_${dateKey}_${id}`);
-                if (cb) { cb.checked = isChecked; cb.disabled = isChecked; secManualState[dateKey][id] = isChecked; }
+                if(cb) {
+                    cb.checked = isChecked;
+                    cb.disabled = isChecked;
+                    secManualState[dateKey][id] = isChecked;
+                }
             });
             triggerUpdate();
         }
 
         function handleSecCheckboxChange(dateKey, id) {
             const cb = el(`m_sec_${dateKey}_${id}`);
-            if (cb) { secManualState[dateKey] = secManualState[dateKey] || {}; secManualState[dateKey][id] = cb.checked; }
+            if(cb) {
+                secManualState[dateKey] = secManualState[dateKey] || {};
+                secManualState[dateKey][id] = cb.checked;
+            }
             triggerUpdate();
         }
 
-        function renderSecurityForms(dates, legsByDate) {
-            const container = el('sec-forms-wrapper');
-            const prev = {};
-            container.querySelectorAll('input, textarea').forEach(i => { prev[i.id] = i.type === 'checkbox' ? i.checked : i.value; });
-            const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-
-            container.innerHTML = dates.map(dateKey => {
-                const legs = legsByDate[dateKey] || [];
-                const first = legs[0], last = legs[legs.length - 1];
-                const fields = [
-                    ['est', 'Estacionamiento', ''],
-                    ['origen', 'Origen', first?.desde || ''],
-                    ['destino', 'Destino', last?.dest || ''],
-                    ['hinicio', 'H. inicio', first?.tOut || ''],
-                    ['htermino', 'H. término', last?.tIn || ''],
-                    ['alerta', 'Alerta', '']
-                ];
-                const fieldsHtml = fields.map(([name, label, def]) =>
-                    `<div class="form-group"><label>${label}</label><input type="text" id="m_sec_${name}_${dateKey}" value="${esc(def)}" oninput="triggerUpdate()"></div>`
-                ).join('');
-                const itemsHtml = secData.map(item =>
-                    `<label class="checkbox-item"><input type="checkbox" id="m_sec_${dateKey}_${item.id}" onchange="handleSecCheckboxChange('${dateKey}', '${item.id}')"> <span><strong>${item.id}.</strong> ${item.text}</span></label>`
-                ).join('');
-                return `
-                <div class="card" id="sec_card_${dateKey}">
-                    <div class="card-header"><span>🛡️ Inspección de seguridad · ${dateKey}</span></div>
-                    <div class="card-content">
-                        <div class="grid-3">${fieldsHtml}</div>
-                        <label class="checkbox-item"><input type="checkbox" id="m_sec_sin_obs_${dateKey}" onchange="toggleSecSinObs('${dateKey}')"> <span>Sin observaciones</span></label>
-                        <div>${itemsHtml}</div>
-                    </div>
-                </div>`;
-            }).join('');
-
-            Object.entries(prev).forEach(([id, value]) => {
-                const input = el(id);
-                if (!input) return;
-                if (input.type === 'checkbox') input.checked = value;
-                else input.value = value;
-            });
-            dates.forEach(dateKey => {
-                const sinObs = el(`m_sec_sin_obs_${dateKey}`);
-                if (!sinObs?.checked) return;
-                secData.forEach(item => { const cb = el(`m_sec_${dateKey}_${item.id}`); if (cb) { cb.disabled = true; } });
-            });
-        }
-
+        // =======================================================
+        // CONSTRUCCIÓN DINÁMICA DE FORMULARIOS SMS / SEGURIDAD
+        // =======================================================
         const smsData = [
             { cat: "I. OPERACIONES DE DESPEGUE - ATERRIZAJE Y EN TIERRA", items: ["Colisión en tierra", "Casi colisión en tierra", "Pérdida de control en tierra", "Salida de la pista", "Incursión en la pista", "Aterrizaje antes de la pista/Después de la pista", "Contacto anormal con la pista", "Incidente derivado de evacuación", "Incidente por: gestión de tránsito aéreo/Comunicaciones(fallas o degradadas)/Vigilancia", "Despegue interrumpido después de alcanzar potencia de despegue", "Aproximación no estabilizada a menos de 500 pies", "Se lleva a cabo una aproximación frustrada a menos de 1000 pies encima del nivel del terreno", "Los procedimientos o el equipo de seguridad operacional son inadecuados o tienen defecto", "Deficiencias graves en la documentación operacional", "Modo incorrecto de cargar combustible, carga o mercancías peligrosas", "Condiciones de superficie peligrosa (Hielo, nieve fundente, frenado deficiente)", "Choque con ave, o daño por objetos extraños (FOD)", "Algunos tripulantes o pasajeros están gravemente enfermos, lesionados, incapacitados o mueren", "Pasajeros violentos, armados o intoxicados, o cuando sea necesario inmovilizar"] },
             { cat: "II. OPERACIONES EN EL AIRE", items: ["Alerta TCAS/pérdida de separación/casi colisión en el aire", "Colisión en el aire", "Vuelo controlado contra/hacia el terreno (CFIT)", "Pérdida de control en vuelo (Incluye pérdida de sustentación)", "Incidente por gestión de combustible (Aterriza con combustible de reserva o menos)", "Incidente por: Gestión de tránsito aéreo/comunicación-navegación vigilancia", "Incidente por: Configuración de la aeronave (manual-automática)en cualquier fase del vuelo", "Se declara emergencia (la que sea)", "Error de navegación con una desviación importante en la derrota", "Se produce una desviación vertical de más de 500 pies", "Se exceden los parámetros que limitan la configuración de la aeronave", "Desviación importante de los SOP", "Activación del GPWS/TAWS", "Suceso RA del TCAS/ACAS"] },
@@ -586,6 +535,7 @@
         ];
 
         function buildForms() {
+            // SMS UI
             let smsHtml = '';
             let globalIndex = 1;
             smsData.forEach(cat => {
@@ -596,9 +546,92 @@
                 });
             });
             el('sms_form_container').innerHTML = smsHtml;
+
+            // SMS PDF
+            let pSmsHtml = `
+            <div id="print_sms_container" class="page-break" style="font-family: Arial, sans-serif; box-sizing: border-box;">
+                <table class="print-table" style="border-bottom: none;">
+                    <tr>
+                        <td colspan="2" class="no-border-x" style="width: 30%;"><div class="logo-text">AEROCARDAL</div></td>
+                        <td colspan="2" class="no-border-x" style="vertical-align: bottom; padding-bottom: 4px;"><div class="main-title">ÍNDICE DE SEGURIDAD OPERACIONAL (SMS)</div></td>
+                        <td colspan="1" style="border-left: none; width: 20%;"></td>
+                    </tr>
+                    <tr>
+                        <td style="width: 25%;">FECHA: <span id="sms_p_fecha"></span></td>
+                        <td style="width: 20%;">P.O.V.: N° <span id="sms_p_pov"></span></td>
+                        <td style="width: 25%;">MATERIAL: <span id="sms_p_material" class="bold"></span></td>
+                        <td colspan="2">MATRICULA: <span id="sms_p_matricula" class="bold"></span></td>
+                    </tr>
+                    <tr><td colspan="5" class="gray-bg">TRIPULACIÓN: <span id="sms_p_tripulacion" class="bold"></span></td></tr>
+                </table>
+
+                <table style="width:100%; border-collapse: collapse; border: none; table-layout: fixed; margin-top: 4px;">
+                    <tr>
+                        <td style="width: 50%; vertical-align: top; padding-right: 4px; border: none;">
+                            <table class="print-form-table" style="width:100%; margin:0; font-size: 10px;">
+            `;
+            
+            globalIndex = 1;
+            const roman = ["I", "II", "III", "IV", "V"];
+            
+            const leftCatsIndices = [0, 1, 2]; 
+            leftCatsIndices.forEach(cIdx => {
+                let cat = smsData[cIdx];
+                pSmsHtml += `<tr class="sms-cat-row"><td style="width:25px; padding:3px;">${roman[cIdx]}</td><td style="padding:3px;">${cat.cat.substring(4).trim()}</td><td style="width:30px; padding:3px;">SI</td></tr>`;
+                
+                let startIdx = 1;
+                for(let prev=0; prev<cIdx; prev++) startIdx += smsData[prev].items.length;
+                
+                cat.items.forEach((item, itemIdx) => {
+                    let realIdx = startIdx + itemIdx;
+                    pSmsHtml += `<tr><td style="text-align:center; padding:2px 4px;">${realIdx}</td><td style="padding:2px 4px;">${item}</td><td class="tick-cell" id="p_sms_${realIdx}" style="padding:2px 4px; font-size:14px;"></td></tr>`;
+                });
+            });
+            
+            pSmsHtml += `
+                            </table>
+                        </td>
+                        <td style="width: 50%; vertical-align: top; padding-left: 4px; border: none;">
+                            <table class="print-form-table" style="width:100%; margin-bottom:5px; font-size: 10px;">
+            `;
+            
+            const rightCatsIndices = [3, 4];
+            rightCatsIndices.forEach(cIdx => {
+                let cat = smsData[cIdx];
+                pSmsHtml += `<tr class="sms-cat-row"><td style="width:25px; padding:3px;">${roman[cIdx]}</td><td style="padding:3px;">${cat.cat.substring(4).trim()}</td><td style="width:30px; padding:3px;">SI</td></tr>`;
+                
+                let startIdx = 1;
+                for(let prev=0; prev<cIdx; prev++) startIdx += smsData[prev].items.length;
+                
+                cat.items.forEach((item, itemIdx) => {
+                    let realIdx = startIdx + itemIdx;
+                    pSmsHtml += `<tr><td style="text-align:center; padding:2px 4px;">${realIdx}</td><td style="padding:2px 4px;">${item}</td><td class="tick-cell" id="p_sms_${realIdx}" style="padding:2px 4px; font-size:14px;"></td></tr>`;
+                });
+            });
+            
+            pSmsHtml += `
+                            </table>
+                            <div style="border: 1px solid black; padding: 6px; font-size:11px; height: 185px; margin-bottom: 5px;">
+                                <b>Observaciones:</b><br><span id="p_sms_obs"></span>
+                            </div>
+                            <div style="font-size:11px; padding-top: 2px;">
+                                <b>Nombre y firma comandante Vuelo:</b> <span id="sms_p_nombre" style="border-bottom: 1px solid black; display:inline-block; width:220px; height:14px;"></span>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            `;
+            el('print-layout').insertAdjacentHTML('beforeend', pSmsHtml);
         }
 
-        function triggerUpdate() { if (updateRAF) cancelAnimationFrame(updateRAF); updateRAF = requestAnimationFrame(updateAll); }
+        // =======================================================
+        // CONTROL Y ACTUALIZACIÓN
+        // =======================================================
+        function triggerUpdate() {
+            if (updateRAF) cancelAnimationFrame(updateRAF);
+            updateRAF = requestAnimationFrame(updateAll);
+        }
 
         function formatTime(input) {
             let v = input.value.replace(/\D/g, '').substring(0, 4);
@@ -609,28 +642,66 @@
         function validateTime(input) {
             if (!input.value) return triggerUpdate();
             let [h, m] = input.value.split(':').map(Number);
-            if (input.value.includes(':')) { h = Math.min(h || 0, 23); m = Math.min(m || 0, 59); input.value = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`; }
-            else { input.value = ""; }
+            if (input.value.includes(':')) {
+                h = Math.min(h || 0, 23);
+                m = Math.min(m || 0, 59);
+                input.value = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+            } else { input.value = ""; }
             triggerUpdate();
         }
 
-        const timeToMins = t => { if (!t || !t.includes(':')) return null; const [h, m] = t.split(':').map(Number); return (isNaN(h) || isNaN(m)) ? null : h * 60 + m; };
-        const minsToTime = m => { if (m === null || isNaN(m)) return "--:--"; m = (m % 1440 + 1440) % 1440; return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`; };
-        const timeDiffMins = (start, end) => { const s = timeToMins(start), e = timeToMins(end); if (s === null || e === null) return 0; return e - s < 0 ? (e - s) + 1440 : e - s; };
-        const addMins = (t, mins) => { if (!t || !t.includes(':')) return ""; let [h, m] = t.split(':').map(Number); let total = h * 60 + m + mins; total = ((total % 1440) + 1440) % 1440; return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`; };
+        const timeToMins = t => {
+            if (!t || !t.includes(':')) return null;
+            const [h, m] = t.split(':').map(Number);
+            return (isNaN(h) || isNaN(m)) ? null : h * 60 + m;
+        };
+
+        const minsToTime = m => {
+            if (m === null || isNaN(m)) return "--:--";
+            m = (m % 1440 + 1440) % 1440; 
+            return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+        };
+
+        const timeDiffMins = (start, end) => {
+            const s = timeToMins(start), e = timeToMins(end);
+            if (s === null || e === null) return 0;
+            return e - s < 0 ? (e - s) + 1440 : e - s;
+        };
+
+        const addMins = (t, mins) => {
+            if (!t || !t.includes(':')) return "";
+            let [h, m] = t.split(':').map(Number);
+            let total = h * 60 + m + mins;
+            total = ((total % 1440) + 1440) % 1440;
+            return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
+        };
 
         function toggleLink(id, field) {
             const input = el(`m_t${id}_${field}`), btn = el(`lbtn_${field}_${id}`);
             const isLinked = input.dataset.linked === "true";
-            input.dataset.linked = !isLinked; input.readOnly = !isLinked;
+            input.dataset.linked = !isLinked;
+            input.readOnly = !isLinked;
             input.classList.toggle('inherited-input', !isLinked);
-            btn.textContent = isLinked ? "🔓" : "🔗"; btn.title = isLinked ? "Restablecer herencia" : "Desvincular";
-            if (isLinked) triggerUpdate();
+            btn.textContent = isLinked ? "🔓" : "🔗";
+            btn.title = isLinked ? "Restablecer herencia" : "Desvincular y editar manualmente";
+            if(isLinked) triggerUpdate();
         }
 
-        function addRefuelRecord(id) { (refuelData[id] = refuelData[id] || []).push({ id: Date.now(), amount: '', time: '' }); renderRefuels(id); }
-        function removeRefuelRecord(legId, recordId) { refuelData[legId] = refuelData[legId].filter(r => r.id !== recordId); renderRefuels(legId); }
-        function updateRefuelRecord(legId, recordId, field, value) { const rec = refuelData[legId].find(r => r.id === recordId); if (rec) rec[field] = value; triggerUpdate(); }
+        function addRefuelRecord(id) {
+            (refuelData[id] = refuelData[id] || []).push({ id: Date.now(), amount: '', time: '' });
+            renderRefuels(id);
+        }
+
+        function removeRefuelRecord(legId, recordId) {
+            refuelData[legId] = refuelData[legId].filter(r => r.id !== recordId);
+            renderRefuels(legId);
+        }
+
+        function updateRefuelRecord(legId, recordId, field, value) {
+            const rec = refuelData[legId].find(r => r.id === recordId);
+            if(rec) rec[field] = value;
+            triggerUpdate();
+        }
 
         function renderRefuels(id) {
             const container = el(`refuel_container_${id}`);
@@ -650,7 +721,10 @@
             refuelData[id] = [];
             return `
             <div class="card" id="leg_card_${id}">
-                <div class="card-header"><span>🛫 ${ordinals[index] || index + '°'} TRAMO (Leg #${index})</span>${index > 1 ? `<button class="btn btn-danger" onclick="removeLeg(${id})">Eliminar</button>` : ''}</div>
+                <div class="card-header">
+                    <span>🛫 ${ordinals[index] || index + '°'} TRAMO (Leg #${index})</span>
+                    ${index > 1 ? `<button class="btn btn-danger" onclick="removeLeg(${id})">Eliminar</button>` : ''}
+                </div>
                 <div class="card-content">
                     <div class="grid-4" style="margin-bottom: 8px;">
                         <div class="form-group"><label>Desde <span class="link-btn" id="lbtn_desde_${id}" onclick="toggleLink(${id}, 'desde')">🔗</span></label><input type="text" id="m_t${id}_desde" data-linked="true" value="${defaultOrigin}" style="text-transform: uppercase;" oninput="triggerUpdate()"></div>
@@ -658,6 +732,7 @@
                         <div class="form-group"><label>PF</label><input type="text" id="m_t${id}_pf" placeholder="Ej: RE" oninput="triggerUpdate()"></div>
                         <div class="form-group"><label>PM</label><input type="text" id="m_t${id}_pm" placeholder="Ej: EI" oninput="triggerUpdate()"></div>
                     </div>
+
                     <div class="time-sequence-box">
                         <div style="font-size:0.72rem; color:var(--text-main); margin-bottom:8px; font-weight:bold;">SECUENCIA HORARIA (ESTRICTA 24H)</div>
                         <div class="time-sequence-grid">
@@ -667,58 +742,225 @@
                             <div class="time-step"><label>4. BLOCK IN</label><span>Llegada Calzos</span><input type="text" class="time-input" placeholder="HH:MM" maxlength="5" inputmode="numeric" id="m_t${id}_time_in" oninput="formatTime(this)" onblur="validateTime(this)"></div>
                         </div>
                         <div style="margin-top:8px; padding:6px; background:rgba(255,255,255,0.05); border-radius:6px; font-size:0.75rem; text-align:center; border: 1px dashed rgba(255,255,255,0.2);">
-                            <span style="color:var(--text-muted);">BLOCK TIME:</span> <strong id="ui_t${id}_block_diff" style="color:var(--text-main);">--:--</strong> &nbsp;|&nbsp; <span style="color:var(--text-muted);">AIR TIME:</span> <strong id="ui_t${id}_air_diff" style="color:var(--text-main);">--:--</strong>
+                            <span style="color:var(--text-muted);">BLOCK TIME:</span> <strong id="ui_t${id}_block_diff" style="color:var(--text-main);">--:--</strong> &nbsp;|&nbsp;
+                            <span style="color:var(--text-muted);">AIR TIME:</span> <strong id="ui_t${id}_air_diff" style="color:var(--text-main);">--:--</strong>
                         </div>
                     </div>
+
                     <div class="grid-2">
-                        <div><label style="font-size:0.7rem; color:var(--text-muted); font-weight:bold;">HORÓMETRO</label><div style="display:flex; gap:5px; margin-top:4px;"><input type="number" step="0.1" id="m_t${id}_horo_bot" placeholder="Inicial" oninput="triggerUpdate()"><input type="number" step="0.1" id="m_t${id}_horo_top" placeholder="Final" oninput="this.dataset.manual = (this.value !== '') ? 'true' : 'false'; triggerUpdate()"></div></div>
-                        <div><label style="font-size:0.7rem; color:var(--text-muted); font-weight:bold;">DATOS EXTRA</label><div style="display:flex; gap:5px; margin-top:4px;"><input type="number" id="m_t${id}_pax" placeholder="PAX" oninput="triggerUpdate()"><input type="text" id="m_t${id}_dist" placeholder="Dist" oninput="triggerUpdate()"></div></div>
+                        <div>
+                            <label style="font-size:0.7rem; color:var(--text-muted); font-weight:bold;">HORÓMETRO (INICIAL / FINAL)</label>
+                            <div style="display:flex; gap:5px; margin-top:4px;">
+                                <input type="number" step="0.1" id="m_t${id}_horo_bot" placeholder="Inicial" oninput="triggerUpdate()">
+                                <input type="number" step="0.1" id="m_t${id}_horo_top" placeholder="Final" oninput="this.dataset.manual = (this.value !== '') ? 'true' : 'false'; triggerUpdate()">
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-size:0.7rem; color:var(--text-muted); font-weight:bold;">DATOS EXTRA</label>
+                            <div style="display:flex; gap:5px; margin-top:4px;">
+                                <input type="number" id="m_t${id}_pax" placeholder="PAX" oninput="triggerUpdate()">
+                                <input type="text" id="m_t${id}_dist" placeholder="Dist" oninput="triggerUpdate()">
+                            </div>
+                        </div>
                     </div>
+
                     <div style="margin-top:12px; padding:10px; border:1px solid var(--border-color); border-radius:8px; background:rgba(0,0,0,0.2);">
                         <label style="font-size:0.75rem; color:var(--text-main); font-weight:bold; margin-bottom:8px; display:block;">COMBUSTIBLE PRINCIPAL (1 DECIMAL)</label>
                         <div class="grid-3">
                             <div><label style="font-size:0.65rem; color:var(--text-muted);">1. FUEL ON</label><input type="number" step="0.1" id="m_t${id}_fuel_on" oninput="this.dataset.manual=(this.value !== '') ? 'true' : 'false'; triggerUpdate()"></div>
                             <div><label style="font-size:0.65rem; color:var(--text-muted);">2. FUEL OFF</label><input type="number" step="0.1" id="m_t${id}_fuel_off" oninput="triggerUpdate()"></div>
-                            <div style="background:rgba(255,255,255,0.03); padding:6px; border-radius:6px; border: 1px dashed var(--border-color);"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;"><span style="font-size:0.65rem; color:var(--success);">3. REFUEL</span><button class="btn btn-success" onclick="addRefuelRecord(${id})">+ Añadir</button></div><div id="refuel_container_${id}" style="display:flex; flex-direction:column; gap:4px;"></div></div>
+                            <div style="background:rgba(255,255,255,0.03); padding:6px; border-radius:6px; border: 1px dashed var(--border-color);">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                                    <span style="font-size:0.65rem; color:var(--success);">3. REFUEL POST-TRAMO</span>
+                                    <button class="btn btn-success" onclick="addRefuelRecord(${id})">+ Añadir</button>
+                                </div>
+                                <div id="refuel_container_${id}" style="display:flex; flex-direction:column; gap:4px;"></div>
+                            </div>
                         </div>
                     </div>
+
                     <details class="param-section" style="background: rgba(255,255,255,0.02); border: 1px dashed var(--border-color); border-radius: 8px; margin-top: 15px;">
-                        <summary style="display:flex; justify-content:space-between; align-items:center; padding: 12px;"><div style="font-size: 0.8rem; font-weight: bold; flex:1;">⚙️ PARÁMETROS DE VUELO Y WAYPOINTS <span class="arrow"></span></div></summary>
+                        <summary style="display:flex; justify-content:space-between; align-items:center; padding: 12px; cursor:pointer; outline:none; user-select:none;">
+                            <div style="font-size: 0.8rem; color: var(--text-main); font-weight: bold; flex:1;">⚙️ PARÁMETROS DE VUELO Y WAYPOINTS <span class="arrow"></span></div>
+                            <label style="display:flex; align-items:center; gap:5px; font-size:0.75rem; color:var(--text-main); cursor:pointer; margin:0; padding-left:10px; border-left:1px solid var(--border-color);" onclick="event.stopPropagation();">
+                                <input type="checkbox" id="m_t${id}_show_params" onchange="triggerUpdate()"> Imprimir en PDF
+                            </label>
+                        </summary>
                         <div style="padding: 0 12px 12px 12px;">
-                            <div class="grid-6">${['fl','mach','isa','oat','gspd','ff','n1','n2','oilt','oilp','itt','obs'].map(f => `<div class="form-group"><label>${f.toUpperCase()}</label><input type="text" id="m_t${id}_${f}" oninput="triggerUpdate()"></div>`).join('')}</div>
+                            <div class="grid-6">
+                                ${['fl','mach','isa','oat','gspd','ff','n1','n2','oilt','oilp','itt','obs'].map(f => `<div class="form-group"><label>${f.toUpperCase()}</label><input type="text" id="m_t${id}_${f}" oninput="triggerUpdate()"></div>`).join('')}
+                            </div>
+                            
                             <div style="font-size: 0.75rem; color: var(--text-main); font-weight: bold; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; margin: 10px 0;">🛢️ COMBUSTIBLE WAYPOINTS</div>
-                            <div class="grid-4">${[1,2,3,4].map(w => `<div style="background:rgba(0,0,0,0.2); padding:5px; border-radius:4px;"><div class="form-group"><label>WP ${w}</label><input type="text" id="m_t${id}_wp${w}" oninput="triggerUpdate()"></div><div class="form-group"><label>Plan</label><input type="text" id="m_t${id}_cp${w}" oninput="triggerUpdate()"></div><div class="form-group"><label>Real</label><input type="text" id="m_t${id}_cr${w}" oninput="triggerUpdate()"></div></div>`).join('')}</div>
-                            <div class="grid-2" style="margin-top:10px;"><div class="form-group"><label>METEOROLOGÍA</label><textarea id="m_t${id}_meteo" oninput="triggerUpdate()"></textarea></div><div class="form-group"><label>AUTORIZACIÓN ATC</label><textarea id="m_t${id}_atc" oninput="triggerUpdate()"></textarea></div></div>
+                            <div class="grid-4">
+                                ${[1,2,3,4].map(w => `
+                                <div style="background:rgba(0,0,0,0.2); padding:5px; border-radius:4px;">
+                                    <div class="form-group"><label>WP ${w} (ID)</label><input type="text" id="m_t${id}_wp${w}" oninput="triggerUpdate()"></div>
+                                    <div class="form-group"><label>Plan</label><input type="text" id="m_t${id}_cp${w}" oninput="triggerUpdate()"></div>
+                                    <div class="form-group"><label>Real</label><input type="text" id="m_t${id}_cr${w}" oninput="triggerUpdate()"></div>
+                                </div>`).join('')}
+                            </div>
+
+                            <div class="grid-2" style="margin-top:10px;">
+                                <div class="form-group"><label>METEOROLOGÍA</label><textarea id="m_t${id}_meteo" oninput="triggerUpdate()"></textarea></div>
+                                <div class="form-group"><label>AUTORIZACIÓN ATC</label><textarea id="m_t${id}_atc" oninput="triggerUpdate()"></textarea></div>
+                            </div>
                         </div>
                     </details>
+
+                    <input type="hidden" id="m_t${id}_horo_diff"><input type="hidden" id="m_t${id}_block_diff"><input type="hidden" id="m_t${id}_air_diff"><input type="hidden" id="m_t${id}_fuel_diff">
+
                     <hr class="divider">
                     <div class="grid-4">
                         <div class="form-group"><label>Fecha <span class="link-btn" id="lbtn_fecha_${id}" onclick="toggleLink(${id}, 'fecha')">🔗</span></label><input type="date" id="m_t${id}_fecha" data-linked="true"></div>
                         <div class="form-group"><label>Folio BIT <span class="link-btn" id="lbtn_folio_${id}" onclick="toggleLink(${id}, 'folio')">🔗</span></label><input type="text" id="m_t${id}_folio" data-linked="true"></div>
                         <div class="form-group"><label>Vientos</label><input type="text" id="m_t${id}_winds" oninput="triggerUpdate()"></div>
-                        <div class="form-group"><label>Aterrizaje</label><div style="display:flex; gap:6px; margin-top:2px;"><select id="m_t${id}_dn" onchange="triggerUpdate()"><option value="">D/N</option><option value="D">Diurno (D)</option><option value="N">Nocturno (N)</option></select><select id="m_t${id}_pnp" onchange="triggerUpdate()"><option value="">APP</option><option value="P">P</option><option value="NP">NP</option></select></div></div>
+                        <div class="form-group"><label>Aterrizaje</label>
+                            <div style="display:flex; gap:6px; margin-top:2px;">
+                                <select id="m_t${id}_dn" onchange="triggerUpdate()"><option value="">D/N</option><option value="D">Diurno (D)</option><option value="N">Nocturno (N)</option></select>
+                                <select id="m_t${id}_pnp" onchange="triggerUpdate()"><option value="">APP</option><option value="P">P</option><option value="NP">NP</option></select>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>`;
         }
 
-        function addLeg(defaultOrigin = '') {
-            const id = nextLegId++;
-            const index = legIds.push(id);
-            el('tramos-container').insertAdjacentHTML('beforeend', getLegHTML(id, index, defaultOrigin));
+        function getPrintLegHTML(id, index) {
+            return `
+            <table class="print-table" id="print_leg_${id}">
+                <tr><td colspan="6" class="tramo-title-darkgray">${ordinals[index] || index + '°'} TRAMO</td></tr>
+                <tr class="header-cell">
+                    <td class="col-fecha">FECHA <span id="p_t${id}_fecha" style="font-weight:normal;"></span><br><span style="font-size:6px; font-weight:normal;">FOLIO: <span id="p_t${id}_folio"></span></span></td>
+                    <td class="col-horo">HOROMETRO</td><td class="col-block">BLOCK TIME</td>
+                    <td class="col-air">AIR TIME</td><td class="col-fuel">COMBUSTIBLE</td><td class="col-land">ATERRIZAJE</td>
+                </tr>
+                <tr>
+                    <td style="padding:0; vertical-align:top;">
+                        <table class="tramo-grid" style="border:none;">
+                            <tr><td class="text-left no-border-t no-border-x">Destino: <span id="p_t${id}_dest" class="bold"></span></td></tr>
+                            <tr><td class="text-left no-border-x">Desde: <span id="p_t${id}_desde" class="bold"></span></td></tr>
+                            <tr><td class="text-left no-border-b no-border-x">Distancia: <span id="p_t${id}_dist" class="bold"></span></td></tr>
+                        </table>
+                    </td>
+                    <td style="padding:0; vertical-align:top;">
+                        <table class="tramo-grid" style="border:none; height:100%;">
+                            <tr><td class="no-border-t no-border-x" style="height:33.3%;"><span id="p_t${id}_horo_top" class="bold" style="font-size:10px;"></span></td></tr>
+                            <tr><td class="no-border-x" style="height:33.3%;"><span id="p_t${id}_horo_bot" class="bold" style="font-size:10px;"></span></td></tr>
+                            <tr><td class="no-border-b no-border-x" style="height:33.3%;"><span id="p_t${id}_horo_diff" class="bold" style="font-size:10px;"></span></td></tr>
+                        </table>
+                    </td>
+                    <td style="padding:0; vertical-align:top;">
+                        <table class="tramo-grid" style="border:none; height:100%;">
+                            <tr><td class="no-border-t no-border-x" style="height:33.3%;"><span id="p_t${id}_time_in" class="bold" style="font-size:10px;"></span></td></tr>
+                            <tr><td class="no-border-x" style="height:33.3%;"><span id="p_t${id}_time_out" class="bold" style="font-size:10px;"></span></td></tr>
+                            <tr><td class="no-border-b no-border-x" style="height:33.3%;"><span id="p_t${id}_block_diff" class="bold" style="font-size:10px;"></span></td></tr>
+                        </table>
+                    </td>
+                    <td style="padding:0; vertical-align:top;">
+                        <table class="tramo-grid" style="border:none; height:100%;">
+                            <tr><td class="no-border-t no-border-x" style="height:33.3%;"><span id="p_t${id}_time_on" class="bold" style="font-size:10px;"></span></td></tr>
+                            <tr><td class="no-border-x" style="height:33.3%;"><span id="p_t${id}_time_off" class="bold" style="font-size:10px;"></span></td></tr>
+                            <tr><td class="no-border-b no-border-x" style="height:33.3%;"><span id="p_t${id}_air_diff" class="bold" style="font-size:10px;"></span></td></tr>
+                        </table>
+                    </td>
+                    <td style="padding:0; vertical-align:top;">
+                        <table class="tramo-grid" style="border:none; height:100%;">
+                            <tr><td class="no-border-t no-border-x text-left" style="height:33.3%; font-size:7.5px;">ON: <span id="p_t${id}_fuel_on" class="bold" style="float:right; font-size:9px;"></span></td></tr>
+                            <tr><td class="no-border-x text-left" style="height:33.3%; font-size:7.5px;">OFF: <span id="p_t${id}_fuel_off" class="bold" style="float:right; font-size:9px;"></span></td></tr>
+                            <tr><td class="no-border-b no-border-x text-left" style="height:33.3%; font-size:7.5px;">USD: <span id="p_t${id}_fuel_diff" class="bold" style="float:right; font-size:9px;"></span></td></tr>
+                        </table>
+                    </td>
+                    <td style="padding:0; vertical-align:top;">
+                        <table class="tramo-grid" style="border:none; height:100%;">
+                            <tr><td class="no-border-t no-border-x text-center bold" style="height:50%; font-size:7.5px;" id="p_t${id}_dn_text"></td></tr>
+                            <tr><td class="no-border-x text-center" style="background:#f0f0f0; font-size:6.5px;">APP. IFR</td></tr>
+                            <tr><td class="no-border-b no-border-x text-center bold" style="height:50%; font-size:7.5px;" id="p_t${id}_pnp_text"></td></tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="6" style="padding: 2px 4px;">
+                        <span style="display:inline-block; width:15%;">PAX: <span id="p_t${id}_pax" class="bold"></span></span>
+                        <span style="display:inline-block; width:20%;">PF: <span id="p_t${id}_pf" class="bold"></span></span>
+                        <span style="display:inline-block; width:20%;">PM: <span id="p_t${id}_pm" class="bold"></span></span>
+                        <span style="display:inline-block; width:40%;" id="p_t${id}_winds_wrapper">WINDS: <span id="p_t${id}_winds" class="bold"></span></span>
+                    </td>
+                </tr>
+            </table>`;
+        }
 
-            const dLink = el(`m_t${id}_desde`), dBtn = el(`lbtn_desde_${id}`);
-            if (index === 1) {
-                dLink.dataset.linked = "false";
-                dLink.classList.remove('inherited-input');
-                dBtn.style.display = "none";
+        function getPrintParamsHTML(id, index) {
+            return `
+            <div id="p_t${id}_params_wrapper" style="display:none;">
+                <table class="print-table" id="p_t${id}_tbl_params">
+                    <tr><td colspan="6" class="tramo-title-gray">PARÁMETROS TRAMO N° ${index}</td></tr>
+                    <tr class="gray-bg" style="font-size:7px; font-weight:bold; text-align:left;">
+                        <td style="width:16.6%;">FL:</td><td style="width:16.6%;">N° MACH:</td><td style="width:16.6%;">ISA:</td>
+                        <td style="width:16.6%;">OAT:</td><td style="width:16.6%;">GSPD:</td><td style="width:16.6%;">FF L/R:</td>
+                    </tr>
+                    <tr>
+                        <td class="cell-data"><span id="p_t${id}_fl"></span></td><td class="cell-data"><span id="p_t${id}_mach"></span></td>
+                        <td class="cell-data"><span id="p_t${id}_isa"></span></td><td class="cell-data"><span id="p_t${id}_oat"></span></td>
+                        <td class="cell-data"><span id="p_t${id}_gspd"></span></td><td class="cell-data"><span id="p_t${id}_ff"></span></td>
+                    </tr>
+                    <tr class="gray-bg" style="font-size:7px; font-weight:bold; text-align:left;">
+                        <td>N1 (L/R):</td><td>N2 (L/R):</td><td>OIL T°:</td><td>OIL P:</td><td>ITT:</td><td>OBS:</td>
+                    </tr>
+                    <tr>
+                        <td class="cell-data"><span id="p_t${id}_n1"></span></td><td class="cell-data"><span id="p_t${id}_n2"></span></td>
+                        <td class="cell-data"><span id="p_t${id}_oilt"></span></td><td class="cell-data"><span id="p_t${id}_oilp"></span></td>
+                        <td class="cell-data"><span id="p_t${id}_itt"></span></td><td class="cell-data"><span id="p_t${id}_obs"></span></td>
+                    </tr>
+                </table>
+
+                <table class="print-table" id="p_t${id}_tbl_fuel">
+                    <tr><td colspan="5" class="tramo-title-gray">COMBUSTIBLE TRAMO N° ${index}</td></tr>
+                    <tr class="gray-bg" style="font-size:7px; font-weight:bold; text-align:left;">
+                        <td style="width:20%;">ID del Punto (Waypoint)</td>
+                        ${[1,2,3,4].map(w => `<td style="width:20%;" class="text-center"><span id="p_t${id}_wp${w}"></span></td>`).join('')}
+                    </tr>
+                    <tr>
+                        <td class="gray-bg" style="font-size:7px; font-weight:bold;">Combustible Plan</td>
+                        ${[1,2,3,4].map(w => `<td class="cell-data"><span id="p_t${id}_cp${w}"></span></td>`).join('')}
+                    </tr>
+                    <tr>
+                        <td class="gray-bg" style="font-size:7px; font-weight:bold;">Combustible Real</td>
+                        ${[1,2,3,4].map(w => `<td class="cell-data"><span id="p_t${id}_cr${w}"></span></td>`).join('')}
+                    </tr>
+                </table>
+
+                <table class="print-table" id="p_t${id}_tbl_meteo">
+                    <tr><td class="tramo-title-gray tramo-title-left">METEOROLOGÍA TRAMO N° ${index}</td></tr>
+                    <tr><td style="height:25px; vertical-align:top; font-size:8px; text-align:left;"><span id="p_t${id}_meteo"></span></td></tr>
+                </table>
+                <table class="print-table" id="p_t${id}_tbl_atc" style="margin-bottom: 12px;">
+                    <tr><td class="tramo-title-gray tramo-title-left">AUTORIZACIÓN ATC TRAMO N° ${index}</td></tr>
+                    <tr><td style="height:25px; vertical-align:top; font-size:8px; text-align:left;"><span id="p_t${id}_atc"></span></td></tr>
+                </table>
+            </div>`;
+        }
+
+        function addLeg(defaultOrigin = '') {
+            const id = nextLegId++, index = legIds.push(id);
+            el('tramos-container').insertAdjacentHTML('beforeend', getLegHTML(id, index, defaultOrigin));
+            el('print-tramos-container').insertAdjacentHTML('beforeend', getPrintLegHTML(id, index));
+            el('print-params-container').insertAdjacentHTML('beforeend', getPrintParamsHTML(id, index));
+            
+            if(index === 1) {
+                const dLink = el(`m_t${id}_desde`), dBtn = el(`lbtn_desde_${id}`);
+                if(dLink) { dLink.dataset.linked = "false"; dLink.classList.remove('inherited-input'); }
+                if(dBtn) dBtn.style.display = "none";
             } else {
-                dLink.dataset.linked = "true"; dLink.readOnly = true; dLink.classList.add('inherited-input');
+                const dLink = el(`m_t${id}_desde`);
+                if(dLink) { dLink.dataset.linked = "true"; dLink.readOnly = true; dLink.classList.add('inherited-input'); }
             }
+
             ['fecha', 'folio'].forEach(f => {
                 const field = el(`m_t${id}_${f}`);
-                field.dataset.linked = "true"; field.readOnly = true; field.classList.add('inherited-input');
+                if(field) { field.dataset.linked = "true"; field.readOnly = true; field.classList.add('inherited-input'); }
             });
+
             triggerUpdate();
         }
 
@@ -726,491 +968,861 @@
             if (!confirm("¿Eliminar tramo? Actualizará continuidad.")) return;
             legIds = legIds.filter(l => l !== id);
             el(`leg_card_${id}`).remove();
+            
+            const pContLegs = el('print-tramos-container'), pContParams = el('print-params-container');
+            pContLegs.innerHTML = ""; pContParams.innerHTML = "";
+
             legIds.forEach((lId, i) => {
-                el(`leg_card_${lId}`).querySelector('.card-header span').innerHTML = `🛫 ${ordinals[i + 1] || (i + 1) + '°'} TRAMO (Leg #${i + 1})`;
+                pContLegs.insertAdjacentHTML('beforeend', getPrintLegHTML(lId, i + 1));
+                pContParams.insertAdjacentHTML('beforeend', getPrintParamsHTML(lId, i + 1));
+                el(`leg_card_${lId}`).querySelector('.card-header span').innerHTML = `🛫 ${ordinals[i + 1] || (i+1) + '°'} TRAMO (Leg #${i+1})`;
             });
-            if (legIds.length > 0) {
+
+            if(legIds.length > 0) {
                 const fId = legIds[0], dLink = el(`m_t${fId}_desde`), dBtn = el(`lbtn_desde_${fId}`);
-                dLink.dataset.linked = "false"; dLink.readOnly = false; dLink.classList.remove('inherited-input');
-                dBtn.style.display = "none";
+                if(dLink) { dLink.dataset.linked = "false"; dLink.readOnly = false; dLink.classList.remove('inherited-input'); }
+                if(dBtn) dBtn.style.display = "none";
             }
             triggerUpdate();
         }
 
         function resetSecTime(dateKey, type) {
             secManualState[dateKey] = secManualState[dateKey] || {};
-            if (type === 'hinicio') secManualState[dateKey].hinicioManual = false;
-            if (type === 'htermino') secManualState[dateKey].hterminoManual = false;
+            if(type === 'hinicio') secManualState[dateKey].hinicioManual = false;
+            if(type === 'htermino') secManualState[dateKey].hterminoManual = false;
             triggerUpdate();
         }
 
+        // =======================================================
+        // GESTIÓN Y CÁLCULOS
+        // =======================================================
         function updateAll() {
-            let totalAirMins = 0, totalBlockMins = 0, totalFuelUsed = 0, globalRefuel = 0;
-            const pilotStats = {}, paxArray = [], legs = [];
+            let totalAirMins = 0, totalBlockMins = 0, totalPax = 0, totalFuelUsed = 0, globalRefuel = 0;
+            const pilotStats = {}, paxArray = [];
             const gDate = val('m_fecha_gen'), gFolio = val('m_folio_gen');
-            const legsByDate = {};
+
+            let legsByDate = {};
+            let legDetails = [];
 
             legIds.forEach((id, i) => {
-                const fechaEl = el(`m_t${id}_fecha`), folioEl = el(`m_t${id}_folio`), desdeEl = el(`m_t${id}_desde`);
-                if (fechaEl.dataset.linked === "true") fechaEl.value = gDate;
-                if (folioEl.dataset.linked === "true") folioEl.value = gFolio;
-                if (i > 0 && desdeEl.dataset.linked === "true") desdeEl.value = val(`m_t${legIds[i - 1]}_dest`);
+                if (el(`m_t${id}_fecha`)?.dataset.linked === "true") setVal(`m_t${id}_fecha`, gDate);
+                if (el(`m_t${id}_folio`)?.dataset.linked === "true") setVal(`m_t${id}_folio`, gFolio);
+                if (i > 0 && el(`m_t${id}_desde`)?.dataset.linked === "true") setVal(`m_t${id}_desde`, val(`m_t${legIds[i-1]}_dest`));
 
-                const legDate = fechaEl.value || gDate || new Date().toISOString().split('T')[0];
-                const desde = val(`m_t${id}_desde`).toUpperCase(), dest = val(`m_t${id}_dest`).toUpperCase();
+                const tDate = val(`m_t${id}_fecha`) || gDate || new Date().toISOString().split('T')[0];
+                const desde = val(`m_t${id}_desde`).toUpperCase();
+                const dest = val(`m_t${id}_dest`).toUpperCase();
                 const tOut = val(`m_t${id}_time_out`), tOff = val(`m_t${id}_time_off`);
-                const tOn = val(`m_t${id}_time_on`), tIn = val(`m_t${id}_time_in`);
-
+                const tOn  = val(`m_t${id}_time_on`), tIn = val(`m_t${id}_time_in`);
+                
                 const bDiff = tOut && tIn ? timeDiffMins(tOut, tIn) : 0;
                 const aDiff = tOff && tOn ? timeDiffMins(tOff, tOn) : 0;
 
                 const hBot = el(`m_t${id}_horo_bot`), hTop = el(`m_t${id}_horo_top`);
-                if (i === 0) { hBot.readOnly = false; }
-                else {
-                    const prevTop = parseFloat(val(`m_t${legIds[i - 1]}_horo_top`));
-                    hBot.readOnly = true;
+                if (i === 0) {
+                    hBot.readOnly = false; hBot.classList.remove('readonly-strict');
+                } else {
+                    const prevTop = parseFloat(val(`m_t${legIds[i-1]}_horo_top`));
+                    hBot.readOnly = true; hBot.classList.add('readonly-strict');
                     hBot.value = !isNaN(prevTop) ? formatDec(prevTop) : '';
                 }
+
                 const valBot = parseFloat(hBot.value);
                 if (hTop.dataset.manual !== "true" && !isNaN(valBot) && aDiff > 0) hTop.value = formatDec(valBot + (aDiff / 60));
+                
                 const valTop = parseFloat(hTop.value);
-                const horoDiff = !isNaN(valBot) && !isNaN(valTop) ? formatDec(valTop - valBot) : '';
+                setVal(`m_t${id}_horo_diff`, !isNaN(valBot) && !isNaN(valTop) ? formatDec(valTop - valBot) : '');
 
-                const refuelTotal = getLegRefuelTotal(id);
-                globalRefuel += refuelTotal;
+                const tramoRefuel = getLegRefuelTotal(id);
+                globalRefuel += tramoRefuel;
+
                 const fOn = el(`m_t${id}_fuel_on`), fOff = el(`m_t${id}_fuel_off`);
-                if (i > 0 && (fOn.dataset.manual !== 'true' || fOn.value === '')) {
-                    const prevOff = parseFloat(val(`m_t${legIds[i - 1]}_fuel_off`));
-                    const prevRefuel = getLegRefuelTotal(legIds[i - 1]);
-                    if (!isNaN(prevOff)) { fOn.value = formatDec(prevOff + prevRefuel); fOn.dataset.manual = 'false'; }
-                    else { fOn.value = ''; }
+                fOn.readOnly = false; fOn.classList.remove('readonly-strict');
+                
+                if (i > 0) {
+                    if (fOn.dataset.manual !== 'true' || fOn.value === '') {
+                        const prevOff = parseFloat(val(`m_t${legIds[i-1]}_fuel_off`)), prevRefuel = getLegRefuelTotal(legIds[i-1]);
+                        if (!isNaN(prevOff)) {
+                            fOn.value = formatDec(prevOff + prevRefuel);
+                            fOn.dataset.manual = 'false';
+                        } else { fOn.value = ''; }
+                    }
                 }
-                const valOn = parseFloat(fOn.value), valOff = parseFloat(fOff.value);
-                const fuelDiff = (!isNaN(valOn) && !isNaN(valOff)) ? Math.max(0, valOn - valOff) : null;
-                if (fuelDiff) totalFuelUsed += fuelDiff;
 
-                const bStr = bDiff > 0 ? `${minsToTime(bDiff)} (${formatDec(bDiff / 60)})` : '';
-                const aStr = aDiff > 0 ? `${minsToTime(aDiff)} (${formatDec(aDiff / 60)})` : '';
-                setTxt(`ui_t${id}_block_diff`, bStr || '--:--');
-                setTxt(`ui_t${id}_air_diff`, aStr || '--:--');
+                const valOn = parseFloat(fOn.value), valOff = parseFloat(fOff.value);
+                let diffF = (!isNaN(valOn) && !isNaN(valOff)) ? Math.max(0, valOn - valOff) : null;
+                let actualFDiff = diffF !== null ? diffF : 0;
+                setVal(`m_t${id}_fuel_diff`, diffF !== null ? formatDec(diffF) : '');
+                
+                if (diffF) totalFuelUsed += diffF;
+
+                const bStr = bDiff > 0 ? `${minsToTime(bDiff)} (${formatDec(bDiff/60)})` : '';
+                const aStr = aDiff > 0 ? `${minsToTime(aDiff)} (${formatDec(aDiff/60)})` : '';
+                setVal(`m_t${id}_block_diff`, bStr); setVal(`m_t${id}_air_diff`, aStr);
+                setTxt(`ui_t${id}_block_diff`, bStr || '--:--'); setTxt(`ui_t${id}_air_diff`, aStr || '--:--');
+
                 totalBlockMins += bDiff; totalAirMins += aDiff;
 
                 const lPax = parseInt(val(`m_t${id}_pax`)) || 0;
-                paxArray.push(`(${lPax})`);
+                totalPax += lPax; paxArray.push(`(${lPax})`);
+                
                 const pf = val(`m_t${id}_pf`).trim().toUpperCase() || "SIN NOMBRE";
                 const pm = val(`m_t${id}_pm`).trim().toUpperCase();
 
-                const leg = {
-                    id, index: i + 1, fecha: legDate, folio: folioEl.value, desde, dest,
-                    dist: val(`m_t${id}_dist`), winds: val(`m_t${id}_winds`).trim(),
-                    pax: lPax, pf, pm, dn: val(`m_t${id}_dn`), pnp: val(`m_t${id}_pnp`),
-                    tOut, tOff, tOn, tIn, bDiff, aDiff,
-                    horoBot: hBot.value, horoTop: hTop.value, horoDiff,
-                    fuelOn: fOn.value, fuelOff: fOff.value, fuelDiff: fuelDiff !== null ? formatDec(fuelDiff) : '',
-                    fDiff: fuelDiff || 0, refuelTotal
-                };
-                legs.push(leg);
-                (legsByDate[legDate] = legsByDate[legDate] || []).push(leg);
+                // Construcción de leg para Daily Stats PDF
+                legDetails.push({ id, date: tDate, desde, dest, tOut, tIn });
+                if(!legsByDate[tDate]) legsByDate[tDate] = [];
+                legsByDate[tDate].push({ id, desde, dest, tOut, tOff, tOn, tIn, bDiff, aDiff, fDiff: actualFDiff, pax: lPax, pf, pm, horoBot: hBot.value, horoTop: hTop.value });
 
+                // Acumulador UI Web (Todos los pilotos)
                 const initPilot = () => ({ pf_time: 0, pf_air: 0, landings: 0, pm_time: 0, pm_air: 0 });
                 if (!pilotStats[pf]) pilotStats[pf] = initPilot();
                 pilotStats[pf].pf_time += bDiff; pilotStats[pf].pf_air += aDiff;
-                if (bDiff > 0 || aDiff > 0) pilotStats[pf].landings += 1;
+                if (bDiff > 0 || aDiff > 0) pilotStats[pf].landings += 1; 
+
                 if (pm) {
                     if (!pilotStats[pm]) pilotStats[pm] = initPilot();
                     pilotStats[pm].pm_time += bDiff; pilotStats[pm].pm_air += aDiff;
                 }
             });
 
-            let activeDates = Object.keys(legsByDate).sort();
-            if (activeDates.length === 0 && gDate) activeDates = [gDate];
-            if (activeDates.length === 0) activeDates = [new Date().toISOString().split('T')[0]];
+            // Agrupación de días por pernocta
+            if(legDetails.length > 1) {
+                for(let idx = 0; idx < legDetails.length - 1; idx++) {
+                    let curr = legDetails[idx];
+                    let next = legDetails[idx+1];
+                    if(curr.date !== next.date && curr.dest && curr.dest !== 'SCEL' && next.desde === curr.dest) {
+                        if(!legsByDate[next.date]) legsByDate[next.date] = [];
+                    }
+                }
+            }
 
-            const dailyStats = [];
+            let activeDates = Object.keys(legsByDate).sort();
+            if(activeDates.length === 0 && gDate) activeDates = [gDate];
+            if(activeDates.length === 0) activeDates = [new Date().toISOString().split('T')[0]];
+
+            // ============================================
+            // CALCULO INDEPENDIENTE DE DUTY, BLK Y AIR
+            // ============================================
+            let dailyStats = [];
             let totalDutyMinsAllDays = 0;
-            const globalEndEl = el('duty_end');
-            const picIni = val('m_pic_ini').trim().toUpperCase(), sicIni = val('m_sic_ini').trim().toUpperCase();
+            let globalEndEl = el('duty_end');
+            
+            let picIni = val('m_pic_ini').trim().toUpperCase();
+            let sicIni = val('m_sic_ini').trim().toUpperCase();
 
             activeDates.forEach((dateKey, index) => {
-                const dayLegs = legsByDate[dateKey] || [];
-                if (dayLegs.length === 0) return;
-                let startDuty = "", endDuty = "", dayBlock = 0, dayAir = 0, dayFuelUsed = 0;
-                const dayPax = [];
-                const firstLeg = dayLegs[0], lastLeg = dayLegs[dayLegs.length - 1];
-                const p1 = { block: 0, air: 0, dep: 0, pf_block: 0, pf_air: 0 };
-                const p2 = { block: 0, air: 0, dep: 0, pf_block: 0, pf_air: 0 };
+                let dayLegs = legsByDate[dateKey] || [];
+                if(dayLegs.length === 0) return;
+                
+                let startDuty = "";
+                let endDuty = "";
+                let dayBlock = 0, dayAir = 0, dayFuelUsed = 0;
+                let dayPax = [];
+                let firstLeg = dayLegs[0];
+                let lastLeg = dayLegs[dayLegs.length - 1];
+                
+                let hIni = firstLeg.horoBot || '--';
+                let hFin = lastLeg.horoTop || '--';
+                
+                // Track stats de pilotos específicos para el PDF (CAP y FO)
+                let p1 = { block: 0, air: 0, dep: 0, pf_block: 0, pf_air: 0 };
+                let p2 = { block: 0, air: 0, dep: 0, pf_block: 0, pf_air: 0 };
 
                 dayLegs.forEach(leg => {
-                    dayBlock += leg.bDiff; dayAir += leg.aDiff; dayFuelUsed += leg.fDiff;
-                    dayPax.push(`(${leg.pax})`);
+                    dayBlock += (leg.bDiff || 0);
+                    dayAir += (leg.aDiff || 0);
+                    dayFuelUsed += (leg.fDiff || 0);
+                    if (leg.pax > 0 || leg.pax === 0) dayPax.push(`(${leg.pax})`);
+
                     if (picIni) {
-                        if (leg.pf === picIni) { p1.block += leg.bDiff; p1.air += leg.aDiff; p1.pf_block += leg.bDiff; p1.pf_air += leg.aDiff; if (leg.bDiff > 0) p1.dep++; }
+                        if (leg.pf === picIni) { p1.block += leg.bDiff; p1.air += leg.aDiff; p1.pf_block += leg.bDiff; p1.pf_air += leg.aDiff; if(leg.bDiff>0) p1.dep++; }
                         else if (leg.pm === picIni) { p1.block += leg.bDiff; p1.air += leg.aDiff; }
                     }
                     if (sicIni) {
-                        if (leg.pf === sicIni) { p2.block += leg.bDiff; p2.air += leg.aDiff; p2.pf_block += leg.bDiff; p2.pf_air += leg.aDiff; if (leg.bDiff > 0) p2.dep++; }
+                        if (leg.pf === sicIni) { p2.block += leg.bDiff; p2.air += leg.aDiff; p2.pf_block += leg.bDiff; p2.pf_air += leg.aDiff; if(leg.bDiff>0) p2.dep++; }
                         else if (leg.pm === sicIni) { p2.block += leg.bDiff; p2.air += leg.aDiff; }
                     }
                 });
 
                 if (index === 0) {
+                    // DÍA 1
                     startDuty = val('duty_start');
-                    if (globalEndEl.dataset.manual === "true" && globalEndEl.value.length === 5) { endDuty = globalEndEl.value; }
-                    else if (lastLeg.tIn) { endDuty = addMins(lastLeg.tIn, 30); globalEndEl.value = endDuty; }
+                    if (globalEndEl.dataset.manual === "true" && globalEndEl.value.length === 5) {
+                        endDuty = globalEndEl.value;
+                    } else if (lastLeg.tIn) {
+                        endDuty = addMins(lastLeg.tIn, 30);
+                        globalEndEl.value = endDuty; 
+                    }
                 } else {
+                    // DÍAS POSTERIORES
                     if (firstLeg.tOff) startDuty = addMins(firstLeg.tOff, -60);
                     if (lastLeg.tIn) endDuty = addMins(lastLeg.tIn, 30);
                 }
-
-                const dur = (startDuty && endDuty) ? timeDiffMins(startDuty, endDuty) : 0;
+                
+                let dur = (startDuty && endDuty) ? timeDiffMins(startDuty, endDuty) : 0;
                 totalDutyMinsAllDays += dur;
-                dailyStats.push({ date: dateKey, start: startDuty, end: endDuty, duration: dur, block: dayBlock, air: dayAir, fuelUsed: dayFuelUsed, pax: dayPax.join(' '), p1, p2, hIni: firstLeg.horoBot || '--', hFin: lastLeg.horoTop || '--' });
+                
+                dailyStats.push({ 
+                    date: dateKey, start: startDuty, end: endDuty, duration: dur, 
+                    block: dayBlock, air: dayAir, fuelUsed: dayFuelUsed, pax: dayPax.join(' '),
+                    p1, p2, hIni, hFin
+                });
             });
 
-            el('ui_duty_table').innerHTML = dailyStats.map(dp => `<tr><td style="padding:6px; text-align:left; border-bottom:1px solid rgba(255,255,255,0.05);">${dp.date}</td><td style="border-bottom:1px solid rgba(255,255,255,0.05);">${dp.start || '--:--'}</td><td style="border-bottom:1px solid rgba(255,255,255,0.05);">${dp.end || '--:--'}</td><td style="border-bottom:1px solid rgba(255,255,255,0.05); font-weight:bold; color:var(--accent);">${dp.duration > 0 ? `${minsToTime(dp.duration)} (${formatDec(dp.duration / 60)}h)` : '--:--'}</td><td style="border-bottom:1px solid rgba(255,255,255,0.05); color:var(--text-muted);">${dp.block > 0 ? `${minsToTime(dp.block)} (${formatDec(dp.block / 60)}h)` : '--:--'}</td><td style="border-bottom:1px solid rgba(255,255,255,0.05); color:var(--text-muted);">${dp.air > 0 ? `${minsToTime(dp.air)} (${formatDec(dp.air / 60)}h)` : '--:--'}</td></tr>`).join('');
-            setTxt('sum_duty_hhmm', minsToTime(totalDutyMinsAllDays));
-            setTxt('sum_duty_dec', `${formatDec(totalDutyMinsAllDays / 60)} hrs`);
+            // Actualización UI Web de Desglose
+            let uiDutyHtml = '';
+            dailyStats.forEach(dp => {
+                let durStr = dp.duration > 0 ? `${minsToTime(dp.duration)} (${formatDec(dp.duration/60)}h)` : '--:--';
+                let blkStr = dp.block > 0 ? `${minsToTime(dp.block)} (${formatDec(dp.block/60)}h)` : '--:--';
+                let airStr = dp.air > 0 ? `${minsToTime(dp.air)} (${formatDec(dp.air/60)}h)` : '--:--';
+
+                uiDutyHtml += `<tr>
+                    <td style="padding:6px; text-align:left; border-bottom:1px solid rgba(255,255,255,0.05);">${dp.date}</td>
+                    <td style="border-bottom:1px solid rgba(255,255,255,0.05);">${dp.start || '--:--'}</td>
+                    <td style="border-bottom:1px solid rgba(255,255,255,0.05);">${dp.end || '--:--'}</td>
+                    <td style="border-bottom:1px solid rgba(255,255,255,0.05); font-weight:bold; color:var(--accent);">${durStr}</td>
+                    <td style="border-bottom:1px solid rgba(255,255,255,0.05); color:var(--text-muted);">${blkStr}</td>
+                    <td style="border-bottom:1px solid rgba(255,255,255,0.05); color:var(--text-muted);">${airStr}</td>
+                </tr>`;
+            });
+            el('ui_duty_table').innerHTML = uiDutyHtml;
+
+            setTxt('sum_duty_hhmm', minsToTime(totalDutyMinsAllDays)); 
+            setTxt('sum_duty_dec', `${formatDec(totalDutyMinsAllDays/60)} hrs`);
 
             renderSecurityForms(activeDates, legsByDate);
 
-            const initialFuel = legs.length > 0 ? parseFloat(legs[0].fuelOn) || 0 : 0;
-            const finalFuel = legs.length > 0 ? (parseFloat(legs[legs.length - 1].fuelOff) || 0) + getLegRefuelTotal(legs[legs.length - 1].id) : 0;
+            // Resumen de Combustible y Resto Global
+            const initialFuel = legIds.length > 0 ? parseFloat(val(`m_t${legIds[0]}_fuel_on`)) || 0 : 0;
+            let finalFuel = legIds.length > 0 ? parseFloat(val(`m_t${legIds[legIds.length-1]}_fuel_off`)) || 0 : 0;
+            if (legIds.length > 0) finalFuel += getLegRefuelTotal(legIds[legIds.length-1]); 
 
-            setTxt('sum_fuel_init', formatDec(initialFuel));
-            setTxt('sum_fuel_final', formatDec(finalFuel));
-            setTxt('sum_fuel_refuel', `+${formatDec(globalRefuel)}`);
-            setTxt('sum_fuel_used', `-${formatDec(totalFuelUsed)}`);
-            setTxt('sum_air_hhmm', minsToTime(totalAirMins)); setTxt('sum_air_dec', `${formatDec(totalAirMins / 60)} hrs`);
-            setTxt('sum_block_hhmm', minsToTime(totalBlockMins)); setTxt('sum_block_dec', `${formatDec(totalBlockMins / 60)} hrs`);
-            setTxt('sum_pax_legs', paxArray.join(' ') || "(0)");
+            const strPaxArray = paxArray.join(' ');
+            setTxt('sum_fuel_init', formatDec(initialFuel)); setTxt('sum_fuel_final', formatDec(finalFuel));
+            setTxt('sum_fuel_refuel', `+${formatDec(globalRefuel)}`); setTxt('sum_fuel_used', `-${formatDec(totalFuelUsed)}`);
 
-            el('sum_pilots_container').innerHTML = Object.entries(pilotStats).filter(([_, d]) => d.pf_time > 0 || d.pm_time > 0).map(([p, d]) => `<div style="background:rgba(255,255,255,0.05); border:1px solid var(--accent); padding:6px 10px; border-radius:6px; flex:1; min-width:160px; text-align:center;"><span style="display:block; font-size:0.75rem; font-weight:bold; color:var(--text-main); border-bottom:1px solid var(--border-color); padding-bottom:3px; margin-bottom:4px;">${p}</span><div style="display:flex; justify-content:space-between; font-size:0.65rem;"><span style="color:var(--text-muted); text-align:left;">PF: ${minsToTime(d.pf_time)}<br><span style="color:var(--accent); font-size:0.6rem;">(Air: ${minsToTime(d.pf_air)})</span></span><span style="color:var(--text-muted); text-align:right;">PM: ${minsToTime(d.pm_time)}<br><span style="color:var(--accent); font-size:0.6rem;">(Air: ${minsToTime(d.pm_air)})</span></span></div></div>`).join('') || "<span style='color:var(--text-muted); font-size:0.8rem;'>Sin horas registradas</span>";
+            setTxt('sum_air_hhmm', minsToTime(totalAirMins)); setTxt('sum_air_dec', `${formatDec(totalAirMins/60)} hrs`);
+            setTxt('sum_block_hhmm', minsToTime(totalBlockMins)); setTxt('sum_block_dec', `${formatDec(totalBlockMins/60)} hrs`);
+            setTxt('sum_pax_legs', strPaxArray || "(0)");
 
-            lastCalc = {
-                legs, dailyStats, activeDates,
-                totals: { air: totalAirMins, block: totalBlockMins, duty: totalDutyMinsAllDays, initialFuel, finalFuel, refuel: globalRefuel, used: totalFuelUsed }
-            };
-            autoSave();
+            el('sum_pilots_container').innerHTML = Object.entries(pilotStats)
+                .filter(([_, d]) => d.pf_time > 0 || d.pm_time > 0)
+                .map(([p, d]) => `
+                    <div style="background:rgba(255,255,255,0.05); border:1px solid var(--accent); padding:6px 10px; border-radius:6px; flex:1; min-width:160px; text-align:center;">
+                        <span style="display:block; font-size:0.75rem; font-weight:bold; color:var(--text-main); border-bottom:1px solid var(--border-color); padding-bottom:3px; margin-bottom:4px;">${p}</span>
+                        <div style="display:flex; justify-content:space-between; font-size:0.65rem;">
+                            <span style="color:var(--text-muted); text-align:left;">PF: ${minsToTime(d.pf_time)}<br><span style="color:var(--accent); font-size:0.6rem;">(Air: ${minsToTime(d.pf_air)})</span></span>
+                            <span style="color:var(--text-muted); text-align:right;">PM: ${minsToTime(d.pm_time)}<br><span style="color:var(--accent); font-size:0.6rem;">(Air: ${minsToTime(d.pm_air)})</span></span>
+                        </div>
+                    </div>`).join('') || "<span style='color:var(--text-muted); font-size:0.8rem;'>Sin horas registradas</span>";
+
+            syncPrintData(totalAirMins, totalBlockMins, initialFuel, globalRefuel, totalFuelUsed, finalFuel, strPaxArray, activeDates, dailyStats);
+            autoSave(); 
         }
 
-        const PDF_GRID = {
-            hLineWidth: () => 0.6, vLineWidth: () => 0.6,
-            hLineColor: () => '#000', vLineColor: () => '#000',
-            paddingLeft: () => 3, paddingRight: () => 3, paddingTop: () => 2, paddingBottom: () => 2
-        };
-        const PDF_FILL_HEAD = '#e6e6e6';
-        const PDF_FILL_TITLE = '#222222';
+        function renderSecurityForms(activeDates, legsByDate) {
+            const container = el('sec-forms-wrapper');
+            const printContainer = el('print-sec-forms-wrapper');
+            if(!container || !printContainer) return;
 
-        const pdfHeadCell = text => ({ text, bold: true, fillColor: PDF_FILL_HEAD, alignment: 'center', fontSize: 6.5 });
-        const pdfSpanRow = (text, span, extra = {}) => [{ text, colSpan: span, ...extra }, ...Array.from({ length: span - 1 }, () => ({}))];
-        const pdfHm = mins => mins > 0 ? `${minsToTime(mins)} (${formatDec(mins / 60)})` : '--';
+            let webHtml = '';
+            let printHtml = '';
 
-        function pdfHeader(title, fecha = val('m_fecha_gen')) {
-            return {
-                table: {
-                    widths: ['*', '*', '*', '*'],
-                    body: [
-                        [{ text: 'AEROCARDAL', bold: true, fontSize: 12, italics: true, colSpan: 2 }, {}, { text: title, bold: true, fontSize: 10, alignment: 'center', colSpan: 2 }, {}],
-                        [`FECHA: ${fecha}`, `P.O.V.: N° ${val('m_pov')}`, { text: `MATERIAL: ${val('m_material')}`, bold: true }, { text: `MATRICULA: ${val('m_matricula')}`, bold: true }],
-                        pdfSpanRow(`FOLIO BIT: ${val('m_folio_gen')}`, 4, { bold: true, fillColor: PDF_FILL_HEAD })
-                    ]
-                },
-                layout: PDF_GRID,
-                margin: [0, 0, 0, 6]
-            };
-        }
+            activeDates.forEach((dateKey, index) => {
+                secManualState[dateKey] = secManualState[dateKey] || { sinObs: false, hinicioManual: false, hterminoManual: false };
+                let st = secManualState[dateKey];
 
-        function pdfLegTable(leg) {
-            const ord = ordinals[leg.index] || `${leg.index}°`;
-            const dnText = leg.dn === 'D' ? 'DIURNO' : (leg.dn === 'N' ? 'NOCTURNO' : '');
-            const pnpText = leg.pnp === 'P' ? 'PRECISIÓN' : (leg.pnp === 'NP' ? 'NO PRECISIÓN' : '');
-            const fuelLines = [`ON: ${leg.fuelOn}`, `OFF: ${leg.fuelOff}`, `USD: ${leg.fuelDiff}`];
-            if (leg.refuelTotal > 0) fuelLines.push(`REFUEL: +${formatDec(leg.refuelTotal)}`);
-            const windsTxt = leg.winds ? `   WINDS: ${leg.winds}` : '';
+                let dayLegs = legsByDate[dateKey] || [];
+                let autoHInicio = dayLegs.length > 0 && dayLegs[0].tOut ? dayLegs[0].tOut : '';
+                let autoHTermino = dayLegs.length > 0 && dayLegs[dayLegs.length-1].tIn ? dayLegs[dayLegs.length-1].tIn : '';
+                let autoOrigen = dayLegs.length > 0 ? dayLegs[0].desde : '';
+                let autoDestino = dayLegs.length > 0 ? dayLegs[dayLegs.length-1].dest : '';
 
-            return {
-                table: {
-                    widths: ['*', '*', '*', '*', '*', '*'],
-                    body: [
-                        pdfSpanRow(`${ord} TRAMO`, 6, { bold: true, color: '#fff', fillColor: PDF_FILL_TITLE, alignment: 'center' }),
-                        ['FECHA / TRAMO', 'HORÓMETRO', 'BLOCK TIME', 'AIR TIME', 'COMBUSTIBLE', 'ATERRIZAJE'].map(pdfHeadCell),
-                        [
-                            { stack: [`Fecha: ${leg.fecha}`, `Folio BIT: ${leg.folio}`, `Destino: ${leg.dest}`, `Desde: ${leg.desde}`, `Distancia: ${leg.dist}`] },
-                            { stack: [`Inicial: ${leg.horoBot}`, `Final: ${leg.horoTop}`, `Diferencia: ${leg.horoDiff}`] },
-                            { stack: [`Salida calzos: ${leg.tOut}`, `Llegada calzos: ${leg.tIn}`, { text: `BLOCK: ${pdfHm(leg.bDiff)}`, bold: true }] },
-                            { stack: [`Despegue: ${leg.tOff}`, `Aterrizaje: ${leg.tOn}`, { text: `AIR: ${pdfHm(leg.aDiff)}`, bold: true }] },
-                            { stack: fuelLines },
-                            { stack: [{ text: dnText, bold: true }, { text: pnpText, bold: true }] }
-                        ],
-                        pdfSpanRow(`PAX: ${leg.pax}     PF: ${leg.pf}     PM: ${leg.pm}${windsTxt}`, 6, { bold: true })
-                    ]
-                },
-                layout: PDF_GRID,
-                fontSize: 7.5,
-                margin: [0, 0, 0, 6]
-            };
-        }
+                let currentHInicio = st.hinicioManual && st.customHInicio !== undefined ? st.customHInicio : autoHInicio;
+                let currentHTermino = st.hterminoManual && st.customHTermino !== undefined ? st.customHTermino : autoHTermino;
 
-        function pdfLegExtras(leg) {
-            const id = leg.id, idx = leg.index;
-            const prmPairs = [['fl', 'FL'], ['mach', 'N° MACH'], ['isa', 'ISA'], ['oat', 'OAT'], ['gspd', 'GSPD'], ['ff', 'FF L/R'], ['n1', 'N1'], ['n2', 'N2'], ['oilt', 'OIL T°'], ['oilp', 'OIL P'], ['itt', 'ITT'], ['obs', 'OBS']];
-            const prm = Object.fromEntries(prmPairs.map(([k]) => [k, val(`m_t${id}_${k}`).trim()]));
-            const hasPrm = prmPairs.some(([k]) => prm[k]);
-            const wps = [1, 2, 3, 4].map(w => ({ wp: val(`m_t${id}_wp${w}`).trim(), cp: val(`m_t${id}_cp${w}`).trim(), cr: val(`m_t${id}_cr${w}`).trim() }));
-            const hasFuel = wps.some(w => w.wp || w.cp || w.cr);
-            const meteo = val(`m_t${id}_meteo`).trim(), atc = val(`m_t${id}_atc`).trim();
-            const nodes = [];
+                let defaultEst = (autoOrigen.trim().toUpperCase() === 'SCEL') ? 'AEROCARDAL' : '';
+                let currentEst = st.estacionamiento !== undefined ? st.estacionamiento : defaultEst;
+                let currentAlerta = st.alerta !== undefined ? st.alerta : '';
 
-            if (hasPrm) {
-                const labels = prmPairs.map(([, label]) => pdfHeadCell(label));
-                const values = prmPairs.map(([k]) => ({ text: prm[k], bold: true, alignment: 'center' }));
-                nodes.push({
-                    table: {
-                        widths: ['*', '*', '*', '*', '*', '*'],
-                        body: [
-                            pdfSpanRow(`PARÁMETROS TRAMO N° ${idx}`, 6, { bold: true, color: '#fff', fillColor: '#555555', alignment: 'center' }),
-                            labels.slice(0, 6), values.slice(0, 6), labels.slice(6), values.slice(6)
-                        ]
-                    },
-                    layout: PDF_GRID, fontSize: 7.5, margin: [0, 0, 0, 4]
+                webHtml += `
+                <details class="card" style="border-color: var(--accent);" open>
+                    <summary style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="flex:1;">🔎 FORMULARIO: INSPECCIÓN DE SEGURIDAD (${dateKey}) <span class="arrow"></span></span>
+                        <div style="display:flex; align-items:center; gap:12px; padding-left:10px; border-left:1px solid var(--border-color);" onclick="event.stopPropagation();">
+                            <label style="font-size:0.75rem; color:var(--accent); display:flex; align-items:center; gap:5px; margin:0; cursor:pointer;">
+                                <input type="checkbox" id="m_sec_sin_obs_${dateKey}" ${st.sinObs ? 'checked' : ''} onchange="toggleSecSinObs('${dateKey}')"> <span>Inspección sin obs</span>
+                            </label>
+                            <label style="font-size:0.75rem; color:var(--accent); display:flex; align-items:center; gap:5px; margin:0; cursor:pointer;">
+                                <input type="checkbox" id="m_inc_sec_${dateKey}" checked onchange="triggerUpdate()"> Imprimir PDF
+                            </label>
+                        </div>
+                    </summary>
+                    <div class="card-content">
+                         <div style="margin-bottom: 12px; padding:10px; background:rgba(255,255,255,0.03); border-radius:6px;">
+                             <div class="grid-3">
+                                 <div class="form-group"><label>Origen Vuelo</label><input type="text" id="m_sec_origen_${dateKey}" value="${autoOrigen}" oninput="triggerUpdate()"></div>
+                                 <div class="form-group"><label>Destino Vuelo</label><input type="text" id="m_sec_destino_${dateKey}" value="${autoDestino}" oninput="triggerUpdate()"></div>
+                                 <div class="form-group"><label>Estacionamiento</label><input type="text" id="m_sec_est_${dateKey}" value="${currentEst}" oninput="secManualState['${dateKey}'].estacionamiento=this.value; triggerUpdate()"></div>
+                             </div>
+                             <div class="grid-3" style="margin-top:5px;">
+                                 <div class="form-group">
+                                     <label style="display:flex; justify-content:space-between;">
+                                         <span>Hora Inicio (Block Out)</span>
+                                         <span style="cursor:pointer; color:var(--success); font-size:0.65rem;" onclick="resetSecTime('${dateKey}', 'hinicio')">🔄 Auto</span>
+                                     </label>
+                                     <input type="text" class="time-input" id="m_sec_hinicio_${dateKey}" value="${currentHInicio}" maxlength="5" inputmode="numeric" oninput="secManualState['${dateKey}'].hinicioManual=true; secManualState['${dateKey}'].customHInicio=this.value; formatTime(this)" onblur="validateTime(this)">
+                                 </div>
+                                 <div class="form-group">
+                                     <label style="display:flex; justify-content:space-between;">
+                                         <span>Hora Término (Block In)</span>
+                                         <span style="cursor:pointer; color:var(--success); font-size:0.65rem;" onclick="resetSecTime('${dateKey}', 'htermino')">🔄 Auto</span>
+                                     </label>
+                                     <input type="text" class="time-input" id="m_sec_htermino_${dateKey}" value="${currentHTermino}" maxlength="5" inputmode="numeric" oninput="secManualState['${dateKey}'].hterminoManual=true; secManualState['${dateKey}'].customHTermino=this.value; formatTime(this)" onblur="validateTime(this)">
+                                 </div>
+                                 <div class="form-group"><label>Estado Alerta</label><input type="text" id="m_sec_alerta_${dateKey}" value="${currentAlerta}" oninput="secManualState['${dateKey}'].alerta=this.value; triggerUpdate()"></div>
+                             </div>
+                         </div>
+                         <div id="sec_form_container_${dateKey}">
+                `;
+
+                secData.forEach(item => {
+                    let isChecked = st[item.id] !== undefined ? st[item.id] : st.sinObs;
+                    webHtml += `<label class="checkbox-item"><input type="checkbox" id="m_sec_${dateKey}_${item.id}" ${isChecked ? 'checked' : ''} ${st.sinObs ? 'disabled' : ''} onchange="handleSecCheckboxChange('${dateKey}', '${item.id}')"> <span><b>${item.id}.</b> ${item.text}</span></label>`;
                 });
-            }
 
-            if (hasFuel) {
-                nodes.push({
-                    table: {
-                        widths: ['*', '*', '*', '*', '*'],
-                        body: [
-                            [pdfHeadCell('ID WP'), ...wps.map(w => ({ text: w.wp, bold: true, alignment: 'center' }))],
-                            [pdfHeadCell('Plan'), ...wps.map(w => ({ text: w.cp, alignment: 'center' }))],
-                            [pdfHeadCell('Real'), ...wps.map(w => ({ text: w.cr, alignment: 'center' }))]
-                        ]
-                    },
-                    layout: PDF_GRID, fontSize: 7.5, margin: [0, 0, 0, 4]
-                });
-            }
+                webHtml += `
+                         </div>
+                         <div class="signature-block">
+                             <div>III. COMANDANTE DE LA AERONAVE:</div>
+                             <div class="grid-3" style="margin-top:8px;">
+                                 <div>Nombre: <strong id="sec_ui_nombre_${dateKey}" style="color:var(--accent);">______________________</strong></div>
+                                 <div>RUT: <strong id="sec_ui_rut_${dateKey}" style="color:var(--accent);">______________________</strong></div>
+                                 <div>Licencia: <strong id="sec_ui_licencia_${dateKey}" style="color:var(--accent);">______________________</strong></div>
+                             </div>
+                         </div>
+                    </div>
+                </details>
+                `;
 
-            [[`METEOROLOGÍA TRAMO N° ${idx}`, meteo], [`AUTORIZACIÓN ATC TRAMO N° ${idx}`, atc]].forEach(([title, text]) => {
-                if (!text) return;
-                nodes.push({
-                    table: {
-                        widths: ['*'],
-                        body: [
-                            [{ text: title, bold: true, color: '#fff', fillColor: '#555555', fontSize: 7.5 }],
-                            [{ text, fontSize: 8 }]
-                        ]
-                    },
-                    layout: PDF_GRID, margin: [0, 0, 0, 4]
+                // Render PDF (Seguridad)
+                let pSecHtml = `
+                <div id="print_sec_container_${dateKey}" class="page-break" style="font-family: Arial, sans-serif; box-sizing: border-box; padding-top: 5px;">
+                    <table class="print-table" style="border-bottom: none;">
+                        <tr>
+                            <td colspan="2" class="no-border-x" style="width: 30%;"><div class="logo-text">AEROCARDAL</div></td>
+                            <td colspan="2" class="no-border-x" style="vertical-align: bottom; padding-bottom: 4px;"><div class="main-title">INSPECCIÓN DE SEGURIDAD DE AERONAVES</div></td>
+                            <td colspan="1" style="border-left: none; width: 20%;"></td>
+                        </tr>
+                        <tr>
+                            <td style="width: 25%;">FECHA: <span class="bold">${dateKey}</span></td>
+                            <td style="width: 20%;">P.O.V.: N° <span id="sec_p_vuelo_${dateKey}" class="bold"></span></td>
+                            <td style="width: 25%;">MATERIAL: <span id="sec_p_material_${dateKey}" class="bold"></span></td>
+                            <td colspan="2">MATRICULA: <span id="sec_p_matricula_${dateKey}" class="bold"></span></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="gray-bg">ESTACIONAMIENTO: <span id="sec_p_estacionamiento_${dateKey}" class="bold"></span></td>
+                            <td class="gray-bg">ORIGEN: <span id="sec_p_origen_${dateKey}" class="bold"></span></td>
+                            <td colspan="2" class="gray-bg">DESTINO: <span id="sec_p_destino_${dateKey}" class="bold"></span></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">H. INICIO: <span id="sec_p_hinicio_${dateKey}" class="bold">${currentHInicio}</span></td>
+                            <td>H. TÉRMINO: <span id="sec_p_htermino_${dateKey}" class="bold">${currentHTermino}</span></td>
+                            <td colspan="2">ESTADO ALERTA: <span id="sec_p_alerta_${dateKey}" class="bold"></span></td>
+                        </tr>
+                    </table>
+                    
+                    <table style="width:100%; border-collapse: collapse; border: 1px solid black; font-size:11px; border-bottom: none; margin-top: 4px;">
+                `;
+
+                secData.forEach(item => {
+                    let splitIdx = item.text.indexOf(':');
+                    let title = splitIdx > -1 ? item.text.substring(0, splitIdx + 1) : item.text;
+                    let desc = splitIdx > -1 ? item.text.substring(splitIdx + 1) : "";
+                    pSecHtml += `
+                        <tr>
+                            <td style="border:1px solid black; border-bottom: 1px solid black; padding: 6px 6px; text-align:justify; line-height: 1.3;">
+                                <b>${item.id}. ${title}</b><br>${desc}
+                            </td>
+                            <td style="border:1px solid black; border-bottom: 1px solid black; width:35px; text-align:center; font-weight:bold; font-size:16px; vertical-align:middle;" id="p_sec_${dateKey}_${item.id}"></td>
+                        </tr>
+                    `;
                 });
+
+                pSecHtml += `
+                    </table>
+                    <table style="width:100%; border-collapse: collapse; border: 1px solid black; border-top:none; font-size:11px;">
+                        <tr>
+                            <td style="border:1px solid black; padding:6px; width:40%; vertical-align: top; height: 60px;">
+                                <div style="font-weight:bold; margin-bottom:2px;">III. COMANDANTE DE LA AERONAVE:</div>
+                                <div style="text-align:center; margin-bottom:8px;">NOMBRE Y APELLIDOS</div>
+                                <div style="text-align:center; font-size:12px;"><span id="sec_p_nombre_${dateKey}" class="bold"></span></div>
+                            </td>
+                            <td style="border:1px solid black; padding:6px; width:20%; vertical-align: top;">
+                                <div style="text-align:center; margin-bottom:20px;">RUT</div>
+                                <div style="text-align:center; font-size:12px;"><span id="sec_p_rut_${dateKey}" class="bold"></span></div>
+                            </td>
+                            <td style="border:1px solid black; padding:6px; width:20%; vertical-align: top;">
+                                <div style="text-align:center; margin-bottom:20px;">LICENCIA</div>
+                                <div style="text-align:center; font-size:12px;"><span id="sec_p_licencia_${dateKey}" class="bold"></span></div>
+                            </td>
+                            <td style="border:1px solid black; padding:6px; width:20%; vertical-align: top;">
+                                <div style="text-align:center;">FIRMA</div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                `;
+                printHtml += pSecHtml;
             });
-            return nodes;
+
+            container.innerHTML = webHtml;
+            printContainer.innerHTML = printHtml;
+            updateFormFooters();
         }
 
-        function pdfBalance(calc) {
-            const first = calc.legs[0], last = calc.legs[calc.legs.length - 1];
-            const t = calc.totals;
-            return {
-                table: {
-                    widths: ['*', '*', '*', '*', '*', '*'],
-                    body: [
-                        pdfSpanRow('BALANCE GENERAL OPERACIONAL', 6, { bold: true, fillColor: '#e0e0e0', alignment: 'center', fontSize: 9 }),
-                        ['TOTAL TRAMOS', 'HORÓMETRO INICIAL', 'HORÓMETRO FINAL', 'COMBUSTIBLE INICIAL', 'COMBUSTIBLE FINAL', 'TOTAL RECARGADO'].map(pdfHeadCell),
-                        [`${calc.legs.length} TRAMOS`, first.horoBot || '--', last.horoTop || '--', formatDec(t.initialFuel), formatDec(t.finalFuel), formatDec(t.refuel)]
-                            .map(text => ({ text, bold: true, alignment: 'center' }))
-                    ]
-                },
-                layout: PDF_GRID,
-                margin: [0, 6, 0, 0]
-            };
-        }
+        function syncPrintData(air, block, initF, refF, usedF, finF, strPax, activeDates, dailyStats) {
+            ['fecha_gen', 'folio_gen', 'pov', 'material', 'matricula'].forEach(f => setTxt(`p_${f}`, val(`m_${f}`)));
 
-        function pdfLibro(calc) {
-            const rows = calc.dailyStats.map(ds => [
-                { text: ds.date.substring(5), bold: true, alignment: 'center' },
-                { text: ds.hIni, alignment: 'center' },
-                { text: ds.hFin, alignment: 'center' },
-                { text: `${ds.start || '--'} - ${ds.end || '--'}`, alignment: 'center' },
-                { text: pdfHm(ds.duration), bold: true, alignment: 'center' },
-                { text: pdfHm(ds.block), bold: true, alignment: 'center' },
-                { text: pdfHm(ds.air), bold: true, alignment: 'center' },
-                { text: formatDec(ds.fuelUsed), bold: true, alignment: 'center' },
-                { text: ds.pax, alignment: 'center' }
-            ]);
-            if (calc.dailyStats.length > 1) {
-                const sum = key => calc.dailyStats.reduce((s, ds) => s + ds[key], 0);
-                const totalPax = calc.dailyStats.map(ds => ds.pax).join(' ');
-                rows.push(pdfSpanRow('TOTAL ACUMULADO', 4, { bold: true, fillColor: PDF_FILL_HEAD, alignment: 'center' }).concat([
-                    { text: pdfHm(sum('duration')), bold: true, alignment: 'center', fillColor: PDF_FILL_HEAD },
-                    { text: pdfHm(sum('block')), bold: true, alignment: 'center', fillColor: PDF_FILL_HEAD },
-                    { text: pdfHm(sum('air')), bold: true, alignment: 'center', fillColor: PDF_FILL_HEAD },
-                    { text: formatDec(sum('fuelUsed')), bold: true, alignment: 'center', fillColor: PDF_FILL_HEAD },
-                    { text: totalPax, alignment: 'center', fillColor: PDF_FILL_HEAD }
-                ]));
+            const stdFields = ['fecha','folio','dest','desde','dist','pax','pf','pm','winds','time_out','time_off','time_on','time_in','block_diff','air_diff','horo_top','horo_bot','horo_diff','fuel_on','fuel_off','fuel_diff'];
+            const prmFields = ['fl','mach','isa','oat','gspd','ff','n1','n2','oilt','oilp','itt','obs'];
+            const wpfFields = ['wp1','wp2','wp3','wp4','cp1','cp2','cp3','cp4','cr1','cr2','cr3','cr4'];
+
+            legIds.forEach(id => {
+                const showP = el(`m_t${id}_show_params`)?.checked;
+                stdFields.forEach(f => setTxt(`p_t${id}_${f}`, val(`m_t${id}_${f}`)));
+
+                const windsVal = val(`m_t${id}_winds`).trim();
+                if(el(`p_t${id}_winds_wrapper`)) el(`p_t${id}_winds_wrapper`).style.display = windsVal ? "inline-block" : "none";
+
+                const hasPrm = prmFields.some(f => val(`m_t${id}_${f}`).trim() !== "");
+                const hasFuel = wpfFields.some(f => val(`m_t${id}_${f}`).trim() !== "");
+                const hasMet = val(`m_t${id}_meteo`).trim() !== "";
+                const hasAtc = val(`m_t${id}_atc`).trim() !== "";
+
+                if (showP) {
+                    prmFields.concat(wpfFields).forEach(f => setTxt(`p_t${id}_${f}`, val(`m_t${id}_${f}`)));
+                    setTxt(`p_t${id}_meteo`, val(`m_t${id}_meteo`)); setTxt(`p_t${id}_atc`, val(`m_t${id}_atc`));
+                }
+
+                if(el(`p_t${id}_tbl_params`)) el(`p_t${id}_tbl_params`).style.display = showP && hasPrm ? "table" : "none";
+                if(el(`p_t${id}_tbl_fuel`)) el(`p_t${id}_tbl_fuel`).style.display = showP && hasFuel ? "table" : "none";
+                if(el(`p_t${id}_tbl_meteo`)) el(`p_t${id}_tbl_meteo`).style.display = showP && hasMet ? "table" : "none";
+                if(el(`p_t${id}_tbl_atc`)) el(`p_t${id}_tbl_atc`).style.display = showP && hasAtc ? "table" : "none";
+                if(el(`p_t${id}_params_wrapper`)) el(`p_t${id}_params_wrapper`).style.display = showP && (hasPrm||hasFuel||hasMet||hasAtc) ? "block" : "none";
+
+                // TEXTO DIURNO / NOCTURNO
+                const dnVal = val(`m_t${id}_dn`), pnpVal = val(`m_t${id}_pnp`);
+                setTxt(`p_t${id}_dn_text`, dnVal === 'D' ? 'DIURNO' : (dnVal === 'N' ? 'NOCTURNO' : ''));
+                setTxt(`p_t${id}_pnp_text`, pnpVal === 'P' ? 'PRECISIÓN' : (pnpVal === 'NP' ? 'NO PRECISIÓN' : ''));
+            });
+
+            // ===============================================
+            // INYECCIÓN DINÁMICA: RESUMEN PDF (NUEVO DISEÑO)
+            // ===============================================
+            let picIni = val('m_pic_ini').trim().toUpperCase() || 'CAP';
+            let sicIni = val('m_sic_ini').trim().toUpperCase() || 'FO';
+
+            // 1. HEADER COMPACTO
+            let horoBot = legIds.length ? val(`m_t${legIds[0]}_horo_bot`) || '--' : '--';
+            let horoTop = legIds.length ? val(`m_t${legIds[legIds.length-1]}_horo_top`) || '--' : '--';
+            let headHtml = `
+            <table class="print-table" style="margin-top:15px; border-bottom:none;">
+                <tr><td colspan="6" class="summary-title-pdf">BALANCE GENERAL OPERACIONAL</td></tr>
+                <tr class="gray-bg text-center" style="font-size:7px; font-weight:bold;">
+                    <td>TOTAL TRAMOS</td><td>HORÓMETRO INICIAL</td><td>HORÓMETRO FINAL</td>
+                    <td>COMBUSTIBLE INICIAL</td><td>COMBUSTIBLE FINAL</td><td>TOTAL RECARGADO</td>
+                </tr>
+                <tr class="text-center" style="font-size:8px; font-weight:bold;">
+                    <td>${legIds.length} TRAMOS</td><td>${horoBot}</td><td>${horoTop}</td>
+                    <td>${formatDec(initF)}</td><td>${formatDec(finF)}</td><td>${formatDec(refF)}</td>
+                </tr>
+            </table>`;
+
+            // 2. CONSOLIDADO LIBRO DE VUELO
+            let t1Html = `
+            <table class="print-table" style="margin-top:0; border-top:none; text-transform:uppercase;">
+                <tr><td colspan="9" class="summary-title-pdf">CONSOLIDADO LIBRO DE VUELO</td></tr>
+                <tr class="gray-bg" style="font-size:7px;">
+                    <td class="text-center bold">FECHA</td>
+                    <td class="text-center bold">HORO<br>INICIAL</td>
+                    <td class="text-center bold">HORO<br>FINAL</td>
+                    <td class="text-center bold">DUTY<br>INICIO - TÉRMINO</td>
+                    <td class="text-center bold">DUTY TOTAL<br>HH:MM (HH.H)</td>
+                    <td class="text-center bold">BLOCK TOTAL<br>HH:MM (HH.H)</td>
+                    <td class="text-center bold">AIR TOTAL<br>HH:MM (HH.H)</td>
+                    <td class="text-center bold">FUEL<br>USADO</td>
+                    <td class="text-center bold">PAX<br>POR TRAMO</td>
+                </tr>
+            `;
+
+            // 3. CONSOLIDADO BITÁCORA PILOTOS
+            let t2Html = `
+            <table class="print-table" style="margin-top:8px; text-transform:uppercase;">
+                <tr><td colspan="9" class="summary-title-pdf">CONSOLIDADO BITÁCORA PILOTOS</td></tr>
+                <tr class="gray-bg" style="font-size:7px;">
+                    <td class="text-center bold" rowspan="2" style="width:10%; vertical-align:middle;">FECHA</td>
+                    <td class="text-center bold" colspan="2" style="width:20%;">BLOCK TOTAL<br>HH:MM (HH.H)</td>
+                    <td class="text-center bold" colspan="2" style="width:20%;">AIR TOTAL<br>HH:MM (HH.H)</td>
+                    <td class="text-center bold" colspan="2" style="width:30%;">HORAS COMO PF<br>BLK / AIR</td>
+                    <td class="text-center bold" colspan="2" style="width:20%;">DEP / AT</td>
+                </tr>
+                <tr class="gray-bg" style="font-size:7px;">
+                    <td class="text-center bold">CAP: ${picIni}</td>
+                    <td class="text-center bold">FO: ${sicIni}</td>
+                    <td class="text-center bold">CAP: ${picIni}</td>
+                    <td class="text-center bold">FO: ${sicIni}</td>
+                    <td class="text-center bold">CAP: ${picIni}</td>
+                    <td class="text-center bold">FO: ${sicIni}</td>
+                    <td class="text-center bold">CAP: ${picIni}</td>
+                    <td class="text-center bold">FO: ${sicIni}</td>
+                </tr>
+            `;
+
+            let totDuty=0, totBlock=0, totAir=0, totFuel=0, totPax="";
+            let totP1Block=0, totP1Air=0, totP1Dep=0, totP1PFBlock=0, totP1PFAir=0;
+            let totP2Block=0, totP2Air=0, totP2Dep=0, totP2PFBlock=0, totP2PFAir=0;
+
+            dailyStats.forEach(ds => {
+                let shortDate = ds.date.length >= 10 ? ds.date.substring(5) : ds.date;
+                
+                // T1 Row
+                let dStr = ds.duration > 0 ? `${minsToTime(ds.duration)} (${formatDec(ds.duration/60)})` : '--:--';
+                let bStr = ds.block > 0 ? `${minsToTime(ds.block)} (${formatDec(ds.block/60)})` : '--:--';
+                let aStr = ds.air > 0 ? `${minsToTime(ds.air)} (${formatDec(ds.air/60)})` : '--:--';
+                
+                t1Html += `
+                <tr>
+                    <td class="text-center bold" style="font-size:8px;">${shortDate}</td>
+                    <td class="text-center" style="font-size:8px;">${ds.hIni}</td>
+                    <td class="text-center" style="font-size:8px;">${ds.hFin}</td>
+                    <td class="text-center" style="font-size:8px;">${ds.start||'--'} - ${ds.end||'--'}</td>
+                    <td class="text-center bold" style="font-size:8px;">${dStr}</td>
+                    <td class="text-center bold" style="font-size:8px;">${bStr}</td>
+                    <td class="text-center bold" style="font-size:8px;">${aStr}</td>
+                    <td class="text-center bold" style="font-size:8px;">${formatDec(ds.fuelUsed)}</td>
+                    <td class="text-center" style="font-size:8px;">${ds.pax}</td>
+                </tr>`;
+
+                totDuty += ds.duration; totBlock += ds.block; totAir += ds.air; totFuel += ds.fuelUsed;
+                totPax += (totPax ? " " : "") + ds.pax;
+
+                // T2 Row
+                let p1B = ds.p1.block > 0 ? `${minsToTime(ds.p1.block)} (${formatDec(ds.p1.block/60)})` : '--';
+                let p1A = ds.p1.air > 0 ? `${minsToTime(ds.p1.air)} (${formatDec(ds.p1.air/60)})` : '--';
+                let p2B = ds.p2.block > 0 ? `${minsToTime(ds.p2.block)} (${formatDec(ds.p2.block/60)})` : '--';
+                let p2A = ds.p2.air > 0 ? `${minsToTime(ds.p2.air)} (${formatDec(ds.p2.air/60)})` : '--';
+                
+                let p1PFStr = ds.p1.pf_block > 0 || ds.p1.pf_air > 0 ? `${minsToTime(ds.p1.pf_block)} (${formatDec(ds.p1.pf_block/60)})<br><span style="font-size:7px;">AIR: ${minsToTime(ds.p1.pf_air)} (${formatDec(ds.p1.pf_air/60)})</span>` : '--';
+                let p2PFStr = ds.p2.pf_block > 0 || ds.p2.pf_air > 0 ? `${minsToTime(ds.p2.pf_block)} (${formatDec(ds.p2.pf_block/60)})<br><span style="font-size:7px;">AIR: ${minsToTime(ds.p2.pf_air)} (${formatDec(ds.p2.pf_air/60)})</span>` : '--';
+
+                t2Html += `
+                <tr>
+                    <td class="text-center bold" style="font-size:8px;">${shortDate}</td>
+                    <td class="text-center" style="font-size:8px;">${p1B}</td>
+                    <td class="text-center" style="font-size:8px;">${p2B}</td>
+                    <td class="text-center" style="font-size:8px;">${p1A}</td>
+                    <td class="text-center" style="font-size:8px;">${p2A}</td>
+                    <td class="text-center" style="font-size:8px; line-height:1.2;">${p1PFStr}</td>
+                    <td class="text-center" style="font-size:8px; line-height:1.2;">${p2PFStr}</td>
+                    <td class="text-center" style="font-size:8px;">${ds.p1.dep}</td>
+                    <td class="text-center" style="font-size:8px;">${ds.p2.dep}</td>
+                </tr>`;
+
+                totP1Block += ds.p1.block; totP1Air += ds.p1.air; totP1Dep += ds.p1.dep;
+                totP1PFBlock += ds.p1.pf_block; totP1PFAir += ds.p1.pf_air;
+                
+                totP2Block += ds.p2.block; totP2Air += ds.p2.air; totP2Dep += ds.p2.dep;
+                totP2PFBlock += ds.p2.pf_block; totP2PFAir += ds.p2.pf_air;
+            });
+
+            // T1 Totals (Condicionado a múltiples días)
+            if (dailyStats.length > 1) {
+                t1Html += `
+                <tr>
+                    <td class="text-center summary-total-bg" style="font-size:8px;" colspan="3">TOTAL ACUMULADO</td>
+                    <td class="text-center summary-total-bg" style="font-size:8px;">--</td>
+                    <td class="text-center summary-total-bg" style="font-size:8px;">${totDuty > 0 ? `${minsToTime(totDuty)} (${formatDec(totDuty/60)})` : '--'}</td>
+                    <td class="text-center summary-total-bg" style="font-size:8px;">${totBlock > 0 ? `${minsToTime(totBlock)} (${formatDec(totBlock/60)})` : '--'}</td>
+                    <td class="text-center summary-total-bg" style="font-size:8px;">${totAir > 0 ? `${minsToTime(totAir)} (${formatDec(totAir/60)})` : '--'}</td>
+                    <td class="text-center summary-total-bg" style="font-size:8px;">${formatDec(totFuel)}</td>
+                    <td class="text-center summary-total-bg" style="font-size:8px;">${totPax}</td>
+                </tr>`;
             }
-            return {
-                stack: [
-                    { table: {
-                        widths: ['*', '*', '*', '*', '*', '*', '*', '*', '*'],
-                        body: [
-                            pdfSpanRow('CONSOLIDADO LIBRO DE VUELO', 9, { bold: true, fillColor: '#e0e0e0', alignment: 'center', fontSize: 9 }),
-                            ['FECHA', 'HORO INICIAL', 'HORO FINAL', 'DUTY INICIO - TÉRMINO', 'DUTY TOTAL HH:MM (HH.H)', 'BLOCK TOTAL HH:MM (HH.H)', 'AIR TOTAL HH:MM (HH.H)', 'FUEL USADO', 'PAX POR TRAMO'].map(pdfHeadCell),
-                            ...rows
-                        ]
-                    }, layout: PDF_GRID, margin: [0, 8, 0, 0] }
-                ]
-            };
-        }
+            t1Html += `</table>`;
 
-        function pdfPilotos(calc) {
-            const picIni = val('m_pic_ini').toUpperCase() || 'CAP';
-            const sicIni = val('m_sic_ini').toUpperCase() || 'FO';
-            const pfCell = (block, air) => ({ text: `${pdfHm(block)}\nAIR: ${pdfHm(air)}`, alignment: 'center' });
-            const rows = calc.dailyStats.map(ds => [
-                { text: ds.date.substring(5), bold: true, alignment: 'center' },
-                { text: pdfHm(ds.p1.block), alignment: 'center' },
-                { text: pdfHm(ds.p2.block), alignment: 'center' },
-                { text: pdfHm(ds.p1.air), alignment: 'center' },
-                { text: pdfHm(ds.p2.air), alignment: 'center' },
-                pfCell(ds.p1.pf_block, ds.p1.pf_air),
-                pfCell(ds.p2.pf_block, ds.p2.pf_air),
-                { text: String(ds.p1.dep), alignment: 'center' },
-                { text: String(ds.p2.dep), alignment: 'center' }
-            ]);
-            if (calc.dailyStats.length > 1) {
-                const sum = (p, key) => calc.dailyStats.reduce((s, ds) => s + ds[p][key], 0);
-                rows.push([
-                    { text: 'TOTAL', bold: true, alignment: 'center', fillColor: PDF_FILL_HEAD },
-                    { text: pdfHm(sum('p1', 'block')), bold: true, alignment: 'center', fillColor: PDF_FILL_HEAD },
-                    { text: pdfHm(sum('p2', 'block')), bold: true, alignment: 'center', fillColor: PDF_FILL_HEAD },
-                    { text: pdfHm(sum('p1', 'air')), bold: true, alignment: 'center', fillColor: PDF_FILL_HEAD },
-                    { text: pdfHm(sum('p2', 'air')), bold: true, alignment: 'center', fillColor: PDF_FILL_HEAD },
-                    { ...pfCell(sum('p1', 'pf_block'), sum('p1', 'pf_air')), bold: true, fillColor: PDF_FILL_HEAD },
-                    { ...pfCell(sum('p2', 'pf_block'), sum('p2', 'pf_air')), bold: true, fillColor: PDF_FILL_HEAD },
-                    { text: String(sum('p1', 'dep')), bold: true, alignment: 'center', fillColor: PDF_FILL_HEAD },
-                    { text: String(sum('p2', 'dep')), bold: true, alignment: 'center', fillColor: PDF_FILL_HEAD }
-                ]);
+            // T2 Totals (Condicionado a múltiples días)
+            if (dailyStats.length > 1) {
+                let totP1PFStr = totP1PFBlock > 0 || totP1PFAir > 0 ? `${minsToTime(totP1PFBlock)} (${formatDec(totP1PFBlock/60)})<br><span style="font-size:7px;">AIR: ${minsToTime(totP1PFAir)} (${formatDec(totP1PFAir/60)})</span>` : '--';
+                let totP2PFStr = totP2PFBlock > 0 || totP2PFAir > 0 ? `${minsToTime(totP2PFBlock)} (${formatDec(totP2PFBlock/60)})<br><span style="font-size:7px;">AIR: ${minsToTime(totP2PFAir)} (${formatDec(totP2PFAir/60)})</span>` : '--';
+
+                t2Html += `
+                <tr>
+                    <td class="text-center summary-total-bg" style="font-size:8px;">TOTAL ACUMULADO</td>
+                    <td class="text-center summary-total-bg" style="font-size:8px;">${totP1Block > 0 ? `${minsToTime(totP1Block)} (${formatDec(totP1Block/60)})` : '--'}</td>
+                    <td class="text-center summary-total-bg" style="font-size:8px;">${totP2Block > 0 ? `${minsToTime(totP2Block)} (${formatDec(totP2Block/60)})` : '--'}</td>
+                    <td class="text-center summary-total-bg" style="font-size:8px;">${totP1Air > 0 ? `${minsToTime(totP1Air)} (${formatDec(totP1Air/60)})` : '--'}</td>
+                    <td class="text-center summary-total-bg" style="font-size:8px;">${totP2Air > 0 ? `${minsToTime(totP2Air)} (${formatDec(totP2Air/60)})` : '--'}</td>
+                    <td class="text-center summary-total-bg" style="font-size:8px; line-height:1.2;">${totP1PFStr}</td>
+                    <td class="text-center summary-total-bg" style="font-size:8px; line-height:1.2;">${totP2PFStr}</td>
+                    <td class="text-center summary-total-bg" style="font-size:8px;">${totP1Dep}</td>
+                    <td class="text-center summary-total-bg" style="font-size:8px;">${totP2Dep}</td>
+                </tr>`;
             }
-            return {
-                table: {
-                    headerRows: 2,
-                    widths: ['*', '*', '*', '*', '*', '*', '*', '*', '*'],
-                    body: [
-                        pdfSpanRow('CONSOLIDADO BITÁCORA PILOTOS', 9, { bold: true, fillColor: '#e0e0e0', alignment: 'center', fontSize: 9 }),
-                        ['FECHA', 'BLOCK TOTAL CAP', 'BLOCK TOTAL FO', 'AIR TOTAL CAP', 'AIR TOTAL FO', 'HORAS PF CAP', 'HORAS PF FO', 'DEP CAP', 'DEP FO'].map(pdfHeadCell),
-                        ...rows
-                    ]
-                },
-                layout: PDF_GRID,
-                margin: [0, 8, 0, 0],
-                fontSize: 7.5
-            };
-        }
+            t2Html += `</table>`;
 
-        function pdfSms() {
+            el('p_resumen_operacional_container').innerHTML = headHtml + t1Html + t2Html;
+
+            // ===============================================
+            // EXPORTACIÓN A PDF: SMS Y SEGURIDAD
+            // ===============================================
             const sinObs = el('m_sms_sin_obs')?.checked;
-            const roman = ['I', 'II', 'III', 'IV', 'V'];
-            let n = 0;
-            const blocks = smsData.map((cat, c) => ({
-                title: cat.cat.replace(/^[IVX]+\.\s*/, ''),
-                roman: roman[c],
-                items: cat.items.map(item => {
-                    n++;
-                    return { item, n, checked: !!el(`m_sms_${n}`)?.checked };
-                })
-            }));
+            setTxt('sms_p_fecha', val('m_fecha_gen'));
+            setTxt('sms_p_pov', val('m_pov'));
+            setTxt('sms_p_matricula', val('m_matricula'));
+            setTxt('sms_p_material', val('m_material'));
+            
+            for(let i=1; i<=47; i++) {
+                const cell = el(`p_sms_${i}`);
+                if(cell) {
+                    if(sinObs) { cell.innerHTML = ""; cell.classList.add('strike-cell'); } 
+                    else { cell.classList.remove('strike-cell'); setTxt(`p_sms_${i}`, el(`m_sms_${i}`)?.checked ? '✓' : ''); }
+                }
+            }
+            setTxt('p_sms_obs', val('m_sms_obs'));
+            
+            activeDates.forEach(dateKey => {
+                const printContainer = el(`print_sec_container_${dateKey}`);
+                const incSec = el(`m_inc_sec_${dateKey}`)?.checked;
+                if(printContainer) printContainer.style.display = incSec ? 'block' : 'none';
 
-            const tickCell = checked => sinObs
-                ? { canvas: [{ type: 'line', x1: 3, y1: 5, x2: 15, y2: 5, lineWidth: 0.8 }] }
-                : { text: checked ? 'X' : '', bold: true, alignment: 'center' };
+                setTxt(`sec_p_vuelo_${dateKey}`, val('m_pov'));
+                setTxt(`sec_p_material_${dateKey}`, val('m_material'));
+                setTxt(`sec_p_matricula_${dateKey}`, val('m_matricula'));
+                setTxt(`sec_p_estacionamiento_${dateKey}`, val(`m_sec_est_${dateKey}`));
+                setTxt(`sec_p_origen_${dateKey}`, val(`m_sec_origen_${dateKey}`));
+                setTxt(`sec_p_destino_${dateKey}`, val(`m_sec_destino_${dateKey}`));
+                setTxt(`sec_p_alerta_${dateKey}`, val(`m_sec_alerta_${dateKey}`));
 
-            const sideBody = list => list.flatMap(b => [
-                [{ text: b.roman, bold: true, alignment: 'center', fillColor: PDF_FILL_HEAD }, { text: b.title, bold: true, fillColor: PDF_FILL_HEAD }, { text: 'SI', bold: true, alignment: 'center', fillColor: PDF_FILL_HEAD }],
-                ...b.items.map(it => [{ text: String(it.n), alignment: 'center' }, { text: it.item }, tickCell(it.checked)])
-            ]);
-            const sideTable = list => ({ width: '*', table: { widths: [14, '*', 16], body: sideBody(list) }, layout: PDF_GRID, fontSize: 7 });
+                ['A','B','C','D','E','F','G','H','I','J','K'].forEach(id => {
+                    const cb = el(`m_sec_${dateKey}_${id}`);
+                    setTxt(`p_sec_${dateKey}_${id}`, cb?.checked ? '✓' : '');
+                });
 
-            const tripulacion = [formatNameForSMS(capitanActual.nombre), formatNameForSMS(foActual.nombre)].filter(Boolean).join(' / ');
-
-            return {
-                stack: [
-                    pdfHeader('ÍNDICE DE SEGURIDAD OPERACIONAL (SMS)'),
-                    { table: { widths: ['*'], body: [[{ text: `TRIPULACIÓN: ${tripulacion}`, bold: true }]] }, layout: PDF_GRID, margin: [0, 0, 0, 6] },
-                    { columns: [sideTable(blocks.slice(0, 3)), sideTable(blocks.slice(3))], columnGap: 6 },
-                    { table: { widths: ['*'], heights: [150], body: [[{ stack: [{ text: 'Observaciones:', bold: true }, { text: val('m_sms_obs') }] }]] }, layout: PDF_GRID, margin: [0, 8, 0, 8] },
-                    { text: `Nombre y firma comandante vuelo: ${capitanActual.nombre || '______________________'}`, margin: [0, 4, 0, 0] }
-                ],
-                pageBreak: 'before'
-            };
-        }
-
-        function pdfSecurity(dateKey) {
-            const field = name => val(`m_sec_${name}_${dateKey}`);
-            const info = [
-                [{ text: `ESTACIONAMIENTO: ${field('est')}`, colSpan: 2 }, {}, { text: `ORIGEN: ${field('origen')}` }, { text: `DESTINO: ${field('destino')}` }],
-                [{ text: `H. INICIO: ${field('hinicio')}`, colSpan: 2 }, {}, { text: `H. TÉRMINO: ${field('htermino')}` }, { text: `ALERTA: ${field('alerta')}` }]
-            ];
-            const items = secData.map(item => {
-                const idx = item.text.indexOf(':');
-                const title = idx > -1 ? item.text.slice(0, idx + 1) : item.text;
-                const desc = idx > -1 ? item.text.slice(idx + 1).trim() : '';
-                const checked = !!el(`m_sec_${dateKey}_${item.id}`)?.checked;
-                return [
-                    { text: [{ text: `${item.id}. ${title} `, bold: true }, desc], alignment: 'justify' },
-                    { text: checked ? 'X' : '', bold: true, alignment: 'center', fontSize: 9 }
-                ];
+                setTxt(`sec_p_nombre_${dateKey}`, capitanActual.nombre || "");
+                setTxt(`sec_p_rut_${dateKey}`, capitanActual.rut || "");
+                setTxt(`sec_p_licencia_${dateKey}`, capitanActual.licencia || "");
             });
-            return {
-                stack: [
-                    pdfHeader('INSPECCIÓN DE SEGURIDAD DE AERONAVES', dateKey),
-                    { table: { widths: ['*', '*', '*', '*'], body: info }, layout: PDF_GRID, margin: [0, 0, 0, 6] },
-                    { table: { widths: ['*', 24], body: items }, layout: PDF_GRID, fontSize: 7.5 },
-                    {
-                        table: {
-                            widths: ['*', '*', '*', '*'],
-                            heights: [14, 28],
-                            body: [
-                                [{ text: 'III. COMANDANTE DE LA AERONAVE: NOMBRE Y APELLIDOS', bold: true, fontSize: 7 }, { text: 'RUT', bold: true, fontSize: 7, alignment: 'center' }, { text: 'LICENCIA', bold: true, fontSize: 7, alignment: 'center' }, { text: 'FIRMA', bold: true, fontSize: 7, alignment: 'center' }],
-                                [{ text: capitanActual.nombre, bold: true, alignment: 'center' }, { text: capitanActual.rut, bold: true, alignment: 'center' }, { text: capitanActual.licencia, bold: true, alignment: 'center' }, '']
-                            ]
-                        },
-                        layout: PDF_GRID, margin: [0, 6, 0, 0]
-                    }
-                ],
-                pageBreak: 'before'
-            };
         }
 
-        function buildPdfDefinition() {
-            const calc = lastCalc;
-            return {
-                pageSize: 'LETTER',
-                pageMargins: [17, 17, 17, 28],
-                defaultStyle: { fontSize: 8 },
-                footer: (currentPage, pageCount) => ({ text: `${currentPage} / ${pageCount}`, alignment: 'right', fontSize: 7, margin: [17, 0, 17, 0] }),
-                content: [
-                    pdfHeader('PLANIFICACIÓN OPERACIONAL'),
-                    ...calc.legs.map(leg => pdfLegTable(leg)),
-                    ...calc.legs.flatMap(leg => pdfLegExtras(leg)),
-                    pdfBalance(calc),
-                    pdfLibro(calc),
-                    pdfPilotos(calc),
-                    pdfSms(),
-                    ...calc.activeDates.map(dateKey => pdfSecurity(dateKey))
-                ]
+        // =======================================================
+        // HERRAMIENTAS ADICIONALES (GUARDADO, LIMPIAR, EJEMPLO)
+        // =======================================================
+        function getAllData() {
+            let data = {
+                globals: {},
+                legs: legIds.length,
+                legData: {},
+                refuelData: refuelData,
+                secManualState: secManualState
             };
-        }
 
-        function generarBlobPDF() {
-            updateAll();
-            const docDefinition = buildPdfDefinition();
-            return new Promise((resolve, reject) => {
-                try {
-                    pdfMake.createPdf(docDefinition).getBlob(resolve);
-                } catch (e) {
-                    reject(e);
+            let globalFields = ['duty_start', 'duty_end', 'm_fecha_gen', 'm_folio_gen', 'm_pov', 'm_material', 'm_matricula', 'm_matricula_suffix', 'm_pic_ini', 'm_sic_ini', 'm_sms_obs', 'm_inc_sms', 'm_sms_sin_obs'];
+            for(let i=1; i<=47; i++) globalFields.push(`m_sms_${i}`);
+
+            globalFields.forEach(id => {
+                let element = el(id);
+                if (element) {
+                    if(element.type === 'checkbox') data.globals[id] = element.checked;
+                    else data.globals[id] = element.value;
                 }
             });
+
+            legIds.forEach(id => {
+                data.legData[id] = {};
+                let inputs = document.querySelectorAll(`#leg_card_${id} input, #leg_card_${id} select, #leg_card_${id} textarea`);
+                inputs.forEach(input => {
+                    if(input.id) data.legData[id][input.id] = { value: input.value, linked: input.dataset.linked || "false" };
+                });
+            });
+
+            return JSON.stringify(data);
         }
+
+        function autoSave() { localStorage.setItem('aerocardal_flight_data', getAllData()); }
+
+        function clearAllData() {
+            if(!confirm("⚠️ ¿Estás seguro de LIMPIAR TODOS los datos? Perderás el progreso no guardado.")) return;
+            localStorage.removeItem('aerocardal_flight_data');
+            window.location.reload();
+        }
+
+        function loadExampleData() {
+            if(!confirm("Esto sobrescribirá los datos actuales con un vuelo de prueba de varios días. ¿Continuar?")) return;
+            
+            const today = new Date().toISOString().split('T')[0];
+            const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+
+            setVal('m_fecha_gen', today);
+            setVal('m_folio_gen', 'BIT-9999');
+            setVal('m_pov', 'POV-123');
+            setVal('m_matricula_suffix', 'DLI');
+            lookupAircraft();
+            setVal('m_pic_ini', 'RE');
+            setVal('m_sic_ini', 'EI');
+            setVal('duty_start', '07:30');
+            
+            el('tramos-container').innerHTML = '';
+            el('print-tramos-container').innerHTML = '';
+            el('print-params-container').innerHTML = '';
+            legIds = []; nextLegId = 1; refuelData = {}; secManualState = {};
+            
+            addLeg('SCEL'); addLeg(); addLeg();
+            
+            const t1 = legIds[0];
+            setVal(`m_t${t1}_fecha`, today);
+            setVal(`m_t${t1}_desde`, 'SCEL'); setVal(`m_t${t1}_dest`, 'SCNK');
+            setVal(`m_t${t1}_pf`, 'RE'); setVal(`m_t${t1}_pm`, 'EI');
+            setVal(`m_t${t1}_time_out`, '08:00'); setVal(`m_t${t1}_time_off`, '08:10');
+            setVal(`m_t${t1}_time_on`, '08:50'); setVal(`m_t${t1}_time_in`, '08:55');
+            setVal(`m_t${t1}_horo_bot`, '1200.0'); setVal(`m_t${t1}_horo_top`, '1200.7');
+            setVal(`m_t${t1}_pax`, '12'); setVal(`m_t${t1}_fuel_on`, '1500'); setVal(`m_t${t1}_fuel_off`, '1200');
+            
+            const t2 = legIds[1];
+            setVal(`m_t${t2}_fecha`, today);
+            setVal(`m_t${t2}_dest`, 'SCNK');
+            setVal(`m_t${t2}_pf`, 'EI'); setVal(`m_t${t2}_pm`, 'RE');
+            setVal(`m_t${t2}_time_out`, '09:30'); setVal(`m_t${t2}_time_off`, '09:35');
+            setVal(`m_t${t2}_time_on`, '10:15'); setVal(`m_t${t2}_time_in`, '10:20');
+            setVal(`m_t${t2}_pax`, '15'); setVal(`m_t${t2}_fuel_off`, '900');
+
+            const t3 = legIds[2];
+            setVal(`m_t${t3}_fecha`, tomorrow);
+            setVal(`m_t${t3}_desde`, 'SCNK'); setVal(`m_t${t3}_dest`, 'SCEL');
+            setVal(`m_t${t3}_pf`, 'RE'); setVal(`m_t${t3}_pm`, 'EI');
+            setVal(`m_t${t3}_time_out`, '07:30'); setVal(`m_t${t3}_time_off`, '07:40');
+            setVal(`m_t${t3}_time_on`, '08:20'); setVal(`m_t${t3}_time_in`, '08:30');
+            setVal(`m_t${t3}_pax`, '10'); setVal(`m_t${t3}_fuel_off`, '600');
+
+            if(el('m_sms_sin_obs')) { el('m_sms_sin_obs').checked = false; toggleSinObservaciones(); }
+            el('m_sms_1').checked = true;
+
+            lookupPilots();
+            triggerUpdate();
+        }
+
+        function exportData() {
+            const dataStr = getAllData();
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            let dateStr = val('m_fecha_gen') || 'vuelo';
+            a.download = `Planificacion_${dateStr}.json`; 
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    loadDataIntoApp(data);
+                    alert("✅ Datos cargados correctamente.");
+                } catch (error) {
+                    alert("❌ Error al leer el archivo. Asegúrate de que sea un JSON válido.");
+                }
+                event.target.value = ''; 
+            };
+            reader.readAsText(file);
+        }
+
+        function loadDataIntoApp(data) {
+            if (!data) return;
+            if (data.globals) {
+                for (let key in data.globals) {
+                    let element = el(key);
+                    if (element) {
+                        if(element.type === 'checkbox') element.checked = (data.globals[key] === true || data.globals[key] === "true");
+                        else setVal(key, data.globals[key]);
+                    }
+                }
+            }
+            if(data.secManualState) secManualState = data.secManualState;
+
+            el('tramos-container').innerHTML = '';
+            el('print-tramos-container').innerHTML = '';
+            el('print-params-container').innerHTML = '';
+            legIds = []; nextLegId = 1; refuelData = data.refuelData || {};
+
+            let legCount = data.legs || 1;
+            for(let i=0; i<legCount; i++) {
+                let newId = nextLegId++; legIds.push(newId);
+                let index = legIds.length;
+                el('tramos-container').insertAdjacentHTML('beforeend', getLegHTML(newId, index, i === 0 ? 'SCEL' : ''));
+                el('print-tramos-container').insertAdjacentHTML('beforeend', getPrintLegHTML(newId, index));
+                el('print-params-container').insertAdjacentHTML('beforeend', getPrintParamsHTML(newId, index));
+                renderRefuels(newId);
+            }
+
+            if (data.legData) {
+                let savedIds = Object.keys(data.legData);
+                for(let i=0; i<legIds.length; i++) {
+                    let currentId = legIds[i]; let savedId = savedIds[i];
+                    if(!savedId) continue;
+                    let savedLeg = data.legData[savedId];
+                    for (let inputId in savedLeg) {
+                        let targetId = inputId.replace(`_t${savedId}_`, `_t${currentId}_`);
+                        let element = el(targetId);
+                        if (element) {
+                            element.value = savedLeg[inputId].value;
+                            if (savedLeg[inputId].linked) {
+                                element.dataset.linked = savedLeg[inputId].linked;
+                                if(savedLeg[inputId].linked === "false") {
+                                    element.readOnly = false; element.classList.remove('inherited-input');
+                                    let btn = el(`lbtn_${targetId.split('_').pop()}_${currentId}`);
+                                    if(btn) { btn.textContent = "🔓"; btn.title = "Restablecer herencia"; }
+                                } else {
+                                    element.readOnly = true; element.classList.add('inherited-input');
+                                    let btn = el(`lbtn_${targetId.split('_').pop()}_${currentId}`);
+                                    if(btn) { btn.textContent = "🔗"; btn.title = "Desvincular"; }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            lookupAircraft();
+            toggleSinObservaciones();
+            lookupPilots(); 
+        }
+
+        window.onload = () => {
+            buildForms();
+            let saved = localStorage.getItem('aerocardal_flight_data');
+            if (saved) {
+                if(confirm("Se encontró un vuelo en progreso guardado localmente. ¿Deseas recuperarlo?")) {
+                    loadDataIntoApp(JSON.parse(saved));
+                } else {
+                    localStorage.removeItem('aerocardal_flight_data');
+                    addLeg('SCEL');
+                    toggleSinObservaciones();
+                    lookupPilots();
+                }
+            } else {
+                addLeg('SCEL');
+                toggleSinObservaciones();
+                lookupPilots();
+            }
+        };
+
     </script>
 </body>
 </html>
