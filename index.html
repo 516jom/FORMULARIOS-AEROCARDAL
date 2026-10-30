@@ -1,7 +1,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta id="viewport-meta" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Planificación Operacional - Aerocardal</title>
     
     <!-- Librerías Externas Requeridas -->
@@ -88,13 +88,13 @@
         .form-category-title { font-size: 0.75rem; font-weight: bold; color: var(--accent); margin: 15px 0 8px 0; background: rgba(255,255,255,0.05); padding: 6px; border-radius: 4px; border-left: 3px solid var(--accent);}
         .signature-block { margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border-color); font-size: 0.85rem; color: var(--text-muted); }
 
-        /* Pantalla de Carga Overlay PWA Ready */
+        /* Pantalla de Carga */
         #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: none; justify-content: center; align-items: center; flex-direction: column; color: var(--accent); backdrop-filter: blur(4px); }
         .spinner { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--accent); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* =======================================================
-           ESTILOS ORIGINALES DE IMPRESIÓN (VERSIONES PREVIAS EXACTAS)
+           ESTILOS ORIGINALES DE IMPRESIÓN - 8.5px NÍTIDO
            ======================================================= */
         @media print {
             @page { size: letter portrait; margin: 6mm; }
@@ -104,6 +104,15 @@
         }
 
         #print-layout { display: none; font-family: Arial, sans-serif; font-size: 8.5px; line-height: 1.2; background: white; color: black; }
+        
+        /* FUERZA NEGRO EN TODO EL PDF (Evita textos grises invisibles en Drive) */
+        #print-layout td, #print-layout span, #print-layout div, #print-layout th { color: black; }
+        #print-layout table, #print-layout td, #print-layout th { border-color: black; }
+
+        /* EXCEPCIONES PARA LOS ENCABEZADOS DE LAS TABLAS */
+        .tramo-title-gray, .tramo-title-darkgray { color: white !important; }
+        .tramo-title-gray *, .tramo-title-darkgray * { color: white !important; }
+
         .page-break { page-break-before: always; padding-top: 5px; clear: both;}
         .print-table { width: 100%; border-collapse: collapse; border: 1px solid black; margin-bottom: 4px; page-break-inside: avoid; table-layout: fixed;}
         .print-table th, .print-table td, .tramo-grid td { border: 1px solid black; padding: 2px 4px; vertical-align: middle; }
@@ -150,7 +159,7 @@
 
     <header>
         <h1>AEROCARDAL - PLANIFICACIÓN OPERACIONAL</h1>
-        <div class="subtitle">VERSIÓN 6.2 (HYBRID CLOUD)</div>
+        <div class="subtitle">VERSIÓN 6.3 (HYBRID CLOUD)</div>
     </header>
 
     <main id="mobile-ui" class="container">
@@ -472,7 +481,7 @@
         }
 
         // =======================================================
-        // IMPRESIÓN HACIA DRIVE (HACK PARA IPAD SAFARI)
+        // IMPRESIÓN HACIA DRIVE (HACK PARA IPAD SAFARI SCALE)
         // =======================================================
         async function accionGenerarPDF() {
             mostrarCargando("Renderizando PDF para Drive...\n(Espera unos segundos)");
@@ -510,32 +519,31 @@
             const mainUi = el('mobile-ui');
             const header = document.querySelector('header');
             const fab = document.querySelector('.fab-container');
-            const originalScroll = window.scrollY;
+            const vpMeta = el('viewport-meta');
             
-            // Ocultamos todo lo demás
+            const originalScroll = window.scrollY;
+            const originalVp = vpMeta.getAttribute('content');
+            
+            // 1. Esconder la UI
             if(mainUi) mainUi.style.display = 'none';
             if(header) header.style.display = 'none';
             if(fab) fab.style.display = 'none';
 
-            // TRUCO DEFINITIVO PARA SAFARI IPAD: 
-            // Forzamos al documento <body> entero a medir exactamente 800px.
-            // Esto evita que Safari escale o achique el contenedor de html2canvas.
-            const bodyOgWidth = document.body.style.width;
-            const htmlOgWidth = document.documentElement.style.width;
-            
-            document.documentElement.style.width = '800px';
-            document.body.style.width = '800px';
+            // 2. TRUCO DE ORO PARA IPAD SAFARI: 
+            // Modificamos el Viewport tag para decirle al iPad que la pantalla ES de 800px.
+            // Esto evita que Safari escale/apriete las letras y deforme las tablas.
+            vpMeta.setAttribute('content', 'width=800, initial-scale=1.0');
             
             printDiv.style.display = 'block';
-            printDiv.style.width = '800px'; // Ancho estricto sin max-width
+            printDiv.style.width = '800px'; 
             
             window.scrollTo(0, 0);
             
-            // Damos un buen tiempo a Safari para que recalcule la pantalla
+            // 3. Darle 800ms a Safari para que recalcule los pixeles de la pantalla
             await new Promise(resolve => setTimeout(resolve, 800));
 
             const opt = {
-                margin: 6,
+                margin: 5,
                 filename: 'temp.pdf',
                 image: { type: 'jpeg', quality: 1 },
                 pagebreak: { mode: ['css', 'legacy'] },
@@ -543,8 +551,8 @@
                     scale: 2, 
                     useCORS: true, 
                     logging: false,
-                    width: 800, // Forzar que la captura sea de 800px
-                    windowWidth: 800 // Forzar el viewport simulado
+                    width: 800,
+                    windowWidth: 800 
                 },
                 jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
             };
@@ -552,9 +560,8 @@
             try {
                 return await html2pdf().set(opt).from(printDiv).output('blob');
             } finally {
-                // Restauramos el iPad a su estado normal (modo celular)
-                document.documentElement.style.width = htmlOgWidth;
-                document.body.style.width = bodyOgWidth;
+                // 4. Devolver todo a la normalidad en el iPad
+                vpMeta.setAttribute('content', originalVp);
                 
                 printDiv.style.display = 'none';
                 printDiv.style.width = '';
