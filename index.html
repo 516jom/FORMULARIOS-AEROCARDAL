@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -29,7 +30,7 @@
         .card-header { padding: 0.85rem 1rem; font-size: 1rem; font-weight: 600; background-color: rgba(255,255,255,0.05); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
         .card-content { padding: 1rem; }
 
-        /* Estilos Acordeón (Detalles) */
+        /* Estilos Acordeón */
         details.card summary, details.param-section summary { padding: 0.85rem 1rem; font-size: 1rem; font-weight: 600; background-color: rgba(255,255,255,0.05); cursor: pointer; user-select: none; outline: none; border-bottom: 1px solid transparent; transition: background 0.2s;}
         details.card summary::-webkit-details-marker, details.param-section summary::-webkit-details-marker { display:none; }
         details.card summary .arrow::after, details.param-section summary .arrow::after { content: "▼"; float: right; font-size: 0.8rem; color: var(--text-muted); margin-top: 3px; margin-left: 8px;}
@@ -56,7 +57,8 @@
         
         .time-input { text-align: center; font-family: monospace; font-size: 1.2rem !important; font-weight: bold; color: var(--accent) !important; letter-spacing: 2px;}
         .inherited-input { background-color: rgba(255, 255, 255, 0.05) !important; color: var(--accent) !important; font-weight: bold; border: 1px solid rgba(255, 255, 255, 0.3) !important; cursor: not-allowed; }
-        
+        .readonly-strict { background-color: rgba(255, 255, 255, 0.02) !important; color: var(--text-muted) !important; border: 1px solid var(--border-color) !important; cursor: not-allowed; }
+
         .link-btn { cursor: pointer; font-size: 1rem; user-select: none; transition: transform 0.2s; }
         .link-btn:active { transform: scale(0.9); }
 
@@ -88,50 +90,47 @@
         .signature-block { margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border-color); font-size: 0.85rem; color: var(--text-muted); }
 
         /* =======================================================
-           ESTILOS DE IMPRESIÓN UNIFICADOS (TAMAÑO CARTA + 6MM)
+           ESTILOS DE IMPRESIÓN HOMOGÉNEOS (TAMAÑO 8PX UNIFORME)
            ======================================================= */
         @media print {
             @page { size: letter portrait; margin: 6mm; }
 
             body { background-color: white; color: black; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin:0;}
             #mobile-ui, header, .fab-container { display: none !important; }
-            #print-layout { display: block; font-family: Arial, sans-serif; width: 100%; font-size: 8.5px; line-height: 1.2; }
+            #print-layout { display: block; font-family: Arial, sans-serif; width: 100%; font-size: 8px; line-height: 1.15; }
             
             .page-break { page-break-before: always; padding-top: 5px; }
 
             .print-table { width: 100%; border-collapse: collapse; border: 1px solid black; margin-bottom: 4px; page-break-inside: avoid; table-layout: fixed;}
-            .print-table th, .print-table td, .tramo-grid td { border: 1px solid black; padding: 2px 4px; vertical-align: middle; }
+            .print-table th, .print-table td, .tramo-grid td { border: 1px solid black; padding: 2px 3px; vertical-align: middle; font-size: 8px; }
             .header-cell { background-color: #f0f0f0; font-weight: bold; text-align: center; font-size: 8px;}
             
-            .tramo-title-gray { background-color: #555555 !important; color: white !important; text-align: center; font-weight: bold; padding: 3px; letter-spacing: 0.5px; font-size: 9.5px; border: 1px solid black;}
-            .tramo-title-darkgray { background-color: #222222 !important; color: white !important; text-align: center; font-weight: bold; padding: 4px; letter-spacing: 1px; font-size: 10px; border: 1px solid black;}
+            .tramo-title-gray { background-color: #555555 !important; color: white !important; text-align: center; font-weight: bold; padding: 2px; font-size: 8.5px; border: 1px solid black;}
+            .tramo-title-darkgray { background-color: #222222 !important; color: white !important; text-align: center; font-weight: bold; padding: 3px; font-size: 9px; border: 1px solid black;}
             
-            /* Estilos Ecológicos para Títulos de Resumen (Ahorro de Tinta) */
-            .summary-title-pdf { background-color: #e0e0e0 !important; color: black !important; text-align: center; font-weight: bold; padding: 4px; letter-spacing: 1px; font-size: 10.5px; border: 1px solid black; }
+            .summary-title-pdf { background-color: #e0e0e0 !important; color: black !important; text-align: center; font-weight: bold; padding: 3px; font-size: 9px; border: 1px solid black; }
             .summary-total-bg { background-color: #f2f2f2 !important; color: black !important; font-weight: bold; }
 
             .tramo-grid { width: 100%; border-collapse: collapse; }
-            .tramo-grid td { padding: 1.5px 3px; text-align: center;}
+            .tramo-grid td { padding: 1px 2px; text-align: center; font-size: 8px;}
             .text-left { text-align: left !important; }
             .text-center { text-align: center !important; }
             .bold { font-weight: bold; }
             
-            .logo-text { font-size: 13px; font-weight: bold; font-style: italic; letter-spacing: -0.5px;}
-            .main-title { font-size: 11px; font-weight: bold; text-align: center; }
+            .logo-text { font-size: 10px; font-weight: bold; font-style: italic; letter-spacing: -0.5px;}
+            .main-title { font-size: 9.5px; font-weight: bold; text-align: center; }
             .gray-bg { background-color: #e6e6e6 !important; }
             
-            .cell-data { height: 16px; font-weight: bold; text-align: center; font-size: 9px;}
+            .cell-data { height: 14px; font-weight: bold; text-align: center; font-size: 8px;}
             .no-border-x { border-left: none !important; border-right: none !important; }
             .no-border-t { border-top: none !important; }
             .no-border-b { border-bottom: none !important; }
 
-            /* Tablas de Formularios en PDF */
             .print-form-table { width: 100%; border-collapse: collapse; border: 1px solid black; }
-            .print-form-table td, .print-form-table th { border: 1px solid black; }
+            .print-form-table td, .print-form-table th { border: 1px solid black; font-size: 8px; }
             .sms-cat-row { background-color: #f0f0f0 !important; font-weight: bold; text-align: center; }
-            .tick-cell { text-align: center; font-weight: bold; }
+            .tick-cell { text-align: center; font-weight: bold; font-size: 10px; }
             
-            /* Tachado visual para PDF SMS sin observaciones */
             .strike-cell { position: relative; }
             .strike-cell::after {
                 content: "";
@@ -148,7 +147,7 @@
 
     <header>
         <h1>AEROCARDAL - PLANIFICACIÓN OPERACIONAL</h1>
-        <div class="subtitle">VERSIÓN 5.0 (INTEGRACIÓN GOOGLE DRIVE)</div>
+        <div class="subtitle">VERSIÓN 5.1 (FUENTES HOMOGÉNEAS 8PX + GOOGLE DRIVE)</div>
     </header>
 
     <main id="mobile-ui" class="container">
@@ -234,7 +233,7 @@
             </div>
         </details>
 
-        <!-- CONTENEDOR DINÁMICO DE INSPECCIONES DE SEGURIDAD (SOPORTE MULTIDÍA / PERNOCTA) -->
+        <!-- CONTENEDOR DINÁMICO DE INSPECCIONES DE SEGURIDAD -->
         <div id="sec-forms-wrapper"></div>
 
         <!-- RESUMEN GENERAL -->
@@ -297,27 +296,28 @@
     <!-- LAYOUT DE IMPRESIÓN (PDF) -->
     <div id="print-layout">
         
-        <!-- OPERACIONAL - ENVUELTO EN UPPERCASE POR REGLA 5 -->
+        <!-- OPERACIONAL -->
         <div id="print_op_container" style="text-transform: uppercase;">
-            <table class="print-table" style="border-bottom: none;">
+            <table class="print-table" style="border-bottom: none; margin-bottom: 0;">
                 <tr>
-                    <td colspan="2" class="no-border-x" style="width: 30%;"><div class="logo-text">AEROCARDAL</div></td>
-                    <td colspan="2" class="no-border-x" style="vertical-align: bottom; padding-bottom: 4px;"><div class="main-title">PLANIFICACIÓN OPERACIONAL</div></td>
-                    <td colspan="1" style="border-left: none; width: 20%;"></td>
+                    <td colspan="2" style="font-size: 10px; font-weight: bold; font-style: italic; width: 50%;">AEROCARDAL</td>
+                    <td colspan="2" style="font-size: 9.5px; font-weight: bold; text-align: center; width: 50%;">PLANIFICACIÓN OPERACIONAL</td>
                 </tr>
                 <tr>
-                    <td style="width: 25%;">FECHA: <span id="p_fecha_gen"></span></td>
-                    <td style="width: 20%;">P.O.V.: N° <span id="p_pov"></span></td>
+                    <td style="width: 20%;">FECHA: <span id="p_fecha_gen"></span></td>
+                    <td style="width: 30%;">P.O.V.: N° <span id="p_pov"></span></td>
                     <td style="width: 25%;">MATERIAL: <span id="p_material" class="bold"></span></td>
-                    <td colspan="2">MATRICULA: <span id="p_matricula" class="bold"></span></td>
+                    <td style="width: 25%;">MATRICULA: <span id="p_matricula" class="bold"></span></td>
                 </tr>
-                <tr><td colspan="5" class="gray-bg">FOLIO BIT: <span id="p_folio_gen" class="bold"></span></td></tr>
+                <tr>
+                    <td colspan="4" class="gray-bg">FOLIO BIT: <span id="p_folio_gen" class="bold"></span></td>
+                </tr>
             </table>
 
             <div id="print-tramos-container"></div>
             <div id="print-params-container" style="margin-top: 15px;"></div>
 
-            <!-- CONTENEDOR NUEVO DEL RESUMEN -->
+            <!-- CONTENEDOR DEL RESUMEN PDF -->
             <div id="p_resumen_operacional_container"></div>
 
         </div>
@@ -406,7 +406,7 @@
           "CM": { "nombre": "Claudio Muñoz P.", "rut": "7.999.795-1", "licencia": "921" },
           "FE": { "nombre": "Francisco Esquivel C.", "rut": "88.888.888-8", "licencia": "1899" },
           "JO": { "nombre": "José Oyarzún M.", "rut": "16.239.897-0", "licencia": "2387" },
-          "FCH":{ "nombre": "Fernando  Chacana X.", "rut": "66.666.666-6", "licencia": "2604" },
+          "FCH":{ "nombre": "Fernando Chacana X.", "rut": "66.666.666-6", "licencia": "2604" },
           "MS": { "nombre": "Mauricio Solano P.", "rut": "14.322.271-3", "licencia": "1657" },
           "CV": { "nombre": "Cristhian Vázquez F.", "rut": "15.549.870-6", "licencia": "3435" },
           "MV": { "nombre": "Matías Vega C.", "rut": "77.777.777-7", "licencia": "2420" },
@@ -545,25 +545,26 @@
             // SMS PDF
             let pSmsHtml = `
             <div id="print_sms_container" class="page-break" style="font-family: Arial, sans-serif; box-sizing: border-box;">
-                <table class="print-table" style="border-bottom: none;">
+                <table class="print-table" style="border-bottom: none; margin-bottom: 0;">
                     <tr>
-                        <td colspan="2" class="no-border-x" style="width: 30%;"><div class="logo-text">AEROCARDAL</div></td>
-                        <td colspan="2" class="no-border-x" style="vertical-align: bottom; padding-bottom: 4px;"><div class="main-title">ÍNDICE DE SEGURIDAD OPERACIONAL (SMS)</div></td>
-                        <td colspan="1" style="border-left: none; width: 20%;"></td>
+                        <td colspan="2" style="font-size: 10px; font-weight: bold; font-style: italic; width: 50%;">AEROCARDAL</td>
+                        <td colspan="2" style="font-size: 9.5px; font-weight: bold; text-align: center; width: 50%;">ÍNDICE DE SEGURIDAD OPERACIONAL (SMS)</td>
                     </tr>
                     <tr>
-                        <td style="width: 25%;">FECHA: <span id="sms_p_fecha"></span></td>
-                        <td style="width: 20%;">P.O.V.: N° <span id="sms_p_pov"></span></td>
+                        <td style="width: 20%;">FECHA: <span id="sms_p_fecha"></span></td>
+                        <td style="width: 30%;">P.O.V.: N° <span id="sms_p_pov"></span></td>
                         <td style="width: 25%;">MATERIAL: <span id="sms_p_material" class="bold"></span></td>
-                        <td colspan="2">MATRICULA: <span id="sms_p_matricula" class="bold"></span></td>
+                        <td style="width: 25%;">MATRICULA: <span id="sms_p_matricula" class="bold"></span></td>
                     </tr>
-                    <tr><td colspan="5" class="gray-bg">TRIPULACIÓN: <span id="sms_p_tripulacion" class="bold"></span></td></tr>
+                    <tr>
+                        <td colspan="4" class="gray-bg">TRIPULACIÓN: <span id="sms_p_tripulacion" class="bold"></span></td>
+                    </tr>
                 </table>
 
                 <table style="width:100%; border-collapse: collapse; border: none; table-layout: fixed; margin-top: 4px;">
                     <tr>
                         <td style="width: 50%; vertical-align: top; padding-right: 4px; border: none;">
-                            <table class="print-form-table" style="width:100%; margin:0; font-size: 10px;">
+                            <table class="print-form-table" style="width:100%; margin:0;">
             `;
             
             globalIndex = 1;
@@ -572,14 +573,14 @@
             const leftCatsIndices = [0, 1, 2]; 
             leftCatsIndices.forEach(cIdx => {
                 let cat = smsData[cIdx];
-                pSmsHtml += `<tr class="sms-cat-row"><td style="width:25px; padding:3px;">${roman[cIdx]}</td><td style="padding:3px;">${cat.cat.substring(4).trim()}</td><td style="width:30px; padding:3px;">SI</td></tr>`;
+                pSmsHtml += `<tr class="sms-cat-row"><td style="width:20px; padding:2px;">${roman[cIdx]}</td><td style="padding:2px;">${cat.cat.substring(4).trim()}</td><td style="width:25px; padding:2px;">SI</td></tr>`;
                 
                 let startIdx = 1;
                 for(let prev=0; prev<cIdx; prev++) startIdx += smsData[prev].items.length;
                 
                 cat.items.forEach((item, itemIdx) => {
                     let realIdx = startIdx + itemIdx;
-                    pSmsHtml += `<tr><td style="text-align:center; padding:2px 4px;">${realIdx}</td><td style="padding:2px 4px;">${item}</td><td class="tick-cell" id="p_sms_${realIdx}" style="padding:2px 4px; font-size:14px;"></td></tr>`;
+                    pSmsHtml += `<tr><td style="text-align:center; padding:1px 2px;">${realIdx}</td><td style="padding:1px 2px;">${item}</td><td class="tick-cell" id="p_sms_${realIdx}" style="padding:1px 2px;"></td></tr>`;
                 });
             });
             
@@ -587,30 +588,30 @@
                             </table>
                         </td>
                         <td style="width: 50%; vertical-align: top; padding-left: 4px; border: none;">
-                            <table class="print-form-table" style="width:100%; margin-bottom:5px; font-size: 10px;">
+                            <table class="print-form-table" style="width:100%; margin-bottom:4px;">
             `;
             
             const rightCatsIndices = [3, 4];
             rightCatsIndices.forEach(cIdx => {
                 let cat = smsData[cIdx];
-                pSmsHtml += `<tr class="sms-cat-row"><td style="width:25px; padding:3px;">${roman[cIdx]}</td><td style="padding:3px;">${cat.cat.substring(4).trim()}</td><td style="width:30px; padding:3px;">SI</td></tr>`;
+                pSmsHtml += `<tr class="sms-cat-row"><td style="width:20px; padding:2px;">${roman[cIdx]}</td><td style="padding:2px;">${cat.cat.substring(4).trim()}</td><td style="width:25px; padding:2px;">SI</td></tr>`;
                 
                 let startIdx = 1;
                 for(let prev=0; prev<cIdx; prev++) startIdx += smsData[prev].items.length;
                 
                 cat.items.forEach((item, itemIdx) => {
                     let realIdx = startIdx + itemIdx;
-                    pSmsHtml += `<tr><td style="text-align:center; padding:2px 4px;">${realIdx}</td><td style="padding:2px 4px;">${item}</td><td class="tick-cell" id="p_sms_${realIdx}" style="padding:2px 4px; font-size:14px;"></td></tr>`;
+                    pSmsHtml += `<tr><td style="text-align:center; padding:1px 2px;">${realIdx}</td><td style="padding:1px 2px;">${item}</td><td class="tick-cell" id="p_sms_${realIdx}" style="padding:1px 2px;"></td></tr>`;
                 });
             });
             
             pSmsHtml += `
                             </table>
-                            <div style="border: 1px solid black; padding: 6px; font-size:11px; height: 185px; margin-bottom: 5px;">
+                            <div style="border: 1px solid black; padding: 4px; font-size:8px; height: 180px; margin-bottom: 4px;">
                                 <b>Observaciones:</b><br><span id="p_sms_obs"></span>
                             </div>
-                            <div style="font-size:11px; padding-top: 2px;">
-                                <b>Nombre y firma comandante Vuelo:</b> <span id="sms_p_nombre" style="border-bottom: 1px solid black; display:inline-block; width:220px; height:14px;"></span>
+                            <div style="font-size:8px; padding-top: 2px;">
+                                <b>Nombre y firma comandante Vuelo:</b> <span id="sms_p_nombre" style="border-bottom: 1px solid black; display:inline-block; width:220px; height:12px;"></span>
                             </div>
                         </td>
                     </tr>
@@ -826,51 +827,51 @@
             <table class="print-table" id="print_leg_${id}">
                 <tr><td colspan="6" class="tramo-title-darkgray">${ordinals[index] || index + '°'} TRAMO</td></tr>
                 <tr class="header-cell">
-                    <td class="col-fecha">FECHA <span id="p_t${id}_fecha" style="font-weight:normal;"></span><br><span style="font-size:6px; font-weight:normal;">FOLIO: <span id="p_t${id}_folio"></span></span></td>
+                    <td class="col-fecha">FECHA <span id="p_t${id}_fecha" style="font-weight:normal;"></span><br><span style="font-size:6.5px; font-weight:normal;">FOLIO: <span id="p_t${id}_folio"></span></span></td>
                     <td class="col-horo">HOROMETRO</td><td class="col-block">BLOCK TIME</td>
                     <td class="col-air">AIR TIME</td><td class="col-fuel">COMBUSTIBLE</td><td class="col-land">ATERRIZAJE</td>
                 </tr>
                 <tr>
                     <td style="padding:0; vertical-align:top;">
                         <table class="tramo-grid" style="border:none;">
-                            <tr><td class="text-left no-border-t no-border-x">Destino: <span id="p_t${id}_dest" class="bold"></span></td></tr>
-                            <tr><td class="text-left no-border-x">Desde: <span id="p_t${id}_desde" class="bold"></span></td></tr>
-                            <tr><td class="text-left no-border-b no-border-x">Distancia: <span id="p_t${id}_dist" class="bold"></span></td></tr>
+                            <tr><td class="text-left no-border-t no-border-x">DESTINO: <span id="p_t${id}_dest" class="bold"></span></td></tr>
+                            <tr><td class="text-left no-border-x">DESDE: <span id="p_t${id}_desde" class="bold"></span></td></tr>
+                            <tr><td class="text-left no-border-b no-border-x">DISTANCIA: <span id="p_t${id}_dist" class="bold"></span></td></tr>
                         </table>
                     </td>
                     <td style="padding:0; vertical-align:top;">
                         <table class="tramo-grid" style="border:none; height:100%;">
-                            <tr><td class="no-border-t no-border-x" style="height:33.3%;"><span id="p_t${id}_horo_top" class="bold" style="font-size:10px;"></span></td></tr>
-                            <tr><td class="no-border-x" style="height:33.3%;"><span id="p_t${id}_horo_bot" class="bold" style="font-size:10px;"></span></td></tr>
-                            <tr><td class="no-border-b no-border-x" style="height:33.3%;"><span id="p_t${id}_horo_diff" class="bold" style="font-size:10px;"></span></td></tr>
+                            <tr><td class="no-border-t no-border-x" style="height:33.3%;"><span id="p_t${id}_horo_top" class="bold"></span></td></tr>
+                            <tr><td class="no-border-x" style="height:33.3%;"><span id="p_t${id}_horo_bot" class="bold"></span></td></tr>
+                            <tr><td class="no-border-b no-border-x" style="height:33.3%;"><span id="p_t${id}_horo_diff" class="bold"></span></td></tr>
                         </table>
                     </td>
                     <td style="padding:0; vertical-align:top;">
                         <table class="tramo-grid" style="border:none; height:100%;">
-                            <tr><td class="no-border-t no-border-x" style="height:33.3%;"><span id="p_t${id}_time_in" class="bold" style="font-size:10px;"></span></td></tr>
-                            <tr><td class="no-border-x" style="height:33.3%;"><span id="p_t${id}_time_out" class="bold" style="font-size:10px;"></span></td></tr>
-                            <tr><td class="no-border-b no-border-x" style="height:33.3%;"><span id="p_t${id}_block_diff" class="bold" style="font-size:10px;"></span></td></tr>
+                            <tr><td class="no-border-t no-border-x" style="height:33.3%;"><span id="p_t${id}_time_in" class="bold"></span></td></tr>
+                            <tr><td class="no-border-x" style="height:33.3%;"><span id="p_t${id}_time_out" class="bold"></span></td></tr>
+                            <tr><td class="no-border-b no-border-x" style="height:33.3%;"><span id="p_t${id}_block_diff" class="bold"></span></td></tr>
                         </table>
                     </td>
                     <td style="padding:0; vertical-align:top;">
                         <table class="tramo-grid" style="border:none; height:100%;">
-                            <tr><td class="no-border-t no-border-x" style="height:33.3%;"><span id="p_t${id}_time_on" class="bold" style="font-size:10px;"></span></td></tr>
-                            <tr><td class="no-border-x" style="height:33.3%;"><span id="p_t${id}_time_off" class="bold" style="font-size:10px;"></span></td></tr>
-                            <tr><td class="no-border-b no-border-x" style="height:33.3%;"><span id="p_t${id}_air_diff" class="bold" style="font-size:10px;"></span></td></tr>
+                            <tr><td class="no-border-t no-border-x" style="height:33.3%;"><span id="p_t${id}_time_on" class="bold"></span></td></tr>
+                            <tr><td class="no-border-x" style="height:33.3%;"><span id="p_t${id}_time_off" class="bold"></span></td></tr>
+                            <tr><td class="no-border-b no-border-x" style="height:33.3%;"><span id="p_t${id}_air_diff" class="bold"></span></td></tr>
                         </table>
                     </td>
                     <td style="padding:0; vertical-align:top;">
                         <table class="tramo-grid" style="border:none; height:100%;">
-                            <tr><td class="no-border-t no-border-x text-left" style="height:33.3%; font-size:7.5px;">ON: <span id="p_t${id}_fuel_on" class="bold" style="float:right; font-size:9px;"></span></td></tr>
-                            <tr><td class="no-border-x text-left" style="height:33.3%; font-size:7.5px;">OFF: <span id="p_t${id}_fuel_off" class="bold" style="float:right; font-size:9px;"></span></td></tr>
-                            <tr><td class="no-border-b no-border-x text-left" style="height:33.3%; font-size:7.5px;">USD: <span id="p_t${id}_fuel_diff" class="bold" style="float:right; font-size:9px;"></span></td></tr>
+                            <tr><td class="no-border-t no-border-x text-left" style="height:33.3%;">ON: <span id="p_t${id}_fuel_on" class="bold" style="float:right;"></span></td></tr>
+                            <tr><td class="no-border-x text-left" style="height:33.3%;">OFF: <span id="p_t${id}_fuel_off" class="bold" style="float:right;"></span></td></tr>
+                            <tr><td class="no-border-b no-border-x text-left" style="height:33.3%;">USD: <span id="p_t${id}_fuel_diff" class="bold" style="float:right;"></span></td></tr>
                         </table>
                     </td>
                     <td style="padding:0; vertical-align:top;">
                         <table class="tramo-grid" style="border:none; height:100%;">
-                            <tr><td class="no-border-t no-border-x text-center bold" style="height:50%; font-size:7.5px;" id="p_t${id}_dn_text"></td></tr>
+                            <tr><td class="no-border-t no-border-x text-center bold" style="height:50%;" id="p_t${id}_dn_text"></td></tr>
                             <tr><td class="no-border-x text-center" style="background:#f0f0f0; font-size:6.5px;">APP. IFR</td></tr>
-                            <tr><td class="no-border-b no-border-x text-center bold" style="height:50%; font-size:7.5px;" id="p_t${id}_pnp_text"></td></tr>
+                            <tr><td class="no-border-b no-border-x text-center bold" style="height:50%;" id="p_t${id}_pnp_text"></td></tr>
                         </table>
                     </td>
                 </tr>
@@ -890,7 +891,7 @@
             <div id="p_t${id}_params_wrapper" style="display:none;">
                 <table class="print-table" id="p_t${id}_tbl_params">
                     <tr><td colspan="6" class="tramo-title-gray">PARÁMETROS TRAMO N° ${index}</td></tr>
-                    <tr class="gray-bg" style="font-size:7px; font-weight:bold; text-align:left;">
+                    <tr class="gray-bg" style="font-weight:bold; text-align:left;">
                         <td style="width:16.6%;">FL:</td><td style="width:16.6%;">N° MACH:</td><td style="width:16.6%;">ISA:</td>
                         <td style="width:16.6%;">OAT:</td><td style="width:16.6%;">GSPD:</td><td style="width:16.6%;">FF L/R:</td>
                     </tr>
@@ -899,7 +900,7 @@
                         <td class="cell-data"><span id="p_t${id}_isa"></span></td><td class="cell-data"><span id="p_t${id}_oat"></span></td>
                         <td class="cell-data"><span id="p_t${id}_gspd"></span></td><td class="cell-data"><span id="p_t${id}_ff"></span></td>
                     </tr>
-                    <tr class="gray-bg" style="font-size:7px; font-weight:bold; text-align:left;">
+                    <tr class="gray-bg" style="font-weight:bold; text-align:left;">
                         <td>N1 (L/R):</td><td>N2 (L/R):</td><td>OIL T°:</td><td>OIL P:</td><td>ITT:</td><td>OBS:</td>
                     </tr>
                     <tr>
@@ -911,27 +912,27 @@
 
                 <table class="print-table" id="p_t${id}_tbl_fuel">
                     <tr><td colspan="5" class="tramo-title-gray">COMBUSTIBLE TRAMO N° ${index}</td></tr>
-                    <tr class="gray-bg" style="font-size:7px; font-weight:bold; text-align:left;">
+                    <tr class="gray-bg" style="font-weight:bold; text-align:left;">
                         <td style="width:20%;">ID del Punto (Waypoint)</td>
                         ${[1,2,3,4].map(w => `<td style="width:20%;" class="text-center"><span id="p_t${id}_wp${w}"></span></td>`).join('')}
                     </tr>
                     <tr>
-                        <td class="gray-bg" style="font-size:7px; font-weight:bold;">Combustible Plan</td>
+                        <td class="gray-bg" style="font-weight:bold;">Combustible Plan</td>
                         ${[1,2,3,4].map(w => `<td class="cell-data"><span id="p_t${id}_cp${w}"></span></td>`).join('')}
                     </tr>
                     <tr>
-                        <td class="gray-bg" style="font-size:7px; font-weight:bold;">Combustible Real</td>
+                        <td class="gray-bg" style="font-weight:bold;">Combustible Real</td>
                         ${[1,2,3,4].map(w => `<td class="cell-data"><span id="p_t${id}_cr${w}"></span></td>`).join('')}
                     </tr>
                 </table>
 
                 <table class="print-table" id="p_t${id}_tbl_meteo">
-                    <tr><td class="tramo-title-gray tramo-title-left">METEOROLOGÍA TRAMO N° ${index}</td></tr>
-                    <tr><td style="height:25px; vertical-align:top; font-size:8px; text-align:left;"><span id="p_t${id}_meteo"></span></td></tr>
+                    <tr><td class="tramo-title-gray text-left">METEOROLOGÍA TRAMO N° ${index}</td></tr>
+                    <tr><td style="height:25px; vertical-align:top; text-align:left;"><span id="p_t${id}_meteo"></span></td></tr>
                 </table>
                 <table class="print-table" id="p_t${id}_tbl_atc" style="margin-bottom: 12px;">
-                    <tr><td class="tramo-title-gray tramo-title-left">AUTORIZACIÓN ATC TRAMO N° ${index}</td></tr>
-                    <tr><td style="height:25px; vertical-align:top; font-size:8px; text-align:left;"><span id="p_t${id}_atc"></span></td></tr>
+                    <tr><td class="tramo-title-gray text-left">AUTORIZACIÓN ATC TRAMO N° ${index}</td></tr>
+                    <tr><td style="height:25px; vertical-align:top; text-align:left;"><span id="p_t${id}_atc"></span></td></tr>
                 </table>
             </div>`;
         }
@@ -1064,12 +1065,10 @@
                 const pf = val(`m_t${id}_pf`).trim().toUpperCase() || "SIN NOMBRE";
                 const pm = val(`m_t${id}_pm`).trim().toUpperCase();
 
-                // Construcción de leg para Daily Stats PDF
                 legDetails.push({ id, date: tDate, desde, dest, tOut, tIn });
                 if(!legsByDate[tDate]) legsByDate[tDate] = [];
                 legsByDate[tDate].push({ id, desde, dest, tOut, tOff, tOn, tIn, bDiff, aDiff, fDiff: actualFDiff, pax: lPax, pf, pm, horoBot: hBot.value, horoTop: hTop.value });
 
-                // Acumulador UI Web (Todos los pilotos)
                 const initPilot = () => ({ pf_time: 0, pf_air: 0, landings: 0, pm_time: 0, pm_air: 0 });
                 if (!pilotStats[pf]) pilotStats[pf] = initPilot();
                 pilotStats[pf].pf_time += bDiff; pilotStats[pf].pf_air += aDiff;
@@ -1081,7 +1080,6 @@
                 }
             });
 
-            // Agrupación de días por pernocta
             if(legDetails.length > 1) {
                 for(let idx = 0; idx < legDetails.length - 1; idx++) {
                     let curr = legDetails[idx];
@@ -1096,9 +1094,7 @@
             if(activeDates.length === 0 && gDate) activeDates = [gDate];
             if(activeDates.length === 0) activeDates = [new Date().toISOString().split('T')[0]];
 
-            // ============================================
             // CALCULO INDEPENDIENTE DE DUTY, BLK Y AIR
-            // ============================================
             let dailyStats = [];
             let totalDutyMinsAllDays = 0;
             let globalEndEl = el('duty_end');
@@ -1120,7 +1116,6 @@
                 let hIni = firstLeg.horoBot || '--';
                 let hFin = lastLeg.horoTop || '--';
                 
-                // Track stats de pilotos específicos para el PDF (CAP y FO)
                 let p1 = { block: 0, air: 0, dep: 0, pf_block: 0, pf_air: 0 };
                 let p2 = { block: 0, air: 0, dep: 0, pf_block: 0, pf_air: 0 };
 
@@ -1141,7 +1136,6 @@
                 });
 
                 if (index === 0) {
-                    // DÍA 1
                     startDuty = val('duty_start');
                     if (globalEndEl.dataset.manual === "true" && globalEndEl.value.length === 5) {
                         endDuty = globalEndEl.value;
@@ -1150,7 +1144,6 @@
                         globalEndEl.value = endDuty; 
                     }
                 } else {
-                    // DÍAS POSTERIORES
                     if (firstLeg.tOff) startDuty = addMins(firstLeg.tOff, -60);
                     if (lastLeg.tIn) endDuty = addMins(lastLeg.tIn, 30);
                 }
@@ -1165,7 +1158,7 @@
                 });
             });
 
-            // Actualización UI Web de Desglose
+            // Actualización UI Web
             let uiDutyHtml = '';
             dailyStats.forEach(dp => {
                 let durStr = dp.duration > 0 ? `${minsToTime(dp.duration)} (${formatDec(dp.duration/60)}h)` : '--:--';
@@ -1188,7 +1181,6 @@
 
             renderSecurityForms(activeDates, legsByDate);
 
-            // Resumen de Combustible y Resto Global
             const initialFuel = legIds.length > 0 ? parseFloat(val(`m_t${legIds[0]}_fuel_on`)) || 0 : 0;
             let finalFuel = legIds.length > 0 ? parseFloat(val(`m_t${legIds[legIds.length-1]}_fuel_off`)) || 0 : 0;
             if (legIds.length > 0) finalFuel += getLegRefuelTotal(legIds[legIds.length-1]); 
@@ -1304,31 +1296,32 @@
                 // Render PDF (Seguridad)
                 let pSecHtml = `
                 <div id="print_sec_container_${dateKey}" class="page-break" style="font-family: Arial, sans-serif; box-sizing: border-box; padding-top: 5px;">
-                    <table class="print-table" style="border-bottom: none;">
+                    <table class="print-table" style="border-bottom: none; margin-bottom: 0;">
                         <tr>
-                            <td colspan="2" class="no-border-x" style="width: 30%;"><div class="logo-text">AEROCARDAL</div></td>
-                            <td colspan="2" class="no-border-x" style="vertical-align: bottom; padding-bottom: 4px;"><div class="main-title">INSPECCIÓN DE SEGURIDAD DE AERONAVES</div></td>
-                            <td colspan="1" style="border-left: none; width: 20%;"></td>
+                            <td colspan="2" style="font-size: 10px; font-weight: bold; font-style: italic; width: 50%;">AEROCARDAL</td>
+                            <td colspan="2" style="font-size: 9.5px; font-weight: bold; text-align: center; width: 50%;">INSPECCIÓN DE SEGURIDAD DE AERONAVES</td>
                         </tr>
                         <tr>
-                            <td style="width: 25%;">FECHA: <span class="bold">${dateKey}</span></td>
-                            <td style="width: 20%;">P.O.V.: N° <span id="sec_p_vuelo_${dateKey}" class="bold"></span></td>
+                            <td style="width: 20%;">FECHA: <span class="bold">${dateKey}</span></td>
+                            <td style="width: 30%;">P.O.V.: N° <span id="sec_p_vuelo_${dateKey}" class="bold"></span></td>
                             <td style="width: 25%;">MATERIAL: <span id="sec_p_material_${dateKey}" class="bold"></span></td>
-                            <td colspan="2">MATRICULA: <span id="sec_p_matricula_${dateKey}" class="bold"></span></td>
+                            <td style="width: 25%;">MATRICULA: <span id="sec_p_matricula_${dateKey}" class="bold"></span></td>
                         </tr>
                         <tr>
                             <td colspan="2" class="gray-bg">ESTACIONAMIENTO: <span id="sec_p_estacionamiento_${dateKey}" class="bold"></span></td>
                             <td class="gray-bg">ORIGEN: <span id="sec_p_origen_${dateKey}" class="bold"></span></td>
-                            <td colspan="2" class="gray-bg">DESTINO: <span id="sec_p_destino_${dateKey}" class="bold"></span></td>
+                            <td class="gray-bg">DESTINO: <span id="sec_p_destino_${dateKey}" class="bold"></span></td>
                         </tr>
                         <tr>
                             <td colspan="2">H. INICIO: <span id="sec_p_hinicio_${dateKey}" class="bold">${currentHInicio}</span></td>
-                            <td>H. TÉRMINO: <span id="sec_p_htermino_${dateKey}" class="bold">${currentHTermino}</span></td>
-                            <td colspan="2">ESTADO ALERTA: <span id="sec_p_alerta_${dateKey}" class="bold"></span></td>
+                            <td colspan="2">H. TÉRMINO: <span id="sec_p_htermino_${dateKey}" class="bold">${currentHTermino}</span></td>
+                        </tr>
+                        <tr>
+                            <td colspan="4">ESTADO ALERTA: <span id="sec_p_alerta_${dateKey}" class="bold"></span></td>
                         </tr>
                     </table>
                     
-                    <table style="width:100%; border-collapse: collapse; border: 1px solid black; font-size:11px; border-bottom: none; margin-top: 4px;">
+                    <table style="width:100%; border-collapse: collapse; border: 1px solid black; margin-top: 4px;">
                 `;
 
                 secData.forEach(item => {
@@ -1337,32 +1330,32 @@
                     let desc = splitIdx > -1 ? item.text.substring(splitIdx + 1) : "";
                     pSecHtml += `
                         <tr>
-                            <td style="border:1px solid black; border-bottom: 1px solid black; padding: 6px 6px; text-align:justify; line-height: 1.3;">
+                            <td style="border:1px solid black; padding: 4px; text-align:justify; line-height: 1.2;">
                                 <b>${item.id}. ${title}</b><br>${desc}
                             </td>
-                            <td style="border:1px solid black; border-bottom: 1px solid black; width:35px; text-align:center; font-weight:bold; font-size:16px; vertical-align:middle;" id="p_sec_${dateKey}_${item.id}"></td>
+                            <td style="border:1px solid black; width:30px; text-align:center; font-weight:bold; vertical-align:middle;" id="p_sec_${dateKey}_${item.id}"></td>
                         </tr>
                     `;
                 });
 
                 pSecHtml += `
                     </table>
-                    <table style="width:100%; border-collapse: collapse; border: 1px solid black; border-top:none; font-size:11px;">
+                    <table style="width:100%; border-collapse: collapse; border: 1px solid black; border-top:none;">
                         <tr>
-                            <td style="border:1px solid black; padding:6px; width:40%; vertical-align: top; height: 60px;">
+                            <td style="border:1px solid black; padding:4px; width:40%; vertical-align: top; height: 50px;">
                                 <div style="font-weight:bold; margin-bottom:2px;">III. COMANDANTE DE LA AERONAVE:</div>
-                                <div style="text-align:center; margin-bottom:8px;">NOMBRE Y APELLIDOS</div>
-                                <div style="text-align:center; font-size:12px;"><span id="sec_p_nombre_${dateKey}" class="bold"></span></div>
+                                <div style="text-align:center; margin-bottom:6px;">NOMBRE Y APELLIDOS</div>
+                                <div style="text-align:center;"><span id="sec_p_nombre_${dateKey}" class="bold"></span></div>
                             </td>
-                            <td style="border:1px solid black; padding:6px; width:20%; vertical-align: top;">
-                                <div style="text-align:center; margin-bottom:20px;">RUT</div>
-                                <div style="text-align:center; font-size:12px;"><span id="sec_p_rut_${dateKey}" class="bold"></span></div>
+                            <td style="border:1px solid black; padding:4px; width:20%; vertical-align: top;">
+                                <div style="text-align:center; margin-bottom:15px;">RUT</div>
+                                <div style="text-align:center;"><span id="sec_p_rut_${dateKey}" class="bold"></span></div>
                             </td>
-                            <td style="border:1px solid black; padding:6px; width:20%; vertical-align: top;">
-                                <div style="text-align:center; margin-bottom:20px;">LICENCIA</div>
-                                <div style="text-align:center; font-size:12px;"><span id="sec_p_licencia_${dateKey}" class="bold"></span></div>
+                            <td style="border:1px solid black; padding:4px; width:20%; vertical-align: top;">
+                                <div style="text-align:center; margin-bottom:15px;">LICENCIA</div>
+                                <div style="text-align:center;"><span id="sec_p_licencia_${dateKey}" class="bold"></span></div>
                             </td>
-                            <td style="border:1px solid black; padding:6px; width:20%; vertical-align: top;">
+                            <td style="border:1px solid black; padding:4px; width:20%; vertical-align: top;">
                                 <div style="text-align:center;">FIRMA</div>
                             </td>
                         </tr>
@@ -1407,39 +1400,35 @@
                 if(el(`p_t${id}_tbl_atc`)) el(`p_t${id}_tbl_atc`).style.display = showP && hasAtc ? "table" : "none";
                 if(el(`p_t${id}_params_wrapper`)) el(`p_t${id}_params_wrapper`).style.display = showP && (hasPrm||hasFuel||hasMet||hasAtc) ? "block" : "none";
 
-                // TEXTO DIURNO / NOCTURNO
                 const dnVal = val(`m_t${id}_dn`), pnpVal = val(`m_t${id}_pnp`);
                 setTxt(`p_t${id}_dn_text`, dnVal === 'D' ? 'DIURNO' : (dnVal === 'N' ? 'NOCTURNO' : ''));
                 setTxt(`p_t${id}_pnp_text`, pnpVal === 'P' ? 'PRECISIÓN' : (pnpVal === 'NP' ? 'NO PRECISIÓN' : ''));
             });
 
-            // ===============================================
-            // INYECCIÓN DINÁMICA: RESUMEN PDF (NUEVO DISEÑO)
-            // ===============================================
+            // RESUMEN OPERACIONAL PDF
             let picIni = val('m_pic_ini').trim().toUpperCase() || 'CAP';
             let sicIni = val('m_sic_ini').trim().toUpperCase() || 'FO';
 
-            // 1. HEADER COMPACTO
             let horoBot = legIds.length ? val(`m_t${legIds[0]}_horo_bot`) || '--' : '--';
             let horoTop = legIds.length ? val(`m_t${legIds[legIds.length-1]}_horo_top`) || '--' : '--';
+            
             let headHtml = `
-            <table class="print-table" style="margin-top:15px; border-bottom:none;">
+            <table class="print-table" style="margin-top:10px; border-bottom:none;">
                 <tr><td colspan="6" class="summary-title-pdf">BALANCE GENERAL OPERACIONAL</td></tr>
-                <tr class="gray-bg text-center" style="font-size:7px; font-weight:bold;">
+                <tr class="gray-bg text-center" style="font-weight:bold;">
                     <td>TOTAL TRAMOS</td><td>HORÓMETRO INICIAL</td><td>HORÓMETRO FINAL</td>
                     <td>COMBUSTIBLE INICIAL</td><td>COMBUSTIBLE FINAL</td><td>TOTAL RECARGADO</td>
                 </tr>
-                <tr class="text-center" style="font-size:8px; font-weight:bold;">
+                <tr class="text-center" style="font-weight:bold;">
                     <td>${legIds.length} TRAMOS</td><td>${horoBot}</td><td>${horoTop}</td>
                     <td>${formatDec(initF)}</td><td>${formatDec(finF)}</td><td>${formatDec(refF)}</td>
                 </tr>
             </table>`;
 
-            // 2. CONSOLIDADO LIBRO DE VUELO
             let t1Html = `
             <table class="print-table" style="margin-top:0; border-top:none; text-transform:uppercase;">
                 <tr><td colspan="9" class="summary-title-pdf">CONSOLIDADO LIBRO DE VUELO</td></tr>
-                <tr class="gray-bg" style="font-size:7px;">
+                <tr class="gray-bg">
                     <td class="text-center bold">FECHA</td>
                     <td class="text-center bold">HORO<br>INICIAL</td>
                     <td class="text-center bold">HORO<br>FINAL</td>
@@ -1452,18 +1441,17 @@
                 </tr>
             `;
 
-            // 3. CONSOLIDADO BITÁCORA PILOTOS
             let t2Html = `
-            <table class="print-table" style="margin-top:8px; text-transform:uppercase;">
+            <table class="print-table" style="margin-top:6px; text-transform:uppercase;">
                 <tr><td colspan="9" class="summary-title-pdf">CONSOLIDADO BITÁCORA PILOTOS</td></tr>
-                <tr class="gray-bg" style="font-size:7px;">
+                <tr class="gray-bg">
                     <td class="text-center bold" rowspan="2" style="width:10%; vertical-align:middle;">FECHA</td>
                     <td class="text-center bold" colspan="2" style="width:20%;">BLOCK TOTAL<br>HH:MM (HH.H)</td>
                     <td class="text-center bold" colspan="2" style="width:20%;">AIR TOTAL<br>HH:MM (HH.H)</td>
                     <td class="text-center bold" colspan="2" style="width:30%;">HORAS COMO PF<br>BLK / AIR</td>
                     <td class="text-center bold" colspan="2" style="width:20%;">DEP / AT</td>
                 </tr>
-                <tr class="gray-bg" style="font-size:7px;">
+                <tr class="gray-bg">
                     <td class="text-center bold">CAP: ${picIni}</td>
                     <td class="text-center bold">FO: ${sicIni}</td>
                     <td class="text-center bold">CAP: ${picIni}</td>
@@ -1482,28 +1470,26 @@
             dailyStats.forEach(ds => {
                 let shortDate = ds.date.length >= 10 ? ds.date.substring(5) : ds.date;
                 
-                // T1 Row
                 let dStr = ds.duration > 0 ? `${minsToTime(ds.duration)} (${formatDec(ds.duration/60)})` : '--:--';
                 let bStr = ds.block > 0 ? `${minsToTime(ds.block)} (${formatDec(ds.block/60)})` : '--:--';
                 let aStr = ds.air > 0 ? `${minsToTime(ds.air)} (${formatDec(ds.air/60)})` : '--:--';
                 
                 t1Html += `
                 <tr>
-                    <td class="text-center bold" style="font-size:8px;">${shortDate}</td>
-                    <td class="text-center" style="font-size:8px;">${ds.hIni}</td>
-                    <td class="text-center" style="font-size:8px;">${ds.hFin}</td>
-                    <td class="text-center" style="font-size:8px;">${ds.start||'--'} - ${ds.end||'--'}</td>
-                    <td class="text-center bold" style="font-size:8px;">${dStr}</td>
-                    <td class="text-center bold" style="font-size:8px;">${bStr}</td>
-                    <td class="text-center bold" style="font-size:8px;">${aStr}</td>
-                    <td class="text-center bold" style="font-size:8px;">${formatDec(ds.fuelUsed)}</td>
-                    <td class="text-center" style="font-size:8px;">${ds.pax}</td>
+                    <td class="text-center bold">${shortDate}</td>
+                    <td class="text-center">${ds.hIni}</td>
+                    <td class="text-center">${ds.hFin}</td>
+                    <td class="text-center">${ds.start||'--'} - ${ds.end||'--'}</td>
+                    <td class="text-center bold">${dStr}</td>
+                    <td class="text-center bold">${bStr}</td>
+                    <td class="text-center bold">${aStr}</td>
+                    <td class="text-center bold">${formatDec(ds.fuelUsed)}</td>
+                    <td class="text-center">${ds.pax}</td>
                 </tr>`;
 
                 totDuty += ds.duration; totBlock += ds.block; totAir += ds.air; totFuel += ds.fuelUsed;
                 totPax += (totPax ? " " : "") + ds.pax;
 
-                // T2 Row
                 let p1B = ds.p1.block > 0 ? `${minsToTime(ds.p1.block)} (${formatDec(ds.p1.block/60)})` : '--';
                 let p1A = ds.p1.air > 0 ? `${minsToTime(ds.p1.air)} (${formatDec(ds.p1.air/60)})` : '--';
                 let p2B = ds.p2.block > 0 ? `${minsToTime(ds.p2.block)} (${formatDec(ds.p2.block/60)})` : '--';
@@ -1514,15 +1500,15 @@
 
                 t2Html += `
                 <tr>
-                    <td class="text-center bold" style="font-size:8px;">${shortDate}</td>
-                    <td class="text-center" style="font-size:8px;">${p1B}</td>
-                    <td class="text-center" style="font-size:8px;">${p2B}</td>
-                    <td class="text-center" style="font-size:8px;">${p1A}</td>
-                    <td class="text-center" style="font-size:8px;">${p2A}</td>
-                    <td class="text-center" style="font-size:8px; line-height:1.2;">${p1PFStr}</td>
-                    <td class="text-center" style="font-size:8px; line-height:1.2;">${p2PFStr}</td>
-                    <td class="text-center" style="font-size:8px;">${ds.p1.dep}</td>
-                    <td class="text-center" style="font-size:8px;">${ds.p2.dep}</td>
+                    <td class="text-center bold">${shortDate}</td>
+                    <td class="text-center">${p1B}</td>
+                    <td class="text-center">${p2B}</td>
+                    <td class="text-center">${p1A}</td>
+                    <td class="text-center">${p2A}</td>
+                    <td class="text-center" style="line-height:1.1;">${p1PFStr}</td>
+                    <td class="text-center" style="line-height:1.1;">${p2PFStr}</td>
+                    <td class="text-center">${ds.p1.dep}</td>
+                    <td class="text-center">${ds.p2.dep}</td>
                 </tr>`;
 
                 totP1Block += ds.p1.block; totP1Air += ds.p1.air; totP1Dep += ds.p1.dep;
@@ -1532,46 +1518,42 @@
                 totP2PFBlock += ds.p2.pf_block; totP2PFAir += ds.p2.pf_air;
             });
 
-            // T1 Totals (Condicionado a múltiples días)
             if (dailyStats.length > 1) {
                 t1Html += `
                 <tr>
-                    <td class="text-center summary-total-bg" style="font-size:8px;" colspan="3">TOTAL ACUMULADO</td>
-                    <td class="text-center summary-total-bg" style="font-size:8px;">--</td>
-                    <td class="text-center summary-total-bg" style="font-size:8px;">${totDuty > 0 ? `${minsToTime(totDuty)} (${formatDec(totDuty/60)})` : '--'}</td>
-                    <td class="text-center summary-total-bg" style="font-size:8px;">${totBlock > 0 ? `${minsToTime(totBlock)} (${formatDec(totBlock/60)})` : '--'}</td>
-                    <td class="text-center summary-total-bg" style="font-size:8px;">${totAir > 0 ? `${minsToTime(totAir)} (${formatDec(totAir/60)})` : '--'}</td>
-                    <td class="text-center summary-total-bg" style="font-size:8px;">${formatDec(totFuel)}</td>
-                    <td class="text-center summary-total-bg" style="font-size:8px;">${totPax}</td>
+                    <td class="text-center summary-total-bg" colspan="3">TOTAL ACUMULADO</td>
+                    <td class="text-center summary-total-bg">--</td>
+                    <td class="text-center summary-total-bg">${totDuty > 0 ? `${minsToTime(totDuty)} (${formatDec(totDuty/60)})` : '--'}</td>
+                    <td class="text-center summary-total-bg">${totBlock > 0 ? `${minsToTime(totBlock)} (${formatDec(totBlock/60)})` : '--'}</td>
+                    <td class="text-center summary-total-bg">${totAir > 0 ? `${minsToTime(totAir)} (${formatDec(totAir/60)})` : '--'}</td>
+                    <td class="text-center summary-total-bg">${formatDec(totFuel)}</td>
+                    <td class="text-center summary-total-bg">${totPax}</td>
                 </tr>`;
             }
             t1Html += `</table>`;
 
-            // T2 Totals (Condicionado a múltiples días)
             if (dailyStats.length > 1) {
                 let totP1PFStr = totP1PFBlock > 0 || totP1PFAir > 0 ? `${minsToTime(totP1PFBlock)} (${formatDec(totP1PFBlock/60)})<br><span style="font-size:7px;">AIR: ${minsToTime(totP1PFAir)} (${formatDec(totP1PFAir/60)})</span>` : '--';
                 let totP2PFStr = totP2PFBlock > 0 || totP2PFAir > 0 ? `${minsToTime(totP2PFBlock)} (${formatDec(totP2PFBlock/60)})<br><span style="font-size:7px;">AIR: ${minsToTime(totP2PFAir)} (${formatDec(totP2PFAir/60)})</span>` : '--';
 
                 t2Html += `
                 <tr>
-                    <td class="text-center summary-total-bg" style="font-size:8px;">TOTAL ACUMULADO</td>
-                    <td class="text-center summary-total-bg" style="font-size:8px;">${totP1Block > 0 ? `${minsToTime(totP1Block)} (${formatDec(totP1Block/60)})` : '--'}</td>
-                    <td class="text-center summary-total-bg" style="font-size:8px;">${totP2Block > 0 ? `${minsToTime(totP2Block)} (${formatDec(totP2Block/60)})` : '--'}</td>
-                    <td class="text-center summary-total-bg" style="font-size:8px;">${totP1Air > 0 ? `${minsToTime(totP1Air)} (${formatDec(totP1Air/60)})` : '--'}</td>
-                    <td class="text-center summary-total-bg" style="font-size:8px;">${totP2Air > 0 ? `${minsToTime(totP2Air)} (${formatDec(totP2Air/60)})` : '--'}</td>
-                    <td class="text-center summary-total-bg" style="font-size:8px; line-height:1.2;">${totP1PFStr}</td>
-                    <td class="text-center summary-total-bg" style="font-size:8px; line-height:1.2;">${totP2PFStr}</td>
-                    <td class="text-center summary-total-bg" style="font-size:8px;">${totP1Dep}</td>
-                    <td class="text-center summary-total-bg" style="font-size:8px;">${totP2Dep}</td>
+                    <td class="text-center summary-total-bg">TOTAL ACUMULADO</td>
+                    <td class="text-center summary-total-bg">${totP1Block > 0 ? `${minsToTime(totP1Block)} (${formatDec(totP1Block/60)})` : '--'}</td>
+                    <td class="text-center summary-total-bg">${totP2Block > 0 ? `${minsToTime(totP2Block)} (${formatDec(totP2Block/60)})` : '--'}</td>
+                    <td class="text-center summary-total-bg">${totP1Air > 0 ? `${minsToTime(totP1Air)} (${formatDec(totP1Air/60)})` : '--'}</td>
+                    <td class="text-center summary-total-bg">${totP2Air > 0 ? `${minsToTime(totP2Air)} (${formatDec(totP2Air/60)})` : '--'}</td>
+                    <td class="text-center summary-total-bg" style="line-height:1.1;">${totP1PFStr}</td>
+                    <td class="text-center summary-total-bg" style="line-height:1.1;">${totP2PFStr}</td>
+                    <td class="text-center summary-total-bg">${totP1Dep}</td>
+                    <td class="text-center summary-total-bg">${totP2Dep}</td>
                 </tr>`;
             }
             t2Html += `</table>`;
 
             el('p_resumen_operacional_container').innerHTML = headHtml + t1Html + t2Html;
 
-            // ===============================================
             // EXPORTACIÓN A PDF: SMS Y SEGURIDAD
-            // ===============================================
             const sinObs = el('m_sms_sin_obs')?.checked;
             setTxt('sms_p_fecha', val('m_fecha_gen'));
             setTxt('sms_p_pov', val('m_pov'));
@@ -1714,10 +1696,10 @@
         }
 
         // =======================================================
-        // GOOGLE DRIVE INTEGRATION (REEMPLAZA IMPORTAR/EXPORTAR)
+        // GOOGLE DRIVE INTEGRATION
         // =======================================================
-        const CLIENT_ID = '520674997135-nqt9gjl00t89lkfstqglk4iecfan44em.apps.googleusercontent.com'; // <-- REEMPLAZA ESTO
-        const API_KEY = 'AIzaSyBcL0gWZymOYuFVTUtP4TWMXNAxY3XYb-4'; // <-- REEMPLAZA ESTO
+        const CLIENT_ID = 'TU_CLIENT_ID_AQUI.apps.googleusercontent.com';
+        const API_KEY = 'TU_API_KEY_AQUI';
         const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
 
@@ -1775,7 +1757,7 @@
                 });
                 
                 if(response.result.files && response.result.files.length > 0) {
-                    fileId = response.result.files[0].id; // Sobrescribe si ya existe un archivo con la misma fecha
+                    fileId = response.result.files[0].id;
                 }
 
                 await gapi.client.request({
@@ -1853,7 +1835,6 @@
         };
 
     </script>
-    <!-- APIs requeridas para Google Drive -->
     <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
     <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
 </body>
