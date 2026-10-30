@@ -71,7 +71,7 @@
         .time-step label { font-size: 0.7rem; color: var(--accent); display: block; margin-bottom: 3px; }
         .time-step span { font-size: 0.62rem; color: var(--text-muted); display: block; margin-bottom: 6px; }
 
-        .btn { padding: 9px 14px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 0.9rem;}
+        .btn { border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s; }
         .btn-danger { background-color: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 5px 10px; font-size: 0.75rem;}
         .btn-success { background-color: rgba(255, 255, 255, 0.1); border: 1px solid var(--success); color: var(--success); padding: 4px 8px; font-size: 0.75rem;}
         .btn-outline { background-color: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 10px 16px; font-size: 0.9rem;}
@@ -82,8 +82,8 @@
         .summary-sub { font-size: 0.8rem; color: var(--accent); margin-top: 2px;}
 
         hr.divider { border: 0; border-top: 1px solid var(--border-color); margin: 12px 0; }
-        .fab-container { position: fixed; bottom: 0; left: 0; width: 100%; padding: 0.8rem 1rem; background: rgba(17, 17, 17, 0.95); backdrop-filter: blur(5px); border-top: 1px solid var(--border-color); text-align: center; z-index: 100; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;}
-        .btn-print { background-color: var(--accent); color: #000; border: none; padding: 10px 24px; font-size: 0.9rem; font-weight: bold; border-radius: 6px; }
+        .fab-container { position: fixed; bottom: 0; left: 0; width: 100%; padding: 0.8rem; background: rgba(17, 17, 17, 0.95); backdrop-filter: blur(5px); border-top: 1px solid var(--border-color); text-align: center; z-index: 100; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;}
+        .btn-print { font-weight: bold; border-radius: 6px; border: none; }
 
         .checkbox-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; font-size: 0.8rem; line-height: 1.3; }
         .checkbox-item input[type="checkbox"] { flex-shrink: 0; margin-top: 2px; width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer;}
@@ -96,7 +96,7 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* =======================================================
-           ESTILOS DIRECTOS DE IMPRESIÓN (PARA HTML2PDF Y NATIVO)
+           ESTILOS BASE DE IMPRESIÓN (PARA HTML2PDF)
            ======================================================= */
         #print-layout { 
             font-family: Arial, sans-serif; 
@@ -104,15 +104,28 @@
             line-height: 1.25; 
             background: white; 
             color: black; 
-            width: 100%; 
+            /* Para Drive, forzamos 800px sí o sí */
+            width: 800px !important;
+            max-width: 800px !important;
+            min-width: 800px !important;
+            margin: 0 auto;
             display: none; 
         }
 
+        /* =======================================================
+           ESTILOS NATIVOS DE IMPRESIÓN (PARA LA IMPRESORA DE IOS)
+           ======================================================= */
         @media print {
             @page { size: letter portrait; margin: 6mm; }
             body { background-color: white; color: black; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin:0;}
-            #mobile-ui, header, .fab-container { display: none !important; }
-            #print-layout { display: block !important; }
+            #mobile-ui, header, .fab-container, #loading-overlay { display: none !important; }
+            /* Al imprimir nativo, anulamos los 800px para que ocupe la hoja real */
+            #print-layout { 
+                display: block !important; 
+                width: 100% !important; 
+                max-width: none !important; 
+                min-width: 0 !important; 
+            }
         }
 
         .page-break { page-break-before: always; padding-top: 5px; clear: both;}
@@ -161,7 +174,7 @@
 
     <header>
         <h1>AEROCARDAL - PLANIFICACIÓN OPERACIONAL</h1>
-        <div class="subtitle">VERSIÓN 6.0 (CLOUD SYNC)</div>
+        <div class="subtitle">VERSIÓN 6.1 (HYBRID CLOUD)</div>
     </header>
 
     <main id="mobile-ui" class="container">
@@ -285,12 +298,15 @@
         </div>
     </main>
 
-    <!-- Botones de Acción (FAB) -->
+    <!-- LOS 5 BOTONES DE ACCIÓN (FAB) -->
     <div class="fab-container">
-        <button class="btn btn-danger" style="width:auto; margin:0;" onclick="clearAllData()">🗑️ Limpiar</button>
-        <button class="btn btn-outline" style="width:auto; margin:0; border-color:var(--warning); color:var(--warning);" onclick="ensureAuth(accionLeer)">📂 Leer</button>
-        <button class="btn btn-outline" style="width:auto; margin:0; border-color:var(--success); color:var(--success);" onclick="ensureAuth(accionGuardar)">💾 Guardar</button>
-        <button class="btn-print" style="width:auto; margin:0;" onclick="ensureAuth(accionGenerarPDF)">📄 Generar PDF</button>
+        <button class="btn btn-danger" style="padding: 10px 14px;" onclick="clearAllData()">🗑️ Limpiar</button>
+        <button class="btn btn-outline" style="border-color:var(--warning); color:var(--warning); padding: 10px 14px;" onclick="ensureAuth(accionLeer)">📂 Drive</button>
+        <button class="btn btn-outline" style="border-color:var(--success); color:var(--success); padding: 10px 14px;" onclick="ensureAuth(accionGuardar)">💾 Guardar</button>
+        <button class="btn-print" style="background:#4285F4; color:white; padding: 10px 14px;" onclick="ensureAuth(accionGenerarPDF)">☁️ PDF Drive</button>
+        
+        <!-- ESTE ES EL BOTON MÁGICO QUE TE DEVUELVE LA CALIDAD DEL PRINCIPIO -->
+        <button class="btn-print" style="background:var(--accent); color:black; padding: 10px 14px;" onclick="prepararImpresionNativa()">🖨️ PDF Nativo</button>
     </div>
 
     <!-- LAYOUT DE IMPRESIÓN (PDF) -->
@@ -486,8 +502,17 @@
             } finally { ocultarCargando(); }
         }
 
+        // IMPRESIÓN NATIVA (El PDF perfecto original del iPad)
+        function prepararImpresionNativa() {
+            updateAll();
+            setTimeout(() => {
+                window.print();
+            }, 300);
+        }
+
+        // IMPRESIÓN DRIVE (Ahora con contenedor absoluto para forzar al iPad)
         async function accionGenerarPDF() {
-            mostrarCargando("Renderizando documento PDF...\n(Espera unos segundos)");
+            mostrarCargando("Renderizando PDF para Drive...\n(Espera unos segundos)");
             
             setTimeout(async () => {
                 try {
@@ -516,10 +541,10 @@
         }
 
         // =======================================================
-        // SOLUCIÓN DEFINITIVA: FORZAR ANCHO REAL DE HOJA CARTA
+        // SOLUCIÓN EXTREMA: ENVOLVER EN CONTENEDOR ABSOLUTO
         // =======================================================
         async function generarBlobPDF() {
-            updateAll(); // Sincroniza todos los datos
+            updateAll();
 
             const printDiv = el('print-layout');
             const mainUi = el('mobile-ui');
@@ -527,22 +552,35 @@
             const fab = document.querySelector('.fab-container');
             const originalScroll = window.scrollY;
             
-            // 1. Ocultar interfaz móvil
+            // 1. Ocultar interfaz móvil por completo
             if(mainUi) mainUi.style.display = 'none';
             if(header) header.style.display = 'none';
             if(fab) fab.style.display = 'none';
 
-            // 2. Forzar el contenedor con el ancho exacto para impresión de hoja carta (794px = 100% del ancho)
+            // 2. El truco maestro para iPad Safari:
+            // Al sacarlo del flujo con position: absolute y darle 800px fijos,
+            // Safari móvil NO puede encoger la tabla para hacerla caber en la pantalla.
             printDiv.style.display = 'block';
-            printDiv.style.width = '794px'; 
-            printDiv.style.margin = '0';
-            printDiv.style.backgroundColor = 'white';
+            
+            const wrapper = document.createElement('div');
+            wrapper.style.position = 'absolute';
+            wrapper.style.left = '0';
+            wrapper.style.top = '0';
+            wrapper.style.width = '800px'; 
+            wrapper.style.backgroundColor = 'white';
+            wrapper.style.zIndex = '9999';
+            
+            // Metemos la tabla adentro de nuestro wrapper blindado
+            printDiv.parentNode.insertBefore(wrapper, printDiv);
+            wrapper.appendChild(printDiv);
 
             window.scrollTo(0, 0);
-            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Tiempo necesario para que iOS pinte el nuevo layout
+            await new Promise(resolve => setTimeout(resolve, 800));
 
             const opt = {
-                margin: 6, // 6mm exactos igual que @page
+                margin: 5,
                 filename: 'temp.pdf',
                 image: { type: 'jpeg', quality: 0.98 },
                 pagebreak: { mode: ['css', 'legacy'] },
@@ -550,24 +588,22 @@
                     scale: 2, 
                     useCORS: true, 
                     logging: false,
-                    letterRendering: true,
-                    windowWidth: 794 // Obliga al canvas a renderizar a ancho completo real
+                    windowWidth: 800 // Le decimos al Canvas que mida 800px sí o sí
                 },
                 jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
             };
 
             try {
-                return await html2pdf().set(opt).from(printDiv).output('blob');
+                return await html2pdf().set(opt).from(wrapper).output('blob');
             } finally {
-                // 3. Restaurar la interfaz normal de la app
-                printDiv.style.display = 'none';
-                printDiv.style.width = '';
-                printDiv.style.margin = '';
-                printDiv.style.backgroundColor = '';
+                // 3. Destruir el wrapper y restaurar todo como estaba
+                wrapper.parentNode.insertBefore(printDiv, wrapper);
+                wrapper.remove();
                 
+                printDiv.style.display = 'none';
                 if(mainUi) mainUi.style.display = '';
                 if(header) header.style.display = '';
-                if(fab) fab.style.display = '';
+                if(fab) fab.style.display = 'flex';
                 
                 window.scrollTo(0, originalScroll);
             }
