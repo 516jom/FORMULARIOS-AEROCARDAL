@@ -546,7 +546,10 @@ const opt = {
 margin: 5,
 filename: 'temp.pdf',
 image: { type: 'jpeg', quality: 1 },
-pagebreak: { mode: ['css'] },
+pagebreak: {
+    mode: ['css'],
+    before: '.pdf-page-start'
+},
 html2canvas: { 
 scale: 2, 
 useCORS: true, 
@@ -711,8 +714,7 @@ cat.items.forEach(item => { smsHtml += `<label class="checkbox-item"><input type
 });
 el('sms_form_container').innerHTML = smsHtml;
 let pSmsHtml = `
-<div class="html2pdf__page-break"></div>
-<div id="print_sms_container" style="font-family:Arial, sans-serif; box-sizing:border-box;">
+<div id="print_sms_container" class="pdf-page-start" style="font-family:Arial, sans-serif; box-sizing:border-box;">
 <table class="print-table" style="border-bottom:none;">
 <tr>
 <td colspan="2" class="no-border-x" style="width:30%;">
@@ -1485,8 +1487,7 @@ webHtml += `</div>
 </details>`;
 
 let pSecHtml = `
-<div class="html2pdf__page-break"></div>
-<div id="print_sec_container_${dateKey}"
+<div id="print_sec_container_${dateKey}" class="pdf-page-start"
 style="font-family:Arial, sans-serif; box-sizing:border-box; margin-top: 10px;">
 <table class="print-table" style="border-bottom:none;">
 <tr>
