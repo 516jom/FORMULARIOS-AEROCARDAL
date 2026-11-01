@@ -32,18 +32,21 @@ details.card summary .arrow::after, details.param-section summary .arrow::after 
 details.card[open] summary { border-bottom: 1px solid var(--border-color); }
 details.card[open] summary .arrow::after, details.param-section[open] summary .arrow::after { content: "▲"; }
 details.card summary:hover, details.param-section summary:hover { background-color: rgba(255,255,255,0.1); }
+
+/* GRILLAS CON RESTRICCIÓN ESTRUCTURAL DE ANCHO (FIX SUPERPOSICIÓN IPAD) */
 .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.8rem; }
 .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.8rem; }
 .grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.5rem; }
 .grid-6 { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.5rem; }
-@media (max-width: 600px) { .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .grid-3 { grid-template-columns: minmax(0, 1fr); } .grid-6 {grid-template-columns: repeat(3, minmax(0, 1fr));} }
-
-/* Restricción extra de seguridad para los inputs */
-.form-group { margin-bottom: 0.8rem; min-width: 0; }
-.form-group { margin-bottom: 0.8rem; }
+@media (max-width: 600px) { 
+  .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } 
+  .grid-3 { grid-template-columns: minmax(0, 1fr); } 
+  .grid-6 { grid-template-columns: repeat(3, minmax(0, 1fr)); } 
+}
+.form-group { margin-bottom: 0.8rem; min-width: 0; width: 100%; }
 .form-group label { display: flex; justify-content: space-between; align-items: center; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.35rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 input[type="text"], input[type="number"], input[type="date"], select, textarea {
-width: 100%; padding: 10px 12px; font-size: 1rem; color: var(--text-main);
+width: 100%; max-width: 100%; box-sizing: border-border-box; padding: 10px 12px; font-size: 1rem; color: var(--text-main);
 border: 1px solid var(--border-color); border-radius: 6px; background-color: var(--bg-input);
 transition: all 0.2s;
 }
@@ -54,9 +57,9 @@ textarea { resize: vertical; min-height: 60px; font-family: inherit; }
 .link-btn { cursor: pointer; font-size: 1rem; user-select: none; transition: transform 0.2s; }
 .link-btn:active { transform: scale(0.9); }
 .time-sequence-box { background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.8rem; margin: 0.5rem 0 1rem 0; }
-.time-sequence-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-@media (max-width: 550px) { .time-sequence-grid { grid-template-columns: repeat(2, 1fr); } }
-.time-step { text-align: center; }
+.time-sequence-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 550px) { .time-sequence-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.time-step { text-align: center; min-width: 0; }
 .time-step label { font-size: 0.7rem; color: var(--accent); display: block; margin-bottom: 3px; }
 .time-step span { font-size: 0.62rem; color: var(--text-muted); display: block; margin-bottom: 6px; }
 .btn { border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s; }
@@ -78,8 +81,9 @@ hr.divider { border: 0; border-top: 1px solid var(--border-color); margin: 12px 
 #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: none; justify-content: center; align-items: center; flex-direction: column; color: var(--accent); backdrop-filter: blur(4px); }
 .spinner { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--accent); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 15px; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
 /* =======================================================
-ESTILOS DE IMPRESIÓN - ESCALA TIPOGRÁFICA ARMONIZADA
+ESTILOS DE IMPRESIÓN Y SALTO DE PÁGINA (COMPATIBLE SAFARI IPAD)
 ======================================================= */
 @media print {
 @page { size: letter portrait; margin: 6mm; }
@@ -90,13 +94,17 @@ body { background-color: white; color: black; -webkit-print-color-adjust: exact;
 #print-layout { display: none; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 9px; line-height: 1.35; background: white; color: black; }
 #print-layout td, #print-layout span, #print-layout div, #print-layout th { color: black; }
 #print-layout table, #print-layout td, #print-layout th { border-color: black; }
-/* REGLAS ROBUSTAS DE SALTO DE PÁGINA PARA IOS Y WEB */
+
+/* REGLAS COMPATIBLES WEBKIT/SAFARI PARA SALTOS DE PÁGINA */
 .page-break { 
+  display: block !important;
+  clear: both !important;
   page-break-before: always !important; 
   break-before: page !important; 
-  clear: both; 
-  padding-top: 10px; 
+  height: auto !important;
+  padding-top: 5px; 
 }
+
 .print-table { width: 100%; border-collapse: collapse; border: 1px solid black; margin-bottom: 6px; page-break-inside: avoid; break-inside: avoid; table-layout: fixed; }
 .print-table th, .print-table td, .tramo-grid td { border: 1px solid black; padding: 3px 5px; vertical-align: middle; font-size: 9px; }
 /* Jerarquía de Títulos - Ajustada para ahorro de tinta */
@@ -475,7 +483,7 @@ updateAll();
 setTimeout(() => { window.print(); }, 300);
 }
 // =======================================================
-// IMPRESIÓN HACIA DRIVE (HACK PARA IPAD SAFARI SCALE)
+// IMPRESIÓN HACIA DRIVE (COMPATIBILIDAD CON SALTOS SAFARI IPAD)
 // =======================================================
 async function accionGenerarPDF() {
 mostrarCargando("Renderizando PDF para Drive...\n(Espera unos segundos)");
@@ -508,22 +516,26 @@ const fab = document.querySelector('.fab-container');
 const vpMeta = el('viewport-meta');
 const originalScroll = window.scrollY;
 const originalVp = vpMeta.getAttribute('content');
-// 1. Esconder la UI
+
+// 1. Ocultar la interfaz principal
 if(mainUi) mainUi.style.display = 'none';
 if(header) header.style.display = 'none';
 if(fab) fab.style.display = 'none';
-// 2. TRUCO DE ORO PARA IPAD SAFARI: 
+
+// 2. Ajuste de viewport para renderizado responsivo de html2canvas en Safari
 vpMeta.setAttribute('content', 'width=800, initial-scale=1.0');
 printDiv.style.display = 'block';
 printDiv.style.width = '800px'; 
 window.scrollTo(0, 0);
-// 3. Darle 800ms a Safari para que recalcule los pixeles de la pantalla
+
+// 3. Tiempo de renderizado para recalcular layout en WebKit
 await new Promise(resolve => setTimeout(resolve, 800));
+
 const opt = {
 margin: 5,
 filename: 'temp.pdf',
 image: { type: 'jpeg', quality: 1 },
-pagebreak: { mode: ['css', 'legacy'] },
+pagebreak: { mode: ['css', 'legacy'], before: '.page-break' },
 html2canvas: { 
 scale: 2, 
 useCORS: true, 
@@ -533,10 +545,11 @@ windowWidth: 800
 },
 jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
 };
+
 try {
 return await html2pdf().set(opt).from(printDiv).output('blob');
 } finally {
-// 4. Devolver todo a la normalidad en el iPad
+// 4. Restauración de UI
 vpMeta.setAttribute('content', originalVp);
 printDiv.style.display = 'none';
 printDiv.style.width = '';
@@ -1313,7 +1326,7 @@ hIni: firstLeg.horoBot||'--', hFin: lastLeg.horoTop||'--'
 });
 
 // ========================================================
-// NUEVO CÓDIGO - UI RESUMEN GENERAL SEGÚN IMAGEN REFERENCIA
+// UI RESUMEN GENERAL
 // ========================================================
 
 // TABLA 1: TRAMOS (Transpuesta)
@@ -1399,10 +1412,6 @@ dailyStats.forEach((dp, idx) => {
 dailyTableHtml += `</tbody></table>`;
 if(el('ui_resumen_diario')) el('ui_resumen_diario').innerHTML = dailyTableHtml;
 
-// ========================================================
-// FIN NUEVO CÓDIGO 
-// ========================================================
-
 setTxt('sum_duty_hhmm', minsToTime(totalDutyMinsAllDays)); setTxt('sum_duty_dec', `${formatDec(totalDutyMinsAllDays/60)} hrs`);
 renderSecurityForms(activeDates, legsByDate);
 const initialFuel = legIds.length > 0 ? parseFloat(val(`m_t${legIds[0]}_fuel_on`)) || 0 : 0;
@@ -1465,7 +1474,7 @@ webHtml += `</div>
 
 let pSecHtml = `<div id="print_sec_container_${dateKey}"
 class="page-break"
-style="font-family:Arial, sans-serif; box-sizing:border-box; margin-top: 10px; page-break-before: always; break-before: page;">
+style="font-family:Arial, sans-serif; box-sizing:border-box; margin-top: 10px;">
 <table class="print-table" style="border-bottom:none;">
 <tr>
 <td colspan="2" class="no-border-x" style="width:30%;">
