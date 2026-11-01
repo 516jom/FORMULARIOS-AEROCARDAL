@@ -105,6 +105,17 @@ body { background-color: white; color: black; -webkit-print-color-adjust: exact;
   padding-top: 5px; 
 }
 
+/* CLASE NATIVA INTERCEPTORA PARA html2pdf.js */
+.html2pdf__page-break {
+  display: block !important;
+  clear: both !important;
+  page-break-before: always !important;
+  break-before: page !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
 .print-table { width: 100%; border-collapse: collapse; border: 1px solid black; margin-bottom: 6px; page-break-inside: avoid; break-inside: avoid; table-layout: fixed; }
 .print-table th, .print-table td, .tramo-grid td { border: 1px solid black; padding: 3px 5px; vertical-align: middle; font-size: 9px; }
 /* Jerarquía de Títulos - Ajustada para ahorro de tinta */
@@ -306,10 +317,10 @@ Volver a la app
 <!-- LOS 5 BOTONES DE ACCIÓN (FAB) -->
 <div class="fab-container">
 <button class="btn btn-danger" style="padding: 10px 14px;" onclick="clearAllData()">🗑️ Limpiar</button>
-<button class="btn btn-outline" style="border-color:var(--warning); color:var(--warning); padding: 10px 14px;" onclick="ensureAuth(accionLeer)">📂 Drive</button>
+<button class="btn btn-outline" style="border-color:var(--warning); color:var(--warning); padding: 10px 14px;" onclick="ensureAuth(accionLeer)">📂 Cargar</button>
 <button class="btn btn-outline" style="border-color:var(--success); color:var(--success); padding: 10px 14px;" onclick="ensureAuth(accionGuardar)">💾 Guardar</button>
-<button class="btn-print" style="background:#4285F4; color:white; padding: 10px 14px;" onclick="ensureAuth(accionGenerarPDF)">☁️ PDF Drive</button>
-<button class="btn-print" style="background:var(--accent); color:black; padding: 10px 14px;" onclick="prepararImpresionNativa()">🖨️ PDF Nativo</button>
+<button class="btn-print" style="background:#4285F4; color:white; padding: 10px 14px;" onclick="ensureAuth(accionGenerarPDF)">📱 Generar PDF (IPAD)</button>
+<button class="btn-print" style="background:var(--accent); color:black; padding: 10px 14px;" onclick="prepararImpresionNativa()">💻 Imprimir (PC)</button>
 </div>
 <!-- LAYOUT DE IMPRESIÓN (PDF) -->
 <div id="print-layout">
@@ -535,7 +546,7 @@ const opt = {
 margin: 5,
 filename: 'temp.pdf',
 image: { type: 'jpeg', quality: 1 },
-pagebreak: { mode: ['css', 'legacy'], before: '.page-break' },
+pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
 html2canvas: { 
 scale: 2, 
 useCORS: true, 
@@ -699,8 +710,9 @@ smsHtml += `<div class="form-category-title">${cat.cat}</div>`;
 cat.items.forEach(item => { smsHtml += `<label class="checkbox-item"><input type="checkbox" id="m_sms_${globalIndex}" onchange="triggerUpdate()"> <span>${globalIndex}. ${item}</span></label>`; globalIndex++; });
 });
 el('sms_form_container').innerHTML = smsHtml;
-let pSmsHtml = `<div id="print_sms_container" class="page-break"
-style="font-family:Arial, sans-serif; box-sizing:border-box;">
+let pSmsHtml = `
+<div class="html2pdf__page-break"></div>
+<div id="print_sms_container" style="font-family:Arial, sans-serif; box-sizing:border-box;">
 <table class="print-table" style="border-bottom:none;">
 <tr>
 <td colspan="2" class="no-border-x" style="width:30%;">
@@ -1472,8 +1484,9 @@ webHtml += `</div>
 </div>
 </details>`;
 
-let pSecHtml = `<div id="print_sec_container_${dateKey}"
-class="page-break"
+let pSecHtml = `
+<div class="html2pdf__page-break"></div>
+<div id="print_sec_container_${dateKey}"
 style="font-family:Arial, sans-serif; box-sizing:border-box; margin-top: 10px;">
 <table class="print-table" style="border-bottom:none;">
 <tr>
