@@ -87,8 +87,14 @@ body { background-color: white; color: black; -webkit-print-color-adjust: exact;
 #print-layout { display: none; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 9px; line-height: 1.35; background: white; color: black; }
 #print-layout td, #print-layout span, #print-layout div, #print-layout th { color: black; }
 #print-layout table, #print-layout td, #print-layout th { border-color: black; }
-.page-break { page-break-before: always; padding-top: 5px; clear: both; }
-.print-table { width: 100%; border-collapse: collapse; border: 1px solid black; margin-bottom: 6px; page-break-inside: avoid; table-layout: fixed; }
+/* REGLAS ROBUSTAS DE SALTO DE PÁGINA PARA IOS Y WEB */
+.page-break { 
+  page-break-before: always !important; 
+  break-before: page !important; 
+  clear: both; 
+  padding-top: 10px; 
+}
+.print-table { width: 100%; border-collapse: collapse; border: 1px solid black; margin-bottom: 6px; page-break-inside: avoid; break-inside: avoid; table-layout: fixed; }
 .print-table th, .print-table td, .tramo-grid td { border: 1px solid black; padding: 3px 5px; vertical-align: middle; font-size: 9px; }
 /* Jerarquía de Títulos - Ajustada para ahorro de tinta */
 .logo-text { font-size: 15px; font-weight: 900; font-style: italic; letter-spacing: -0.5px; }
@@ -130,21 +136,23 @@ background-color: #EBEBEB !important;
 font-weight: bold;
 font-size: 9px !important;
 }
-/* Reducción de tamaño encabezados consolidados */
+
+/* Modificación CSS Solicitada (Compactación) */
 .compact-th td {
-padding: 2px 1px !important;
-line-height: 1.1;
-font-size: 8px !important;
+  padding: 1px 1px !important;
+  line-height: 1.0;
+  font-size: 8px !important;
 }
 .compact-td td {
-padding: 2px 1px !important;
-font-size: 8.5px !important;
+  padding: 1px 1px !important;
+  font-size: 8.5px !important;
 }
+
 /* Celdas de Datos y Textos Destacados */
 .cell-data { height: 16px; font-weight: bold; text-align: center; font-size: 9.5px; }
 .bold { font-weight: bold; font-size: 9.5px; }
 /* Tablas SMS y Seguridad */
-.print-form-table { width: 100%; border-collapse: collapse; border: 1px solid black; font-size: 9px; }
+.print-form-table { width: 100%; border-collapse: collapse; border: 1px solid black; font-size: 9px; page-break-inside: avoid; break-inside: avoid; }
 .print-form-table td, .print-form-table th { border: 1px solid black; padding: 4px 6px; line-height: 1.35; }
 .sms-cat-row { background-color: #F5F5F5 !important; font-weight: bold; text-align: center; font-size: 9.5px; }
 .tick-cell { text-align: center; font-weight: bold; font-size: 13px !important; vertical-align: middle; }
@@ -176,7 +184,7 @@ Volver a la app
 </div>
 <header>
 <h1>AEROCARDAL - PLANIFICACIÓN OPERACIONAL</h1>
-<div class="subtitle">VERSIÓN 6.6 (EXPOSICIÓN A JEFATURA)</div>
+<div class="subtitle">VERSIÓN 7.0 (UI SUMMARY LOGBOOK EDITION)</div>
 </header>
 <main id="mobile-ui" class="container">
 <!-- CABECERA GENERAL -->
@@ -252,39 +260,35 @@ Volver a la app
 </details>
 <!-- CONTENEDOR DINÁMICO DE INSPECCIONES DE SEGURIDAD -->
 <div id="sec-forms-wrapper"></div>
-<!-- RESUMEN GENERAL -->
+<!-- RESUMEN GENERAL (Modificado según Referencia LOGBOOK) -->
 <div class="card" style="border-color: var(--accent); margin-top: 1.2rem;">
 <div class="card-header"><span style="color:var(--accent);">⏱️ RESUMEN GENERAL OPERACIONAL</span></div>
 <div class="card-content">
-<div class="summary-title" style="color: var(--accent); margin-bottom: 4px;">🏁 DESGLOSE DIARIO (DUTY, BLOCK, AIR)</div>
-<div style="overflow-x: auto;">
-<table style="width:100%; border-collapse:collapse; margin-bottom:12px; font-size:0.8rem; text-align:center; background:var(--bg-input); border:1px solid var(--border-color); border-radius:8px;">
-<thead>
-<tr style="background:rgba(255,255,255,0.05); border-bottom:1px solid var(--border-color);">
-<th style="padding:8px; text-align:left;">Fecha</th><th>Inicio</th><th>Término</th>
-<th style="color:var(--accent);">Duty</th><th style="color:var(--text-muted);">Block</th><th style="color:var(--text-muted);">Air</th>
-</tr>
-</thead>
-<tbody id="ui_duty_table"></tbody>
-</table>
-</div>
-<div class="grid-2">
-<div class="summary-box summary-duty"><div class="summary-title">🏁 DUTY TOTAL ACUMULADO</div><div class="summary-value" id="sum_duty_hhmm">00:00</div><div class="summary-sub" id="sum_duty_dec">0.0 hrs</div></div>
-<div class="summary-box"><div class="summary-title">✈️ TOTAL VUELO (AIR TIME)</div><div class="summary-value" id="sum_air_hhmm">00:00</div><div class="summary-sub" id="sum_air_dec">0.0 hrs</div></div>
-<div class="summary-box"><div class="summary-title">🛑 TOTAL BLOQUE (BLOCK)</div><div class="summary-value" id="sum_block_hhmm">00:00</div><div class="summary-sub" id="sum_block_dec">0.0 hrs</div></div>
-<div class="summary-box"><div class="summary-title">👥 PAX POR TRAMO</div><div class="summary-value" style="font-size: 1.1rem;" id="sum_pax_legs">(0)</div><div class="summary-sub" style="color:transparent;">-</div></div>
-</div>
-<hr class="divider">
-<div class="summary-title" style="color: var(--accent);">⛽ BALANCE DE COMBUSTIBLE CONSOLIDADO</div>
-<div class="grid-4" style="margin-top: 8px;">
-<div class="summary-box"><div class="summary-title">INICIAL</div><div class="summary-value" style="font-size:1.1rem;" id="sum_fuel_init">0.0</div></div>
-<div class="summary-box"><div class="summary-title">2. FINAL</div><div class="summary-value" style="font-size:1.1rem; color:var(--accent);" id="sum_fuel_final">0.0</div></div>
-<div class="summary-box"><div class="summary-title">3. RECARGADO</div><div class="summary-value" style="font-size:1.1rem; color:var(--success);" id="sum_fuel_refuel">+0.0</div></div>
-<div class="summary-box"><div class="summary-title">4. CONSUMIDO</div><div class="summary-value" style="font-size:1.1rem; color:var(--danger);" id="sum_fuel_used">-0.0</div></div>
-</div>
-<hr class="divider">
-<div class="summary-title" style="color: var(--text-main);">👨‍✈️ HORAS OP WEB (TODOS LOS PILOTOS REGISTRADOS)</div>
-<div id="sum_pilots_container" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;"></div>
+  
+  <div class="summary-title" style="color: var(--accent); margin-bottom: 4px;">📝 DETALLE POR TRAMO</div>
+  <div style="overflow-x: auto; margin-bottom: 15px; border-radius:8px; border:1px solid var(--border-color);" id="ui_resumen_tramos"></div>
+  
+  <div class="summary-title" style="color: var(--accent); margin-bottom: 4px;">📅 CONSOLIDADO DIARIO</div>
+  <div style="overflow-x: auto; margin-bottom: 15px; border-radius:8px; border:1px solid var(--border-color);" id="ui_resumen_diario"></div>
+
+  <details class="param-section" style="background: rgba(255,255,255,0.02); border: 1px dashed var(--border-color); border-radius: 8px;">
+    <summary style="display:flex; justify-content:space-between; align-items:center; padding: 12px;">
+       <div style="font-size: 0.8rem; font-weight: bold; flex:1; color:var(--accent);">📊 TOTALES ACUMULADOS Y PILOTOS <span class="arrow"></span></div>
+    </summary>
+    <div style="padding: 0 12px 12px 12px;">
+      <div class="grid-3" style="margin-bottom:12px;">
+        <div class="summary-box summary-duty"><div class="summary-title">🏁 DUTY TOTAL</div><div class="summary-value" id="sum_duty_hhmm">00:00</div><div class="summary-sub" id="sum_duty_dec">0.0 hrs</div></div>
+        <div class="summary-box"><div class="summary-title">✈️ TOTAL VUELO (AIR)</div><div class="summary-value" id="sum_air_hhmm">00:00</div><div class="summary-sub" id="sum_air_dec">0.0 hrs</div></div>
+        <div class="summary-box"><div class="summary-title">🛑 TOTAL BLOQUE</div><div class="summary-value" id="sum_block_hhmm">00:00</div><div class="summary-sub" id="sum_block_dec">0.0 hrs</div></div>
+      </div>
+      
+      <!-- Contenedores para compatibilidad transparente de Javascript antiguo -->
+      <div style="display:none;" id="sum_fuel_init"></div><div style="display:none;" id="sum_fuel_final"></div><div style="display:none;" id="sum_fuel_refuel"></div><div style="display:none;" id="sum_fuel_used"></div><div style="display:none;" id="sum_pax_legs"></div>
+
+      <div class="summary-title" style="color: var(--text-main); border-top:1px dashed var(--border-color); padding-top:12px;">👨‍✈️ HORAS OP WEB (TODOS LOS PILOTOS REGISTRADOS)</div>
+      <div id="sum_pilots_container" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;"></div>
+    </div>
+  </details>
 </div>
 </div>
 </main>
@@ -1304,11 +1308,98 @@ pax: dayPax.join(' '), p1, p2,
 hIni: firstLeg.horoBot||'--', hFin: lastLeg.horoTop||'--' 
 });
 });
-let uiDutyHtml = '';
-dailyStats.forEach(dp => {
-uiDutyHtml += `<tr><td style="padding:6px; text-align:left; border-bottom:1px solid rgba(255,255,255,0.05);">${dp.date}</td><td style="border-bottom:1px solid rgba(255,255,255,0.05);">${dp.start || '--:--'}</td><td style="border-bottom:1px solid rgba(255,255,255,0.05);">${dp.end || '--:--'}</td><td style="border-bottom:1px solid rgba(255,255,255,0.05); font-weight:bold; color:var(--accent);">${dp.duration > 0 ? `${minsToTime(dp.duration)} (${formatDec(dp.duration/60)}h)` : '--:--'}</td><td style="border-bottom:1px solid rgba(255,255,255,0.05); color:var(--text-muted);">${dp.block > 0 ? `${minsToTime(dp.block)} (${formatDec(dp.block/60)}h)` : '--:--'}</td><td style="border-bottom:1px solid rgba(255,255,255,0.05); color:var(--text-muted);">${dp.air > 0 ? `${minsToTime(dp.air)} (${formatDec(dp.air/60)}h)` : '--:--'}</td></tr>`;
+
+// ========================================================
+// NUEVO CÓDIGO - UI RESUMEN GENERAL SEGÚN IMAGEN REFERENCIA
+// ========================================================
+
+// TABLA 1: TRAMOS (Transpuesta)
+let tramosTableHtml = `<table style="width:100%; min-width: 600px; border-collapse:collapse; font-size:0.75rem; text-align:center; background:var(--bg-input); border:none; white-space:nowrap;">`;
+tramosTableHtml += `<thead><tr style="background:rgba(255,255,255,0.05); border-bottom:1px solid var(--border-color);"><th style="text-align:left; padding:8px; border-right:1px solid var(--border-color); color:var(--accent);">PARÁMETRO</th>`;
+legIds.forEach((id, idx) => { tramosTableHtml += `<th style="padding:8px; border-right:1px solid rgba(255,255,255,0.05); color:var(--accent);">TRAMO ${idx+1}</th>`; });
+tramosTableHtml += `</tr></thead><tbody>`;
+
+const rowDefs = [
+  { label: "FECHA", get: id => val(`m_t${id}_fecha`) || gDate || '--' },
+  { label: "CAPITÁN", get: id => picIni || '--' },
+  { label: "FO", get: id => sicIni || '--' },
+  { label: "DESDE", get: id => val(`m_t${id}_desde`).toUpperCase() || '--' },
+  { label: "DESTINO", get: id => val(`m_t${id}_dest`).toUpperCase() || '--' },
+  { label: "AIR ON", get: id => val(`m_t${id}_time_on`) || '--:--' },
+  { label: "AIR OFF", get: id => val(`m_t${id}_time_off`) || '--:--' },
+  { label: "AIRTIME", get: id => { let text = el(`ui_t${id}_air_diff`)?.innerText.split(' ')[0]; return (text && text !== '--:--') ? text : '--:--'; } },
+  { label: "BLOCK IN", get: id => val(`m_t${id}_time_in`) || '--:--' },
+  { label: "BLOCK OUT", get: id => val(`m_t${id}_time_out`) || '--:--' },
+  { label: "BLOCKTIME", get: id => { let text = el(`ui_t${id}_block_diff`)?.innerText.split(' ')[0]; return (text && text !== '--:--') ? text : '--:--'; } }
+];
+
+rowDefs.forEach((r, idx) => {
+  let isLast = idx === rowDefs.length - 1;
+  let bBottom = isLast ? '' : 'border-bottom:1px solid rgba(255,255,255,0.05);';
+  tramosTableHtml += `<tr><td style="text-align:left; padding:6px 8px; font-weight:bold; color:var(--text-muted); border-right:1px solid var(--border-color); ${bBottom}">${r.label}</td>`;
+  legIds.forEach(id => { tramosTableHtml += `<td style="padding:6px 8px; border-right:1px solid rgba(255,255,255,0.05); color:var(--text-main); ${bBottom}">${r.get(id)}</td>`; });
+  tramosTableHtml += `</tr>`;
 });
-el('ui_duty_table').innerHTML = uiDutyHtml;
+tramosTableHtml += `</tbody></table>`;
+if(el('ui_resumen_tramos')) el('ui_resumen_tramos').innerHTML = tramosTableHtml;
+
+// TABLA 2: CONSOLIDADO DIARIO
+let dailyTableHtml = `<table style="width:100%; min-width: 800px; border-collapse:collapse; font-size:0.75rem; text-align:center; background:var(--bg-input); border:none; white-space:nowrap;">
+<thead>
+  <tr style="background:rgba(255,255,255,0.05); border-bottom:1px solid var(--border-color);">
+    <th rowspan="2" style="padding:8px; text-align:left; border-right:1px solid var(--border-color); color:var(--accent);">FECHA</th>
+    <th rowspan="2" style="padding:8px; border-right:1px solid var(--border-color); color:var(--accent);">PAX POR<br>TRAMO</th>
+    <th rowspan="2" style="padding:8px; border-right:1px solid var(--border-color); color:var(--accent);">TOTAL<br>AIRTIME</th>
+    <th colspan="4" style="padding:4px; border-right:1px solid var(--border-color); color:var(--text-muted);">FUEL</th>
+    <th colspan="2" style="padding:4px; border-right:1px solid var(--border-color); color:var(--text-muted);">HOROMETRO</th>
+    <th colspan="3" style="padding:4px; color:var(--text-muted);">DUTY</th>
+  </tr>
+  <tr style="background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border-color);">
+    <th style="padding:4px; border-right:1px solid rgba(255,255,255,0.05); font-size:0.65rem; color:var(--text-muted);">INICIO</th>
+    <th style="padding:4px; border-right:1px solid rgba(255,255,255,0.05); font-size:0.65rem; color:var(--text-muted);">USADO</th>
+    <th style="padding:4px; border-right:1px solid rgba(255,255,255,0.05); font-size:0.65rem; color:var(--text-muted);">REMANENTE</th>
+    <th style="padding:4px; border-right:1px solid var(--border-color); font-size:0.65rem; color:var(--text-muted);">CARGADO</th>
+    <th style="padding:4px; border-right:1px solid rgba(255,255,255,0.05); font-size:0.65rem; color:var(--text-muted);">INICIAL</th>
+    <th style="padding:4px; border-right:1px solid var(--border-color); font-size:0.65rem; color:var(--text-muted);">FINAL</th>
+    <th style="padding:4px; border-right:1px solid rgba(255,255,255,0.05); font-size:0.65rem; color:var(--text-muted);">INICIAL</th>
+    <th style="padding:4px; border-right:1px solid rgba(255,255,255,0.05); font-size:0.65rem; color:var(--text-muted);">FINAL</th>
+    <th style="padding:4px; font-size:0.65rem; color:var(--text-muted);">TOTAL</th>
+  </tr>
+</thead>
+<tbody>`;
+
+dailyStats.forEach((dp, idx) => {
+  let isLast = idx === dailyStats.length - 1;
+  let bBottom = isLast ? '' : 'border-bottom:1px solid rgba(255,255,255,0.05);';
+  let fIni = Math.round(dp.fuelInit || 0);
+  let fUsed = Math.round(dp.fuelUsed || 0);
+  let fRem = Math.round(dp.fuelFinal || 0);
+  let fRef = Math.round(dp.fuelRefuel || 0);
+  let aStr = dp.air > 0 ? `${minsToTime(dp.air)} (${formatDec(dp.air/60).replace('.', ',')})` : '--:--';
+  let dutyTotalStr = dp.duration > 0 ? `${minsToTime(dp.duration)}` : '--:--';
+  
+  dailyTableHtml += `<tr>
+    <td style="padding:6px 8px; text-align:left; ${bBottom} border-right:1px solid var(--border-color); font-weight:bold;">${dp.date}</td>
+    <td style="padding:6px 8px; ${bBottom} border-right:1px solid var(--border-color);">${dp.pax || '(0)'}</td>
+    <td style="padding:6px 8px; ${bBottom} border-right:1px solid var(--border-color); color:var(--accent); font-weight:bold;">${aStr}</td>
+    <td style="padding:6px 8px; ${bBottom} border-right:1px solid rgba(255,255,255,0.05);">${fIni}</td>
+    <td style="padding:6px 8px; ${bBottom} border-right:1px solid rgba(255,255,255,0.05); color:var(--danger);">${fUsed}</td>
+    <td style="padding:6px 8px; ${bBottom} border-right:1px solid rgba(255,255,255,0.05); color:var(--accent);">${fRem}</td>
+    <td style="padding:6px 8px; ${bBottom} border-right:1px solid var(--border-color); color:var(--success);">+${fRef}</td>
+    <td style="padding:6px 8px; ${bBottom} border-right:1px solid rgba(255,255,255,0.05);">${dp.hIni}</td>
+    <td style="padding:6px 8px; ${bBottom} border-right:1px solid var(--border-color);">${dp.hFin}</td>
+    <td style="padding:6px 8px; ${bBottom} border-right:1px solid rgba(255,255,255,0.05);">${dp.start || '--:--'}</td>
+    <td style="padding:6px 8px; ${bBottom} border-right:1px solid rgba(255,255,255,0.05);">${dp.end || '--:--'}</td>
+    <td style="padding:6px 8px; ${bBottom}">${dutyTotalStr}</td>
+  </tr>`;
+});
+dailyTableHtml += `</tbody></table>`;
+if(el('ui_resumen_diario')) el('ui_resumen_diario').innerHTML = dailyTableHtml;
+
+// ========================================================
+// FIN NUEVO CÓDIGO 
+// ========================================================
+
 setTxt('sum_duty_hhmm', minsToTime(totalDutyMinsAllDays)); setTxt('sum_duty_dec', `${formatDec(totalDutyMinsAllDays/60)} hrs`);
 renderSecurityForms(activeDates, legsByDate);
 const initialFuel = legIds.length > 0 ? parseFloat(val(`m_t${legIds[0]}_fuel_on`)) || 0 : 0;
@@ -1368,9 +1459,10 @@ webHtml += `</div>
 </div>
 </div>
 </details>`;
+
 let pSecHtml = `<div id="print_sec_container_${dateKey}"
 class="page-break"
-style="font-family:Arial, sans-serif; box-sizing:border-box; padding-top:5px;">
+style="font-family:Arial, sans-serif; box-sizing:border-box; margin-top: 10px; page-break-before: always; break-before: page;">
 <table class="print-table" style="border-bottom:none;">
 <tr>
 <td colspan="2" class="no-border-x" style="width:30%;">
