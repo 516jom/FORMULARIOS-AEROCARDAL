@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="es"><head>
+<index>
+<html lang="es"><head>
 <meta charset="UTF-8">
 <meta id="viewport-meta" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Planificación Operacional - Aerocardal</title>
@@ -32,12 +33,12 @@ details.card summary .arrow::after, details.param-section summary .arrow::after 
 details.card[open] summary { border-bottom: 1px solid var(--border-color); }
 details.card[open] summary .arrow::after, details.param-section[open] summary .arrow::after { content: "▲"; }
 details.card summary:hover, details.param-section summary:hover { background-color: rgba(255,255,255,0.1); }
-.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
-.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; }
-.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
-.grid-6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.5rem; }
-@media (max-width: 600px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } .grid-3 { grid-template-columns: 1fr; } .grid-6 {grid-template-columns: repeat(3, 1fr);} }
-.form-group { margin-bottom: 0.8rem; }
+.grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.8rem; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.8rem; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.5rem; }
+.grid-6 { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.5rem; }
+@media (max-width: 600px) { .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .grid-3 { grid-template-columns: minmax(0, 1fr); } .grid-6 {grid-template-columns: repeat(3, minmax(0, 1fr));} }
+.form-group { margin-bottom: 0.8rem; min-width: 0; }
 .form-group label { display: flex; justify-content: space-between; align-items: center; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.35rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 input[type="text"], input[type="number"], input[type="date"], select, textarea {
 width: 100%; padding: 10px 12px; font-size: 1rem; color: var(--text-main);
@@ -192,7 +193,7 @@ Volver a la app
 <div class="card-header"><span>📋 CABECERA DEL VUELO (OBLIGATORIA PARA CLOUD)</span></div>
 <div class="card-content grid-3">
 <div class="form-group"><label style="color:var(--accent);">Fecha del Vuelo</label><input type="date" id="m_fecha_gen" onchange="triggerUpdate()"></div>
-<div class="form-group"><label style="color:var(--accent);">Folio BIT</label><input type="text" id="m_folio_gen" placeholder="Folio Único..." oninput="triggerUpdate()" style="width: 50%;"></div>
+<div class="form-group"><label style="color:var(--accent);">Folio BIT</label><input type="text" id="m_folio_gen" placeholder="Folio Único..." oninput="triggerUpdate()"></div>
 <div class="form-group"><label style="color:#4285F4; text-shadow: 0 0 5px rgba(66,133,244,0.5);">P.O.V. N° (Carpeta)</label><input type="text" id="m_pov" oninput="triggerUpdate()" placeholder="Ej: 1234"></div>
 <div class="form-group">
 <label style="color:var(--accent);">Matrícula (3 últimas letras)</label>
@@ -1798,6 +1799,7 @@ if (savedLeg[inputId].linked) {
 element.dataset.linked = savedLeg[inputId].linked;
 if(savedLeg[inputId].linked === "false") { element.readOnly = false; element.classList.remove('inherited-input'); let btn = el(`lbtn_${targetId.split('_').pop()}_${currentId}`); if(btn) { btn.textContent = "🔓"; btn.title = "Restablecer herencia"; } } 
 else { element.readOnly = true; element.classList.add('inherited-input'); let btn = el(`lbtn_${targetId.split('_').pop()}_${currentId}`); if(btn) { btn.textContent = "🔗"; btn.title = "Desvincular"; } }
+}
 }
 }
 }
