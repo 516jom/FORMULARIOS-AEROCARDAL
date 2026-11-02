@@ -530,7 +530,7 @@ let startIdx = 1; for (let prev = 0; prev < cIdx; prev++) { startIdx += smsData[
 cat.items.forEach((item, itemIdx) => { let realIdx = startIdx + itemIdx; pSmsHtml += `<tr><td class="text-center">${realIdx}</td><td>${item}</td><td class="tick-cell" id="p_sms_${realIdx}"></td></tr>`; });
 });
 pSmsHtml += `</table>
-<div style="border:1px solid black; padding:8px; height:100px; margin-bottom:5px; overflow:hidden; color:#000000!important;">
+<div style="border:1px solid black; padding:8px; height:250px; margin-bottom:5px; overflow:hidden; color:#000000!important;">
 <b style="color:#000000!important;">Observaciones:</b><br>
 <span id="p_sms_obs" style="color:#000000!important; font-weight:bold;"></span>
 </div>
