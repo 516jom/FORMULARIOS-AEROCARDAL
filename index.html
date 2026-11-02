@@ -35,7 +35,7 @@ details.card[open] summary .arrow::after, details.param-section[open] summary .a
 details.card summary:hover, details.param-section summary:hover { background-color: rgba(255,255,255,0.1); }
 
 /* GRILLAS CON RESTRICCIÓN ESTRUCTURAL DE ANCHO (FIX SUPERPOSICIÓN IPAD) */
-.grid-header { display: grid; grid-template-columns: 0.7fr 1fr 1fr; gap: 0.8rem; }
+.grid-header { display: grid; grid-template-columns: 0.6fr 1fr 1fr; gap: 0.8rem; }
 .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.8rem; }
 .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.8rem; }
 .grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.5rem; }
@@ -86,7 +86,7 @@ hr.divider { border: 0; border-top: 1px solid var(--border-color); margin: 12px 
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
 /* =======================================================
-ESTILOS DE IMPRESIÓN Y SALTO DE PÁGINA (COMPATIBLE SAFARI IPAD)
+ESTILOS DE IMPRESIÓN Y SALTO DE PÁGINA (COMPATIBLE NATIVO E IPAD)
 ======================================================= */
 @media print {
 @page { size: letter portrait; margin: 6mm; }
@@ -99,22 +99,13 @@ body { background-color: white; color: black; -webkit-print-color-adjust: exact;
 #print-layout td, #print-layout span, #print-layout div, #print-layout th { color: black; }
 #print-layout table, #print-layout td, #print-layout th { border-color: black; }
 
-/* REGLAS COMPATIBLES WEBKIT/SAFARI PARA SALTOS DE PÁGINA */
-.page-break { 
+/* REGLAS ESTRICTAS PARA SALTOS DE PÁGINA */
+.html2pdf__page-break {
+  page-break-before: always !important;
+  break-before: page !important;
   display: block !important;
+  height: 0 !important;
   clear: both !important;
-  page-break-before: always !important; 
-  break-before: page !important; 
-  position: relative !important;
-  float: none !important;
-  height: auto !important;
-  padding-top: 5px; 
-}
-.print-section-wrapper {
-  display: block !important;
-  width: 100% !important;
-  page-break-inside: avoid !important;
-  break-inside: avoid !important;
 }
 
 .print-table { width: 100%; border-collapse: collapse; border: 1px solid black; margin-bottom: 6px; page-break-inside: avoid; break-inside: avoid; table-layout: fixed; }
@@ -207,13 +198,14 @@ Volver a la app
 </div>
 <header>
 <h1>AEROCARDAL - PLANIFICACIÓN OPERACIONAL</h1>
-<div class="subtitle">VERSIÓN 7.11 (UI & PRINT FIX)</div>
+<div class="subtitle">VERSIÓN 7.2 (UI & DEFINITIVE SAFARI PRINT FIX)</div>
 </header>
 <main id="mobile-ui" class="container">
 <!-- CABECERA GENERAL -->
 <div class="card">
 <div class="card-header"><span>📋 CABECERA DEL VUELO (OBLIGATORIA PARA CLOUD)</span></div>
 <div class="card-content">
+<!-- FIX SUPERPOSICIÓN: Reducción explícita de un 30% del primer elemento (0.6fr) -->
 <div class="grid-header">
 <div class="form-group"><label style="color:var(--accent);">Fecha del Vuelo</label><input type="date" id="m_fecha_gen" onchange="triggerUpdate()"></div>
 <div class="form-group"><label style="color:var(--accent);">Folio BIT</label><input type="text" id="m_folio_gen" placeholder="Folio Único..." oninput="triggerUpdate()"></div>
@@ -287,7 +279,7 @@ Volver a la app
 </details>
 <!-- CONTENEDOR DINÁMICO DE INSPECCIONES DE SEGURIDAD -->
 <div id="sec-forms-wrapper"></div>
-<!-- RESUMEN GENERAL (Modificado según Referencia LOGBOOK) -->
+<!-- RESUMEN GENERAL -->
 <div class="card" style="border-color: var(--accent); margin-top: 1.2rem;">
 <div class="card-header"><span style="color:var(--accent);">⏱️ RESUMEN GENERAL OPERACIONAL</span></div>
 <div class="card-content">
@@ -329,7 +321,7 @@ Volver a la app
 </div>
 <!-- LAYOUT DE IMPRESIÓN (PDF) -->
 <div id="print-layout">
-<div id="print_op_container" class="print-section-wrapper" style="text-transform: uppercase;">
+<div id="print_op_container" style="text-transform: uppercase;">
 <table class="print-table" style="border-bottom: none;">
 <tr>
 <td colspan="2" class="no-border-x" style="width: 30%;"><div class="logo-text">AEROCARDAL</div></td>
@@ -499,7 +491,7 @@ updateAll();
 setTimeout(() => { window.print(); }, 300);
 }
 // =======================================================
-// IMPRESIÓN HACIA DRIVE (COMPATIBILIDAD CON SALTOS SAFARI IPAD)
+// IMPRESIÓN HACIA DRIVE (CORRECCIÓN DEFINITIVA DE SALTOS HTML2PDF)
 // =======================================================
 async function accionGenerarPDF() {
 mostrarCargando("Renderizando PDF para Drive...\n(Espera unos segundos)");
@@ -538,7 +530,7 @@ if(mainUi) mainUi.style.display = 'none';
 if(header) header.style.display = 'none';
 if(fab) fab.style.display = 'none';
 
-// 2. Ajuste de viewport para renderizado responsivo de html2canvas en Safari
+// 2. Ajuste de viewport para renderizado responsivo
 vpMeta.setAttribute('content', 'width=800, initial-scale=1.0');
 printDiv.style.display = 'block';
 printDiv.style.width = '800px'; 
@@ -547,11 +539,13 @@ window.scrollTo(0, 0);
 // 3. Tiempo de renderizado para recalcular layout en WebKit y DOM Tree
 await new Promise(resolve => setTimeout(resolve, 800));
 
+// CONFIGURACIÓN ESTRICTA DE HTML2PDF.JS PARA FORZAR SALTOS DE PÁGINA
 const opt = {
 margin: 5,
 filename: 'temp.pdf',
-image: { type: 'jpeg', quality: 1 },
-pagebreak: { mode: ['css', 'legacy'], before: '.page-break' },
+image: { type: 'jpeg', quality: 0.98 },
+// Obligamos a la librería a basarse en la clase nativa y evitar cortar filas (tr)
+pagebreak: { mode: ['css', 'legacy'], before: '.html2pdf__page-break', avoid: ['tr', 'table'] },
 html2canvas: { 
 scale: 2, 
 useCORS: true, 
@@ -716,7 +710,9 @@ smsHtml += `<div class="form-category-title">${cat.cat}</div>`;
 cat.items.forEach(item => { smsHtml += `<label class="checkbox-item"><input type="checkbox" id="m_sms_${globalIndex}" onchange="triggerUpdate()"> <span>${globalIndex}. ${item}</span></label>`; globalIndex++; });
 });
 el('sms_form_container').innerHTML = smsHtml;
-let pSmsHtml = `<div id="print_sms_container" class="page-break print-section-wrapper"
+
+// INYECCIÓN CLAVE: html2pdf__page-break ANTES DEL CONTENEDOR PARA FORZAR EL SALTO
+let pSmsHtml = `<div class="html2pdf__page-break"></div><div id="print_sms_container"
 style="font-family:Arial, sans-serif; box-sizing:border-box;">
 <table class="print-table" style="border-bottom:none;">
 <tr>
@@ -1105,7 +1101,7 @@ WINDS:
 }
 function getPrintParamsHTML(id, index) {
 return `
-<div id="p_t${id}_params_wrapper" style="display:none;" class="print-section-wrapper">
+<div id="p_t${id}_params_wrapper" style="display:none;">
 <table class="print-table" id="p_t${id}_tbl_params">
 <tr>
 <td colspan="6" class="tramo-title-gray">
@@ -1489,8 +1485,8 @@ webHtml += `</div>
 </div>
 </details>`;
 
-let pSecHtml = `<div id="print_sec_container_${dateKey}"
-class="page-break print-section-wrapper"
+// INYECCIÓN CLAVE: html2pdf__page-break ANTES DEL CONTENEDOR PARA FORZAR EL SALTO
+let pSecHtml = `<div class="html2pdf__page-break"></div><div id="print_sec_container_${dateKey}"
 style="font-family:Arial, sans-serif; box-sizing:border-box; margin-top: 10px;">
 <table class="print-table" style="border-bottom:none;">
 <tr>
