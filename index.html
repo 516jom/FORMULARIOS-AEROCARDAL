@@ -9,7 +9,7 @@
 <script src="https://accounts.google.com/gsi/client" async defer onload="initDrive()"></script>
 <style>
 /* =======================================================
-VARIABLES Y ESTILOS TEMA OSCURO (ESCALA DE GRISES)
+VARIABLES Y ESTILOS TEMA OSCURO (PANTALLA)
 ======================================================= */
 :root {
 --bg-main: #111111; --bg-card: #1E1E1E; --bg-input: #0A0A0A;
@@ -34,7 +34,6 @@ details.card[open] summary { border-bottom: 1px solid var(--border-color); }
 details.card[open] summary .arrow::after, details.param-section[open] summary .arrow::after { content: "▲"; }
 details.card summary:hover, details.param-section summary:hover { background-color: rgba(255,255,255,0.1); }
 
-/* GRILLAS CON RESTRICCIÓN ESTRUCTURAL DE ANCHO */
 .grid-header { display: grid; grid-template-columns: 0.6fr 1fr 1fr; gap: 0.8rem; }
 .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.8rem; }
 .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.8rem; }
@@ -87,55 +86,50 @@ hr.divider { border: 0; border-top: 1px solid var(--border-color); margin: 12px 
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
 /* =======================================================
-ESTILOS DE IMPRESIÓN NATIVA Y PDF
+ESTILOS DE IMPRESIÓN NATIVA Y PDF (NEGRO ABSOLUTO Y SALTO DE PÁGINA ESTRICTO)
 ======================================================= */
 @media print {
   @page { size: letter portrait; margin: 6mm; }
   body { background-color: white !important; color: black !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; display: block !important; }
   #mobile-ui, header, .fab-container, #loading-overlay { display: none !important; }
   
-  /* Restricción eliminada para Windows Print */
   #print-layout { display: block !important; width: 100% !important; max-width: none !important; position: relative !important; float: none !important; }
   
-  /* ESTA REGLA ARREGLA EL PROBLEMA DE WINDOWS: Obliga a cada bloque a imprimir en una página nueva */
-  .pdf-page { page-break-after: always !important; break-after: page !important; width: 100% !important; overflow: visible !important; }
+  /* SALTO DE PÁGINA ESTRICTO PARA WINDOWS ENTRE CADA BLOQUE PDF */
+  .pdf-page { page-break-after: always !important; break-after: page !important; width: 100% !important; overflow: visible !important; display: block !important; }
   .pdf-page:last-of-type { page-break-after: auto !important; break-after: auto !important; }
 }
 
 #print-layout { display: none; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 9px; line-height: 1.35; background: white; color: black; width: 100%; max-width: 800px; margin: 0 auto; }
-#print-layout td, #print-layout span, #print-layout div, #print-layout th { color: black; box-sizing: border-box; }
-#print-layout table, #print-layout td, #print-layout th { border-color: black; }
 
-/* NUEVA CLASE ESTRUCTURAL: AISLA LOS CONTENEDORES PARA EVITAR COLAPSO DE MEMORIA EN IOS */
-.pdf-page {
-  background: white;
-  width: 100%;
-  box-sizing: border-box;
-}
+/* FORZAR NEGRO ABSOLUTO EN TODO EL CONTENIDO IMPRESO / PDF */
+#print-layout td, #print-layout span, #print-layout div, #print-layout th { color: #000000 !important; box-sizing: border-box; }
+#print-layout table, #print-layout td, #print-layout th { border-color: black !important; }
+
+.pdf-page { background: white; width: 100%; box-sizing: border-box; }
 
 .print-table { width: 100%; border-collapse: collapse; border: 1px solid black; margin-bottom: 6px; page-break-inside: avoid; break-inside: avoid; table-layout: fixed; }
 .print-table th, .print-table td, .tramo-grid td { border: 1px solid black; padding: 3px 5px; vertical-align: middle; font-size: 9px; }
-.logo-text { font-size: 15px; font-weight: 900; font-style: italic; letter-spacing: -0.5px; }
-.main-title { font-size: 13px; font-weight: bold; text-align: center; letter-spacing: 0.5px; text-transform: uppercase; }
-.summary-title-pdf, .tramo-title-darkgray { background-color: #E0E0E0 !important; color: black !important; text-align: center; font-weight: bold; padding: 3px; letter-spacing: 1px; font-size: 11px; text-transform: uppercase; border: 1px solid black; }
-.tramo-title-gray { background-color: #F0F0F0 !important; color: black !important; text-align: center; font-weight: bold; padding: 3px; letter-spacing: 0.5px; font-size: 10px; text-transform: uppercase; border: 1px solid black; }
-.header-cell, .gray-bg { background-color: #F5F5F5 !important; font-weight: bold; text-align: center; font-size: 8.5px; color: black !important; }
-.summary-total-bg { background-color: #EBEBEB !important; font-weight: bold; font-size: 9px !important; }
+.logo-text { font-size: 15px; font-weight: 900; font-style: italic; letter-spacing: -0.5px; color: #000000 !important; }
+.main-title { font-size: 13px; font-weight: bold; text-align: center; letter-spacing: 0.5px; text-transform: uppercase; color: #000000 !important; }
+.summary-title-pdf, .tramo-title-darkgray { background-color: #E0E0E0 !important; color: #000000 !important; text-align: center; font-weight: bold; padding: 3px; letter-spacing: 1px; font-size: 11px; text-transform: uppercase; border: 1px solid black; }
+.tramo-title-gray { background-color: #F0F0F0 !important; color: #000000 !important; text-align: center; font-weight: bold; padding: 3px; letter-spacing: 0.5px; font-size: 10px; text-transform: uppercase; border: 1px solid black; }
+.header-cell, .gray-bg { background-color: #F5F5F5 !important; font-weight: bold; text-align: center; font-size: 8.5px; color: #000000 !important; }
+.summary-total-bg { background-color: #EBEBEB !important; font-weight: bold; font-size: 9px !important; color: #000000 !important; }
 
-/* Compactación de tablas */
-.compact-th td { padding: 1px 1px !important; line-height: 1.0; font-size: 8px !important; }
-.compact-td td { padding: 1px 1px !important; font-size: 8.5px !important; }
+.compact-th td { padding: 1px 1px !important; line-height: 1.0; font-size: 8px !important; color: #000000 !important; }
+.compact-td td { padding: 1px 1px !important; font-size: 8.5px !important; color: #000000 !important; }
 
-.cell-data { height: 16px; font-weight: bold; text-align: center; font-size: 9.5px; }
-.bold { font-weight: bold; font-size: 9.5px; }
+.cell-data { height: 16px; font-weight: bold; text-align: center; font-size: 9.5px; color: #000000 !important; }
+.bold { font-weight: bold; font-size: 9.5px; color: #000000 !important; }
 .print-form-table { width: 100%; border-collapse: collapse; border: 1px solid black; font-size: 9px; page-break-inside: avoid; break-inside: avoid; }
-.print-form-table td, .print-form-table th { border: 1px solid black; padding: 4px 6px; line-height: 1.35; }
-.sms-cat-row { background-color: #F5F5F5 !important; font-weight: bold; text-align: center; font-size: 9.5px; }
-.tick-cell { text-align: center; font-weight: bold; font-size: 13px !important; vertical-align: middle; }
+.print-form-table td, .print-form-table th { border: 1px solid black; padding: 4px 6px; line-height: 1.35; color: #000000 !important; }
+.sms-cat-row { background-color: #F5F5F5 !important; font-weight: bold; text-align: center; font-size: 9.5px; color: #000000 !important; }
+.tick-cell { text-align: center; font-weight: bold; font-size: 13px !important; vertical-align: middle; color: #000000 !important; }
 .strike-cell { position: relative; }
 .strike-cell::after { content: ""; position: absolute; left: 15%; right: 15%; top: 50%; border-top: 1px solid black; }
 .tramo-grid { width: 100%; border-collapse: collapse; }
-.tramo-grid td { padding: 2px 4px; text-align: center; }
+.tramo-grid td { padding: 2px 4px; text-align: center; color: #000000 !important; }
 .text-left { text-align: left !important; }
 .text-center { text-align: center !important; }
 .no-border-x { border-left: none !important; border-right: none !important; }
@@ -159,7 +153,7 @@ Volver a la app
 
 <header>
 <h1>AEROCARDAL - PLANIFICACIÓN OPERACIONAL</h1>
-<div class="subtitle">VERSIÓN 8.1 (WINDOWS PRINT ARREGLADO + FUENTES ULTRA NÍTIDAS)</div>
+<div class="subtitle">VERSIÓN 8.2 (NEGRO ABSOLUTO EN PDF + SALTO DE PÁGINA WINDOWS CORREGIDO)</div>
 </header>
 <main id="mobile-ui" class="container">
 <!-- CABECERA GENERAL -->
@@ -263,9 +257,9 @@ Volver a la app
 <button class="btn-print" style="background:var(--accent); color:black; padding: 10px 14px;" onclick="prepararImpresionNativa()">🖨️ Imprimir (PC)</button>
 </div>
 
-<!-- LAYOUT DE IMPRESIÓN (PDF) ESTRUCTURA MODULAR -->
+<!-- LAYOUT DE IMPRESIÓN (PDF) ESTRUCTURA MODULAR CON CLASE .pdf-page EN CADA SECCIÓN -->
 <div id="print-layout">
-  <!-- PÁGINA 1: CONSOLIDADO (Aislada estructuralmente con .pdf-page) -->
+  <!-- PÁGINA 1: CONSOLIDADO -->
   <div class="pdf-page" id="print_op_container" style="text-transform: uppercase;">
     <table class="print-table" style="border-bottom: none;">
       <tr>
@@ -286,18 +280,15 @@ Volver a la app
     <div id="p_resumen_operacional_container"></div>
   </div>
 
-  <!-- PÁGINA 2: SMS (Será inyectado aquí) -->
+  <!-- PÁGINA 2: SMS (Envuelto con .pdf-page para salto de página garantizado) -->
   <div id="print-sms-wrapper"></div>
   
-  <!-- PÁGINAS 3+: SEC FORMS (Serán inyectados aquí) -->
+  <!-- PÁGINAS 3+: SEC FORMS (Envueltos individualmente con .pdf-page) -->
   <div id="print-sec-forms-wrapper"></div>
 </div>
 
 <!-- SCRIPT PRINCIPAL -->
 <script>
-// =======================================================
-// INTEGRACIÓN NATIVA CON GOOGLE DRIVE API V3
-// =======================================================
 const GOOGLE_CLIENT_ID = '520674997135-nqt9gjl00t89lkfstqglk4iecfan44em.apps.googleusercontent.com'; 
 const DRIVE_API_URL = 'https://www.googleapis.com/drive/v3/files';
 let tokenClient;
@@ -362,11 +353,8 @@ try { let pov = val('m_pov'); let folderId = await getOrCreateFolder(pov); let f
 
 function prepararImpresionNativa() { updateAll(); setTimeout(() => { window.print(); }, 300); }
 
-// =======================================================
-// NUEVO MOTOR MODULAR DE PDF (ANTI-CRASH IOS) CON NITIDEZ ULTRA
-// =======================================================
 async function accionGenerarPDF() {
-mostrarCargando("Ensamblando PDF por páginas...\n(Alta Resolución iOS)");
+mostrarCargando("Ensamblando PDF por páginas...\n(Calidad Alta & Texto Negro)");
 setTimeout(async () => {
 try {
 let pov = val('m_pov'); let pdfBlob = await generarBlobPDF();
@@ -394,19 +382,15 @@ vpMeta.setAttribute('content', 'width=800, initial-scale=1.0');
 printLayout.style.display = 'block'; printLayout.style.width = '800px'; 
 window.scrollTo(0, 0);
 
-// Dar tiempo al navegador para recalcular el DOM
 await new Promise(resolve => setTimeout(resolve, 800));
 
-// Capturar TODAS las páginas aisladas
 const pages = document.querySelectorAll('.pdf-page');
 
-// Configuración Base de html2pdf
 const opt = {
 margin: [5, 5, 5, 5],
 filename: 'temp.pdf',
-image: { type: 'jpeg', quality: 1.0 }, // Máxima calidad de compresión
-pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', 'table'] }, // Mantenemos avoid para que no corte filas por la mitad si un consolidado es súper largo
-// ESCALA SUBIDA A 3 PARA MÁXIMA NITIDEZ DE FUENTES. (Como lo procesamos por página, la RAM del iPad lo aguanta sin problemas)
+image: { type: 'jpeg', quality: 1.0 },
+pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', 'table'] },
 html2canvas: { scale: 3, useCORS: true, logging: false, width: 800, windowWidth: 800, letterRendering: true },
 jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
 };
@@ -414,7 +398,6 @@ jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
 try {
 if (pages.length === 0) throw new Error("No se detectaron páginas para renderizar.");
 
-// PROCESAMIENTO SECUENCIAL ESTRUCTURAL:
 let worker = html2pdf().set(opt).from(pages[0]).toPdf();
 
 for (let i = 1; i < pages.length; i++) {
@@ -426,16 +409,12 @@ for (let i = 1; i < pages.length; i++) {
 return await worker.output('blob');
 
 } finally {
-// Restauración de UI
 await new Promise(resolve => setTimeout(resolve, 100));
 vpMeta.setAttribute('content', originalVp); printLayout.style.display = 'none'; printLayout.style.width = '';
 if(mainUi) mainUi.style.display = ''; if(header) header.style.display = ''; if(fab) fab.style.display = 'flex'; window.scrollTo(0, originalScroll);
 }
 }
 
-// =======================================================
-// LÓGICA DE LA APLICACIÓN 
-// =======================================================
 const el = id => document.getElementById(id);
 const val = id => el(id)?.value || '';
 const setVal = (id, v) => { if(el(id)) el(id).value = v; };
@@ -517,7 +496,7 @@ cat.items.forEach(item => { smsHtml += `<label class="checkbox-item"><input type
 });
 el('sms_form_container').innerHTML = smsHtml;
 
-// FORMULARIO SMS ENVUELTO EN SU PROPIO .pdf-page
+// FORMULARIO SMS ENVUELTO EN SU PROPIO .pdf-page (AISLADO PARA SALTO DE PÁGINA)
 let pSmsHtml = `
 <div class="pdf-page" id="print_sms_container" style="font-family:Arial, sans-serif; box-sizing:border-box;">
 <table class="print-table" style="border-bottom:none;">
@@ -761,7 +740,7 @@ webHtml += `<details class="card" style="border-color: var(--accent);"><summary 
 secData.forEach(item => { let isChecked = st[item.id] !== undefined ? st[item.id] : st.sinObs; webHtml += `<label class="checkbox-item"><input type="checkbox" id="m_sec_${dateKey}_${item.id}" ${isChecked ? 'checked' : ''} ${st.sinObs ? 'disabled' : ''} onchange="handleSecCheckboxChange('${dateKey}', '${item.id}')"> <span><b>${item.id}.</b> ${item.text}</span></label>`; });
 webHtml += `</div><div class="signature-block"><div>III. COMANDANTE DE LA AERONAVE:</div><div class="grid-3" style="margin-top:8px;"><div>Nombre: <strong id="sec_ui_nombre_${dateKey}" style="color:var(--accent);">______________________</strong></div><div>RUT: <strong id="sec_ui_rut_${dateKey}" style="color:var(--accent);">______________________</strong></div><div>Licencia: <strong id="sec_ui_licencia_${dateKey}" style="color:var(--accent);">______________________</strong></div></div></div></div></details>`;
 
-// FORMULARIOS SEC ENVUELTOS EN SU PROPIO .pdf-page
+// CADA FORMULARIO SEC ENCAPSULADO CON SU PROPIA CLASE .pdf-page (AISLADO ESTRICTAMENTE)
 let pSecHtml = `
 <div class="pdf-page" id="print_sec_container_${dateKey}" style="font-family:Arial, sans-serif; box-sizing:border-box;">
 <table class="print-table" style="border-bottom:none;">
