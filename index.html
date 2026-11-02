@@ -1,4 +1,4 @@
-<index>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -92,28 +92,20 @@ ESTILOS DE IMPRESIÓN NATIVA Y PDF (NEGRO ABSOLUTO Y SALTO DE PÁGINA ESTRICTO)
   @page { size: letter portrait; margin: 6mm; }
   body { background-color: white !important; color: black !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; display: block !important; }
   #mobile-ui, header, .fab-container, #loading-overlay { display: none !important; }
-  
   #print-layout { display: block !important; width: 100% !important; max-width: none !important; position: relative !important; float: none !important; }
-  
-  /* SALTO DE PÁGINA ESTRICTO BLINDADO CONTRA DESBORDAMIENTOS (OVERFLOWS) DE WINDOWS */
-  .pdf-page { 
-    page-break-after: always !important; 
-    break-after: page !important; 
-    page-break-inside: avoid !important; /* CRÍTICO: Prohíbe a Chrome intentar cortar tablas a la mitad */
-    break-inside: avoid !important; 
-    width: 100% !important; 
-    overflow: hidden !important; 
-    display: block !important; 
-    clear: both !important;
-    margin-bottom: 10px !important;
-  }
+  .pdf-page { page-break-after: always !important; break-after: page !important; page-break-inside: avoid !important; break-inside: avoid !important; width: 100% !important; overflow: hidden !important; display: block !important; clear: both !important; margin-bottom: 10px !important; }
   .pdf-page:last-of-type { page-break-after: auto !important; break-after: auto !important; margin-bottom: 0 !important; }
 }
 
 #print-layout { display: none; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 9px; line-height: 1.35; background: white; color: black; width: 100%; max-width: 800px; margin: 0 auto; }
 
-/* FORZAR NEGRO ABSOLUTO EN TODO EL CONTENIDO IMPRESO / PDF */
-#print-layout td, #print-layout span, #print-layout div, #print-layout th { color: #000000 !important; box-sizing: border-box; }
+/* FORZAR NEGRO ABSOLUTO (BLINDAJE PARA IOS WEB-KIT TEXT FILL) */
+#print-layout td, #print-layout span, #print-layout div, #print-layout th, #print-layout b, #print-layout strong { 
+  color: #000000 !important; 
+  -webkit-text-fill-color: #000000 !important; 
+  box-sizing: border-box; 
+  opacity: 1 !important;
+}
 #print-layout table, #print-layout td, #print-layout th { border-color: black !important; }
 
 .pdf-page { background: white; width: 100%; box-sizing: border-box; }
@@ -127,7 +119,7 @@ ESTILOS DE IMPRESIÓN NATIVA Y PDF (NEGRO ABSOLUTO Y SALTO DE PÁGINA ESTRICTO)
 .header-cell, .gray-bg { background-color: #F5F5F5 !important; font-weight: bold; text-align: center; font-size: 8.5px; color: #000000 !important; }
 .summary-total-bg { background-color: #EBEBEB !important; font-weight: bold; font-size: 9px !important; color: #000000 !important; }
 
-.compact-th td { padding: 1px 1px !important; line-height: 1.0; font-size: 8px !important; color: #000000 !important; }
+.compact-th td { padding: 1px 1px !important; line-height: 1.0; font-size: 8px !important; font-weight: bold !important; color: #000000 !important; }
 .compact-td td { padding: 1px 1px !important; font-size: 8.5px !important; color: #000000 !important; }
 
 .cell-data { height: 16px; font-weight: bold; text-align: center; font-size: 9.5px; color: #000000 !important; }
@@ -163,7 +155,7 @@ Volver a la app
 
 <header>
 <h1>AEROCARDAL - PLANIFICACIÓN OPERACIONAL</h1>
-<div class="subtitle">VERSIÓN 8.3 (CORRECCIÓN DESBORDAMIENTO WINDOWS)</div>
+<div class="subtitle">VERSIÓN 8.4 (NEGRO ABSOLUTO EN TEXTOS IOS)</div>
 </header>
 <main id="mobile-ui" class="container">
 <!-- CABECERA GENERAL -->
@@ -267,7 +259,7 @@ Volver a la app
 <button class="btn-print" style="background:var(--accent); color:black; padding: 10px 14px;" onclick="prepararImpresionNativa()">🖨️ Imprimir (PC)</button>
 </div>
 
-<!-- LAYOUT DE IMPRESIÓN (PDF) ESTRUCTURA MODULAR CON CLASE .pdf-page EN CADA SECCIÓN -->
+<!-- LAYOUT DE IMPRESIÓN (PDF) ESTRUCTURA MODULAR -->
 <div id="print-layout">
   <!-- PÁGINA 1: CONSOLIDADO -->
   <div class="pdf-page" id="print_op_container" style="text-transform: uppercase;">
@@ -278,22 +270,22 @@ Volver a la app
         <td colspan="1" style="border-left: none; width: 20%;"></td>
       </tr>
       <tr>
-        <td style="width: 25%;">FECHA: <span id="p_fecha_gen"></span></td>
-        <td style="width: 20%;">P.O.V.: N° <span id="p_pov"></span></td>
-        <td style="width: 25%;">MATERIAL: <span id="p_material" class="bold"></span></td>
-        <td colspan="2">MATRICULA: <span id="p_matricula" class="bold"></span></td>
+        <td style="width: 25%;"><b>FECHA:</b> <span id="p_fecha_gen"></span></td>
+        <td style="width: 20%;"><b>P.O.V.: N°</b> <span id="p_pov"></span></td>
+        <td style="width: 25%;"><b>MATERIAL:</b> <span id="p_material" class="bold"></span></td>
+        <td colspan="2"><b>MATRICULA:</b> <span id="p_matricula" class="bold"></span></td>
       </tr>
-      <tr><td colspan="5" class="gray-bg" style="text-align:left;">FOLIO BIT: <span id="p_folio_gen" class="bold"></span></td></tr>
+      <tr><td colspan="5" class="gray-bg" style="text-align:left;"><b>FOLIO BIT:</b> <span id="p_folio_gen" class="bold"></span></td></tr>
     </table>
     <div id="print-tramos-container"></div>
     <div id="print-params-container" style="margin-top: 15px;"></div>
     <div id="p_resumen_operacional_container"></div>
   </div>
 
-  <!-- PÁGINA 2: SMS (Envuelto con .pdf-page para salto de página garantizado) -->
+  <!-- PÁGINA 2: SMS -->
   <div id="print-sms-wrapper"></div>
   
-  <!-- PÁGINAS 3+: SEC FORMS (Envueltos individualmente con .pdf-page) -->
+  <!-- PÁGINAS 3+: SEC FORMS -->
   <div id="print-sec-forms-wrapper"></div>
 </div>
 
@@ -506,8 +498,6 @@ cat.items.forEach(item => { smsHtml += `<label class="checkbox-item"><input type
 });
 el('sms_form_container').innerHTML = smsHtml;
 
-// FORMULARIO SMS ENVUELTO EN SU PROPIO .pdf-page (AISLADO PARA SALTO DE PÁGINA)
-// ATENCIÓN: Altura de "Observaciones" reducida a 250px para que Chrome no se vuelva loco con desbordamientos
 let pSmsHtml = `
 <div class="pdf-page" id="print_sms_container" style="font-family:Arial, sans-serif; box-sizing:border-box;">
 <table class="print-table" style="border-bottom:none;">
@@ -516,8 +506,8 @@ let pSmsHtml = `
 <td colspan="2" class="no-border-x" style="vertical-align:bottom; padding-bottom:4px;"><div class="main-title">ÍNDICE DE SEGURIDAD OPERACIONAL (SMS)</div></td>
 <td colspan="1" style="border-left:none; width:20%;"></td>
 </tr>
-<tr><td style="width:25%;">FECHA: <span id="sms_p_fecha"></span></td><td style="width:20%;">P.O.V.: N° <span id="sms_p_pov"></span></td><td style="width:25%;">MATERIAL: <span id="sms_p_material" class="bold"></span></td><td colspan="2">MATRICULA: <span id="sms_p_matricula" class="bold"></span></td></tr>
-<tr><td colspan="5" class="gray-bg" style="text-align:left;">TRIPULACIÓN: <span id="sms_p_tripulacion" class="bold"></span></td></tr>
+<tr><td style="width:25%;"><b>FECHA:</b> <span id="sms_p_fecha"></span></td><td style="width:20%;"><b>P.O.V.: N°</b> <span id="sms_p_pov"></span></td><td style="width:25%;"><b>MATERIAL:</b> <span id="sms_p_material" class="bold"></span></td><td colspan="2"><b>MATRICULA:</b> <span id="sms_p_matricula" class="bold"></span></td></tr>
+<tr><td colspan="5" class="gray-bg" style="text-align:left;"><b>TRIPULACIÓN:</b> <span id="sms_p_tripulacion" class="bold"></span></td></tr>
 </table>
 <table style="width:100%; border-collapse:collapse; border:none; table-layout:fixed; margin-top:4px;">
 <tr>
@@ -527,19 +517,19 @@ let pSmsHtml = `
 globalIndex = 1; const roman = ["I", "II", "III", "IV", "V"];
 [0, 1].forEach(cIdx => {
 let cat = smsData[cIdx]; let titleClean = cat.cat.includes('.') ? cat.cat.split('.')[1].trim() : cat.cat;
-pSmsHtml += `<tr class="sms-cat-row"><td style="width:25px;">${roman[cIdx]}</td><td>${titleClean}</td><td style="width:30px;">SI</td></tr>`;
+pSmsHtml += `<tr class="sms-cat-row"><td style="width:25px;"><b>${roman[cIdx]}</b></td><td><b>${titleClean}</b></td><td style="width:30px;"><b>SI</b></td></tr>`;
 let startIdx = 1; for (let prev = 0; prev < cIdx; prev++) { startIdx += smsData[prev].items.length; }
 cat.items.forEach((item, itemIdx) => { let realIdx = startIdx + itemIdx; pSmsHtml += `<tr><td class="text-center">${realIdx}</td><td>${item}</td><td class="tick-cell" id="p_sms_${realIdx}"></td></tr>`; });
 });
 pSmsHtml += `</table></td><td style="width:50%; vertical-align:top; padding-left:4px; border:none;"><table class="print-form-table" style="width:100%; margin-bottom:5px;">`;
 [2, 3, 4].forEach(cIdx => {
 let cat = smsData[cIdx]; let titleClean = cat.cat.includes('.') ? cat.cat.split('.')[1].trim() : cat.cat;
-pSmsHtml += `<tr class="sms-cat-row"><td style="width:25px;">${roman[cIdx]}</td><td>${titleClean}</td><td style="width:30px;">SI</td></tr>`;
+pSmsHtml += `<tr class="sms-cat-row"><td style="width:25px;"><b>${roman[cIdx]}</b></td><td><b>${titleClean}</b></td><td style="width:30px;"><b>SI</b></td></tr>`;
 let startIdx = 1; for (let prev = 0; prev < cIdx; prev++) { startIdx += smsData[prev].items.length; }
 cat.items.forEach((item, itemIdx) => { let realIdx = startIdx + itemIdx; pSmsHtml += `<tr><td class="text-center">${realIdx}</td><td>${item}</td><td class="tick-cell" id="p_sms_${realIdx}"></td></tr>`; });
 });
 pSmsHtml += `</table>
-<div style="border:1px solid black; padding:8px; height:250px; margin-bottom:5px; overflow:hidden;"><b>Observaciones:</b><br><span id="p_sms_obs"></span></div>
+<div style="border:1px solid black; padding:8px; height:100px; margin-bottom:5px; overflow:hidden;"><b>Observaciones:</b><br><span id="p_sms_obs"></span></div>
 <div style="padding-top:2px;"><b>Nombre y firma:</b><span id="sms_p_nombre" style="border-bottom:1px solid black; display:inline-block; width:220px; height:14px;" class="bold"></span></div>
 </td></tr></table></div>`;
 el('print-sms-wrapper').innerHTML = pSmsHtml;
@@ -606,37 +596,45 @@ return `<div class="card" id="leg_card_${id}">
 
 function getPrintLegHTML(id, index) {
 return `<table class="print-table" id="print_leg_${id}">
-<tr><td colspan="6" class="tramo-title-darkgray">${ordinals[index] || index + '°'} TRAMO</td></tr>
-<tr class="header-cell"><td class="col-fecha">FECHA <span id="p_t${id}_fecha" style="font-weight:normal;"></span><br><span class="text-xs" style="font-weight:normal;">FOLIO: <span id="p_t${id}_folio"></span></span></td><td class="col-horo">HOROMETRO</td><td class="col-block">BLOCK TIME</td><td class="col-air">AIR TIME</td><td class="col-fuel">COMBUSTIBLE</td><td class="col-land">ATERRIZAJE</td></tr>
+<tr><td colspan="6" class="tramo-title-darkgray"><b>${ordinals[index] || index + '°'} TRAMO</b></td></tr>
+<tr class="header-cell">
+<td class="col-fecha"><b>FECHA</b> <span id="p_t${id}_fecha" style="font-weight:normal;"></span><br><span class="text-xs" style="font-weight:normal;"><b>FOLIO:</b> <span id="p_t${id}_folio"></span></span></td>
+<td class="col-horo"><b>HOROMETRO</b></td><td class="col-block"><b>BLOCK TIME</b></td><td class="col-air"><b>AIR TIME</b></td><td class="col-fuel"><b>COMBUSTIBLE</b></td><td class="col-land"><b>ATERRIZAJE</b></td>
+</tr>
 <tr>
 <td style="padding:0; vertical-align:top;"><table class="tramo-grid" style="border:none;"><tr><td class="text-left no-border-t no-border-x">Destino: <span id="p_t${id}_dest" class="bold"></span></td></tr><tr><td class="text-left no-border-x">Desde: <span id="p_t${id}_desde" class="bold"></span></td></tr><tr><td class="text-left no-border-b no-border-x">Distancia: <span id="p_t${id}_dist" class="bold"></span></td></tr></table></td>
 <td style="padding:0; vertical-align:top;"><table class="tramo-grid" style="border:none; height:100%;"><tr><td class="no-border-t no-border-x" style="height:33.3%;"><span id="p_t${id}_horo_top" class="bold text-md"></span></td></tr><tr><td class="no-border-x" style="height:33.3%;"><span id="p_t${id}_horo_bot" class="bold text-md"></span></td></tr><tr><td class="no-border-b no-border-x" style="height:33.3%;"><span id="p_t${id}_horo_diff" class="bold text-md"></span></td></tr></table></td>
 <td style="padding:0; vertical-align:top;"><table class="tramo-grid" style="border:none; height:100%;"><tr><td class="no-border-t no-border-x" style="height:33.3%;"><span id="p_t${id}_time_in" class="bold text-md"></span></td></tr><tr><td class="no-border-x" style="height:33.3%;"><span id="p_t${id}_time_out" class="bold text-md"></span></td></tr><tr><td class="no-border-b no-border-x" style="height:33.3%;"><span id="p_t${id}_block_diff" class="bold text-md"></span></td></tr></table></td>
 <td style="padding:0; vertical-align:top;"><table class="tramo-grid" style="border:none; height:100%;"><tr><td class="no-border-t no-border-x" style="height:33.3%;"><span id="p_t${id}_time_on" class="bold text-md"></span></td></tr><tr><td class="no-border-x" style="height:33.3%;"><span id="p_t${id}_time_off" class="bold text-md"></span></td></tr><tr><td class="no-border-b no-border-x" style="height:33.3%;"><span id="p_t${id}_air_diff" class="bold text-md"></span></td></tr></table></td>
-<td style="padding:0; vertical-align:top;"><table class="tramo-grid" style="border:none; height:100%;"><tr><td class="no-border-t no-border-x text-left text-xs" style="height:33.3%;">ON: <span id="p_t${id}_fuel_on" class="bold text-sm" style="float:right;"></span></td></tr><tr><td class="no-border-x text-left text-xs" style="height:33.3%;">OFF: <span id="p_t${id}_fuel_off" class="bold text-sm" style="float:right;"></span></td></tr><tr><td class="no-border-b no-border-x text-left text-xs" style="height:33.3%;">Used: <span id="p_t${id}_fuel_diff" class="bold text-sm" style="float:right;"></span></td></tr></table></td>
-<td style="padding:0; vertical-align:top;"><table class="tramo-grid" style="border:none; height:100%;"><tr><td class="no-border-t no-border-x text-center bold text-xs" style="height:50%;" id="p_t${id}_dn_text"></td></tr><tr><td class="no-border-x text-center text-xs" style="background:#f0f0f0;">APP. IFR</td></tr><tr><td class="no-border-b no-border-x text-center bold text-xs" style="height:50%;" id="p_t${id}_pnp_text"></td></tr></table></td>
+<td style="padding:0; vertical-align:top;"><table class="tramo-grid" style="border:none; height:100%;"><tr><td class="no-border-t no-border-x text-left text-xs" style="height:33.3%;"><b>ON:</b> <span id="p_t${id}_fuel_on" class="bold text-sm" style="float:right;"></span></td></tr><tr><td class="no-border-x text-left text-xs" style="height:33.3%;"><b>OFF:</b> <span id="p_t${id}_fuel_off" class="bold text-sm" style="float:right;"></span></td></tr><tr><td class="no-border-b no-border-x text-left text-xs" style="height:33.3%;"><b>Used:</b> <span id="p_t${id}_fuel_diff" class="bold text-sm" style="float:right;"></span></td></tr></table></td>
+<td style="padding:0; vertical-align:top;"><table class="tramo-grid" style="border:none; height:100%;"><tr><td class="no-border-t no-border-x text-center bold text-xs" style="height:50%;" id="p_t${id}_dn_text"></td></tr><tr><td class="no-border-x text-center text-xs" style="background:#f0f0f0;"><b>APP. IFR</b></td></tr><tr><td class="no-border-b no-border-x text-center bold text-xs" style="height:50%;" id="p_t${id}_pnp_text"></td></tr></table></td>
 </tr>
-<tr><td colspan="6" style="padding:3px 5px;"><span style="display:inline-block; width:15%;">PAX: <span id="p_t${id}_pax" class="bold"></span></span><span style="display:inline-block; width:20%;">PF: <span id="p_t${id}_pf" class="bold"></span></span><span style="display:inline-block; width:20%;">PM: <span id="p_t${id}_pm" class="bold"></span></span><span style="display:inline-block; width:40%;" id="p_t${id}_winds_wrapper">WINDS: <span id="p_t${id}_winds" class="bold"></span></span></td></tr>
+<tr><td colspan="6" style="padding:3px 5px;">
+<span style="display:inline-block; width:15%; font-weight:bold; color:#000000!important;">PAX: <span id="p_t${id}_pax" class="bold"></span></span>
+<span style="display:inline-block; width:20%; font-weight:bold; color:#000000!important;">PF: <span id="p_t${id}_pf" class="bold"></span></span>
+<span style="display:inline-block; width:20%; font-weight:bold; color:#000000!important;">PM: <span id="p_t${id}_pm" class="bold"></span></span>
+<span style="display:inline-block; width:40%; font-weight:bold; color:#000000!important;" id="p_t${id}_winds_wrapper">WINDS: <span id="p_t${id}_winds" class="bold"></span></span>
+</td></tr>
 </table>`;
 }
 
 function getPrintParamsHTML(id, index) {
 return `<div id="p_t${id}_params_wrapper" style="display:none;">
 <table class="print-table" id="p_t${id}_tbl_params">
-<tr><td colspan="6" class="tramo-title-gray">PARÁMETROS TRAMO N° ${index}</td></tr>
-<tr class="gray-bg text-left text-sm"><td style="width:16.6%;">FL:</td><td style="width:16.6%;">N° MACH:</td><td style="width:16.6%;">ISA:</td><td style="width:16.6%;">OAT:</td><td style="width:16.6%;">GSPD:</td><td style="width:16.6%;">FF L/R:</td></tr>
+<tr><td colspan="6" class="tramo-title-gray"><b>PARÁMETROS TRAMO N° ${index}</b></td></tr>
+<tr class="gray-bg text-left text-sm"><td style="width:16.6%;"><b>FL:</b></td><td style="width:16.6%;"><b>N° MACH:</b></td><td style="width:16.6%;"><b>ISA:</b></td><td style="width:16.6%;"><b>OAT:</b></td><td style="width:16.6%;"><b>GSPD:</b></td><td style="width:16.6%;"><b>FF L/R:</b></td></tr>
 <tr><td class="cell-data"><span id="p_t${id}_fl"></span></td><td class="cell-data"><span id="p_t${id}_mach"></span></td><td class="cell-data"><span id="p_t${id}_isa"></span></td><td class="cell-data"><span id="p_t${id}_oat"></span></td><td class="cell-data"><span id="p_t${id}_gspd"></span></td><td class="cell-data"><span id="p_t${id}_ff"></span></td></tr>
-<tr class="gray-bg text-left text-sm"><td>N1:</td><td>N2:</td><td>OIL T°:</td><td>OIL P:</td><td>ITT:</td><td>OBS:</td></tr>
+<tr class="gray-bg text-left text-sm"><td><b>N1:</b></td><td><b>N2:</b></td><td><b>OIL T°:</b></td><td><b>OIL P:</b></td><td><b>ITT:</b></td><td><b>OBS:</b></td></tr>
 <tr><td class="cell-data"><span id="p_t${id}_n1"></span></td><td class="cell-data"><span id="p_t${id}_n2"></span></td><td class="cell-data"><span id="p_t${id}_oilt"></span></td><td class="cell-data"><span id="p_t${id}_oilp"></span></td><td class="cell-data"><span id="p_t${id}_itt"></span></td><td class="cell-data"><span id="p_t${id}_obs"></span></td></tr>
 </table>
 <table class="print-table" id="p_t${id}_tbl_fuel">
-<tr><td colspan="5" class="tramo-title-gray">COMBUSTIBLE TRAMO N° ${index}</td></tr>
-<tr class="gray-bg text-sm"><td style="width:20%; text-align:left;">ID WP</td>${[1,2,3,4].map(w =>`<td style="width:20%;" class="text-center"><span id="p_t${id}_wp${w}"></span></td>`).join('')}</tr>
-<tr><td class="gray-bg text-sm text-left">Plan</td>${[1,2,3,4].map(w =>`<td class="cell-data"><span id="p_t${id}_cp${w}"></span></td>`).join('')}</tr>
-<tr><td class="gray-bg text-sm text-left">Real</td>${[1,2,3,4].map(w =>`<td class="cell-data"><span id="p_t${id}_cr${w}"></span></td>`).join('')}</tr>
+<tr><td colspan="5" class="tramo-title-gray"><b>COMBUSTIBLE TRAMO N° ${index}</b></td></tr>
+<tr class="gray-bg text-sm"><td style="width:20%; text-align:left;"><b>ID WP</b></td>${[1,2,3,4].map(w =>`<td style="width:20%;" class="text-center"><b><span id="p_t${id}_wp${w}"></span></b></td>`).join('')}</tr>
+<tr><td class="gray-bg text-sm text-left"><b>Plan</b></td>${[1,2,3,4].map(w =>`<td class="cell-data"><span id="p_t${id}_cp${w}"></span></td>`).join('')}</tr>
+<tr><td class="gray-bg text-sm text-left"><b>Real</b></td>${[1,2,3,4].map(w =>`<td class="cell-data"><span id="p_t${id}_cr${w}"></span></td>`).join('')}</tr>
 </table>
-<table class="print-table" id="p_t${id}_tbl_meteo"><tr><td class="tramo-title-gray tramo-title-left">METEOROLOGÍA TRAMO N° ${index}</td></tr><tr><td style="height:25px; vertical-align:top; text-align:left;"><span id="p_t${id}_meteo"></span></td></tr></table>
-<table class="print-table" id="p_t${id}_tbl_atc" style="margin-bottom:12px;"><tr><td class="tramo-title-gray tramo-title-left">AUTORIZACIÓN ATC TRAMO N° ${index}</td></tr><tr><td style="height:25px; vertical-align:top; text-align:left;"><span id="p_t${id}_atc"></span></td></tr></table>
+<table class="print-table" id="p_t${id}_tbl_meteo"><tr><td class="tramo-title-gray tramo-title-left"><b>METEOROLOGÍA TRAMO N° ${index}</b></td></tr><tr><td style="height:25px; vertical-align:top; text-align:left;"><span id="p_t${id}_meteo"></span></td></tr></table>
+<table class="print-table" id="p_t${id}_tbl_atc" style="margin-bottom:12px;"><tr><td class="tramo-title-gray tramo-title-left"><b>AUTORIZACIÓN ATC TRAMO N° ${index}</b></td></tr><tr><td style="height:25px; vertical-align:top; text-align:left;"><span id="p_t${id}_atc"></span></td></tr></table>
 </div>`;
 }
 
@@ -751,7 +749,6 @@ webHtml += `<details class="card" style="border-color: var(--accent);"><summary 
 secData.forEach(item => { let isChecked = st[item.id] !== undefined ? st[item.id] : st.sinObs; webHtml += `<label class="checkbox-item"><input type="checkbox" id="m_sec_${dateKey}_${item.id}" ${isChecked ? 'checked' : ''} ${st.sinObs ? 'disabled' : ''} onchange="handleSecCheckboxChange('${dateKey}', '${item.id}')"> <span><b>${item.id}.</b> ${item.text}</span></label>`; });
 webHtml += `</div><div class="signature-block"><div>III. COMANDANTE DE LA AERONAVE:</div><div class="grid-3" style="margin-top:8px;"><div>Nombre: <strong id="sec_ui_nombre_${dateKey}" style="color:var(--accent);">______________________</strong></div><div>RUT: <strong id="sec_ui_rut_${dateKey}" style="color:var(--accent);">______________________</strong></div><div>Licencia: <strong id="sec_ui_licencia_${dateKey}" style="color:var(--accent);">______________________</strong></div></div></div></div></details>`;
 
-// CADA FORMULARIO SEC ENCAPSULADO CON SU PROPIA CLASE .pdf-page (AISLADO ESTRICTAMENTE)
 let pSecHtml = `
 <div class="pdf-page" id="print_sec_container_${dateKey}" style="font-family:Arial, sans-serif; box-sizing:border-box;">
 <table class="print-table" style="border-bottom:none;">
@@ -760,19 +757,19 @@ let pSecHtml = `
 <td colspan="2" class="no-border-x" style="vertical-align:bottom; padding-bottom:4px;"><div class="main-title">INSPECCIÓN DE SEGURIDAD DE AERONAVES</div></td>
 <td colspan="1" style="border-left:none; width:20%;"></td>
 </tr>
-<tr><td style="width:25%;">FECHA: <span class="bold">${dateKey}</span></td><td style="width:20%;">P.O.V.: N° <span id="sec_p_vuelo_${dateKey}" class="bold"></span></td><td style="width:25%;">MATERIAL: <span id="sec_p_material_${dateKey}" class="bold"></span></td><td colspan="2">MATRICULA: <span id="sec_p_matricula_${dateKey}" class="bold"></span></td></tr>
-<tr><td colspan="2" class="gray-bg text-left">ESTACIONAMIENTO: <span id="sec_p_estacionamiento_${dateKey}" class="bold"></span></td><td class="gray-bg text-left">ORIGEN: <span id="sec_p_origen_${dateKey}" class="bold"></span></td><td colspan="2" class="gray-bg text-left">DESTINO: <span id="sec_p_destino_${dateKey}" class="bold"></span></td></tr>
-<tr><td colspan="2">H. INICIO: <span id="sec_p_hinicio_${dateKey}" class="bold">${currentHInicio}</span></td><td>H. TÉRMINO: <span id="sec_p_htermino_${dateKey}" class="bold">${currentHTermino}</span></td><td colspan="2">ESTADO ALERTA: <span id="sec_p_alerta_${dateKey}" class="bold"></span></td></tr>
+<tr><td style="width:25%;"><b>FECHA:</b> <span class="bold">${dateKey}</span></td><td style="width:20%;"><b>P.O.V.: N°</b> <span id="sec_p_vuelo_${dateKey}" class="bold"></span></td><td style="width:25%;"><b>MATERIAL:</b> <span id="sec_p_material_${dateKey}" class="bold"></span></td><td colspan="2"><b>MATRICULA:</b> <span id="sec_p_matricula_${dateKey}" class="bold"></span></td></tr>
+<tr><td colspan="2" class="gray-bg text-left"><b>ESTACIONAMIENTO:</b> <span id="sec_p_estacionamiento_${dateKey}" class="bold"></span></td><td class="gray-bg text-left"><b>ORIGEN:</b> <span id="sec_p_origen_${dateKey}" class="bold"></span></td><td colspan="2" class="gray-bg text-left"><b>DESTINO:</b> <span id="sec_p_destino_${dateKey}" class="bold"></span></td></tr>
+<tr><td colspan="2"><b>H. INICIO:</b> <span id="sec_p_hinicio_${dateKey}" class="bold">${currentHInicio}</span></td><td><b>H. TÉRMINO:</b> <span id="sec_p_htermino_${dateKey}" class="bold">${currentHTermino}</span></td><td colspan="2"><b>ESTADO ALERTA:</b> <span id="sec_p_alerta_${dateKey}" class="bold"></span></td></tr>
 </table>
 <table class="print-form-table" style="border-bottom:none; margin-top:4px;">`;
 secData.forEach(item => { let splitIdx = item.text.indexOf(':'); let title = splitIdx > -1 ? item.text.substring(0, splitIdx + 1) : item.text; let desc = splitIdx > -1 ? item.text.substring(splitIdx + 1) : ""; pSecHtml += `<tr><td style="text-align:justify;"><b>${item.id}. ${title}</b><br>${desc}</td><td style="width:35px;" class="tick-cell" id="p_sec_${dateKey}_${item.id}"></td></tr>`; });
 pSecHtml += `</table>
 <table class="print-form-table" style="border-top:none;">
 <tr>
-<td style="width:40%; vertical-align:top; height:50px;"><div class="bold" style="margin-bottom:4px;">III. COMANDANTE DE LA AERONAVE:</div><div class="text-center" style="margin-bottom:8px;">NOMBRE Y APELLIDOS</div><div class="text-center"><span id="sec_p_nombre_${dateKey}" class="bold text-md"></span></div></td>
-<td style="width:20%; vertical-align:top;"><div class="text-center" style="margin-bottom:20px;">RUT</div><div class="text-center"><span id="sec_p_rut_${dateKey}" class="bold text-md"></span></div></td>
-<td style="width:20%; vertical-align:top;"><div class="text-center" style="margin-bottom:20px;">LICENCIA</div><div class="text-center"><span id="sec_p_licencia_${dateKey}" class="bold text-md"></span></div></td>
-<td style="width:20%; vertical-align:top;"><div class="text-center">FIRMA</div></td>
+<td style="width:40%; vertical-align:top; height:50px;"><div class="bold" style="margin-bottom:4px;">III. COMANDANTE DE LA AERONAVE:</div><div class="text-center" style="margin-bottom:8px;"><b>NOMBRE Y APELLIDOS</b></div><div class="text-center"><span id="sec_p_nombre_${dateKey}" class="bold text-md"></span></div></td>
+<td style="width:20%; vertical-align:top;"><div class="text-center" style="margin-bottom:20px;"><b>RUT</b></div><div class="text-center"><span id="sec_p_rut_${dateKey}" class="bold text-md"></span></div></td>
+<td style="width:20%; vertical-align:top;"><div class="text-center" style="margin-bottom:20px;"><b>LICENCIA</b></div><div class="text-center"><span id="sec_p_licencia_${dateKey}" class="bold text-md"></span></div></td>
+<td style="width:20%; vertical-align:top;"><div class="text-center"><b>FIRMA</b></div></td>
 </tr>
 </table></div>`;
 printHtml += pSecHtml;
@@ -794,8 +791,8 @@ if(el(`p_t${id}_tbl_params`)) el(`p_t${id}_tbl_params`).style.display = hasPrm ?
 const dnVal = val(`m_t${id}_dn`), pnpVal = val(`m_t${id}_pnp`); setTxt(`p_t${id}_dn_text`, dnVal === 'D' ? 'DIURNO' : (dnVal === 'N' ? 'NOCTURNO' : '')); setTxt(`p_t${id}_pnp_text`, pnpVal === 'P' ? 'PRECISIÓN' : (pnpVal === 'NP' ? 'NO PRECISIÓN' : ''));
 });
 let picIni = val('m_pic_ini').trim().toUpperCase() || 'CAP'; let sicIni = val('m_sic_ini').trim().toUpperCase() || 'FO';
-let t1Html = `<table class="print-table" style="margin-top:0; border-top:none; text-transform:uppercase;"><tr><td colspan="12" class="summary-title-pdf">CONSOLIDADO LIBRO DE VUELO</td></tr><tr class="gray-bg compact-th"><td class="text-center">FECHA</td><td class="text-center">HORO<br>INICIAL</td><td class="text-center">HORO<br>FINAL</td><td class="text-center">DUTY<br>INICIO-TÉRMINO</td><td class="text-center">DUTY<br>TOTAL</td><td class="text-center">BLOCK<br>TOTAL</td><td class="text-center">AIR<br>TOTAL</td><td class="text-center">COMB.<br>INICIAL</td><td class="text-center">COMB.<br>FINAL</td><td class="text-center">COMB.<br>RECARGA</td><td class="text-center">COMB.<br>USADO</td><td class="text-center">PAX</td></tr>`;
-let t2Html = `<table class="print-table" style="margin-top:8px; text-transform:uppercase;"><tr><td colspan="9" class="summary-title-pdf">CONSOLIDADO BITÁCORA PILOTOS</td></tr><tr class="gray-bg compact-th"><td class="text-center" rowspan="2" style="width:10%; vertical-align:middle;">FECHA</td><td class="text-center" colspan="2" style="width:20%;">BLOCK TOTAL</td><td class="text-center" colspan="2" style="width:20%;">AIR TOTAL</td><td class="text-center" colspan="2" style="width:30%;">HORAS COMO PF</td><td class="text-center" colspan="2" style="width:20%;">DEP / AT</td></tr><tr class="gray-bg compact-th"><td class="text-center">CAP: ${picIni}</td><td class="text-center">FO: ${sicIni}</td><td class="text-center">CAP: ${picIni}</td><td class="text-center">FO: ${sicIni}</td><td class="text-center">CAP: ${picIni}</td><td class="text-center">FO: ${sicIni}</td><td class="text-center">CAP: ${picIni}</td><td class="text-center">FO: ${sicIni}</td></tr>`;
+let t1Html = `<table class="print-table" style="margin-top:0; border-top:none; text-transform:uppercase;"><tr><td colspan="12" class="summary-title-pdf"><b>CONSOLIDADO LIBRO DE VUELO</b></td></tr><tr class="gray-bg compact-th"><td class="text-center"><b>FECHA</b></td><td class="text-center"><b>HORO<br>INICIAL</b></td><td class="text-center"><b>HORO<br>FINAL</b></td><td class="text-center"><b>DUTY<br>INICIO-TÉRMINO</b></td><td class="text-center"><b>DUTY<br>TOTAL</b></td><td class="text-center"><b>BLOCK<br>TOTAL</b></td><td class="text-center"><b>AIR<br>TOTAL</b></td><td class="text-center"><b>COMB.<br>INICIAL</b></td><td class="text-center"><b>COMB.<br>FINAL</b></td><td class="text-center"><b>COMB.<br>RECARGA</b></td><td class="text-center"><b>COMB.<br>USADO</b></td><td class="text-center"><b>PAX</b></td></tr>`;
+let t2Html = `<table class="print-table" style="margin-top:8px; text-transform:uppercase;"><tr><td colspan="9" class="summary-title-pdf"><b>CONSOLIDADO BITÁCORA PILOTOS</b></td></tr><tr class="gray-bg compact-th"><td class="text-center" rowspan="2" style="width:10%; vertical-align:middle;"><b>FECHA</b></td><td class="text-center" colspan="2" style="width:20%;"><b>BLOCK TOTAL</b></td><td class="text-center" colspan="2" style="width:20%;"><b>AIR TOTAL</b></td><td class="text-center" colspan="2" style="width:30%;"><b>HORAS COMO PF</b></td><td class="text-center" colspan="2" style="width:20%;"><b>DEP / AT</b></td></tr><tr class="gray-bg compact-th"><td class="text-center"><b>CAP: ${picIni}</b></td><td class="text-center"><b>FO: ${sicIni}</b></td><td class="text-center"><b>CAP: ${picIni}</b></td><td class="text-center"><b>FO: ${sicIni}</b></td><td class="text-center"><b>CAP: ${picIni}</b></td><td class="text-center"><b>FO: ${sicIni}</b></td><td class="text-center"><b>CAP: ${picIni}</b></td><td class="text-center"><b>FO: ${sicIni}</b></td></tr>`;
 let totDuty = 0, totBlock = 0, totAir = 0, totFuel = 0, totPax = ""; let totP1Block = 0, totP1Air = 0, totP1Dep = 0, totP1PFBlock = 0, totP1PFAir = 0; let totP2Block = 0, totP2Air = 0, totP2Dep = 0, totP2PFBlock = 0, totP2PFAir = 0;
 dailyStats.forEach(ds => {
 let shortDate = ds.date.length >= 10 ? ds.date.substring(5) : ds.date; let dStr = ds.duration > 0 ? `${minsToTime(ds.duration)} (${formatDec(ds.duration/60)})` : '--:--'; let bStr = ds.block > 0 ? `${minsToTime(ds.block)} (${formatDec(ds.block/60)})` : '--:--'; let aStr = ds.air > 0 ? `${minsToTime(ds.air)} (${formatDec(ds.air/60)})` : '--:--';
@@ -807,9 +804,9 @@ t2Html += `<tr class="compact-td"><td class="text-center bold">${shortDate}</td>
 totP1Block += ds.p1.block; totP1Air += ds.p1.air; totP1Dep += ds.p1.dep; totP1PFBlock += ds.p1.pf_block; totP1PFAir += ds.p1.pf_air; totP2Block += ds.p2.block; totP2Air += ds.p2.air; totP2Dep += ds.p2.dep; totP2PFBlock += ds.p2.pf_block; totP2PFAir += ds.p2.pf_air;
 });
 if (dailyStats.length > 1) {
-t1Html += `<tr class="compact-td"><td class="text-center summary-total-bg" colspan="4">TOTAL ACUMULADO</td><td class="text-center summary-total-bg">${totDuty > 0 ? `${minsToTime(totDuty)} (${formatDec(totDuty/60)})` : '--'}</td><td class="text-center summary-total-bg">${totBlock > 0 ? `${minsToTime(totBlock)} (${formatDec(totBlock/60)})` : '--'}</td><td class="text-center summary-total-bg">${totAir > 0 ? `${minsToTime(totAir)} (${formatDec(totAir/60)})` : '--'}</td><td class="text-center summary-total-bg">${formatDec(initF)}</td><td class="text-center summary-total-bg">${formatDec(finF)}</td><td class="text-center summary-total-bg">${formatDec(refF)}</td><td class="text-center summary-total-bg">${formatDec(totFuel)}</td><td class="text-center summary-total-bg">${totPax}</td></tr>`;
+t1Html += `<tr class="compact-td"><td class="text-center summary-total-bg" colspan="4"><b>TOTAL ACUMULADO</b></td><td class="text-center summary-total-bg"><b>${totDuty > 0 ? `${minsToTime(totDuty)} (${formatDec(totDuty/60)})` : '--'}</b></td><td class="text-center summary-total-bg"><b>${totBlock > 0 ? `${minsToTime(totBlock)} (${formatDec(totBlock/60)})` : '--'}</b></td><td class="text-center summary-total-bg"><b>${totAir > 0 ? `${minsToTime(totAir)} (${formatDec(totAir/60)})` : '--'}</b></td><td class="text-center summary-total-bg"><b>${formatDec(initF)}</b></td><td class="text-center summary-total-bg"><b>${formatDec(finF)}</b></td><td class="text-center summary-total-bg"><b>${formatDec(refF)}</b></td><td class="text-center summary-total-bg"><b>${formatDec(totFuel)}</b></td><td class="text-center summary-total-bg"><b>${totPax}</b></td></tr>`;
 let totP1PFStr = totP1PFBlock > 0 || totP1PFAir > 0 ? `${minsToTime(totP1PFBlock)} (${formatDec(totP1PFBlock/60)})<br><span class="text-xs">AIR: ${minsToTime(totP1PFAir)} (${formatDec(totP1PFAir/60)})</span>` : '--'; let totP2PFStr = totP2PFBlock > 0 || totP2PFAir > 0 ? `${minsToTime(totP2PFBlock)} (${formatDec(totP2PFBlock/60)})<br><span class="text-xs">AIR: ${minsToTime(totP2PFAir)} (${formatDec(totP2PFAir/60)})</span>` : '--';
-t2Html += `<tr class="compact-td"><td class="text-center summary-total-bg">TOTAL ACUMULADO</td><td class="text-center summary-total-bg">${totP1Block > 0 ? `${minsToTime(totP1Block)} (${formatDec(totP1Block/60)})` : '--'}</td><td class="text-center summary-total-bg">${totP2Block > 0 ? `${minsToTime(totP2Block)} (${formatDec(totP2Block/60)})` : '--'}</td><td class="text-center summary-total-bg">${totP1Air > 0 ? `${minsToTime(totP1Air)} (${formatDec(totP1Air/60)})` : '--'}</td><td class="text-center summary-total-bg">${totP2Air > 0 ? `${minsToTime(totP2Air)} (${formatDec(totP2Air/60)})` : '--'}</td><td class="text-center summary-total-bg" style="line-height:1.2;">${totP1PFStr}</td><td class="text-center summary-total-bg" style="line-height:1.2;">${totP2PFStr}</td><td class="text-center summary-total-bg">${totP1Dep}</td><td class="text-center summary-total-bg">${totP2Dep}</td></tr>`;
+t2Html += `<tr class="compact-td"><td class="text-center summary-total-bg"><b>TOTAL ACUMULADO</b></td><td class="text-center summary-total-bg"><b>${totP1Block > 0 ? `${minsToTime(totP1Block)} (${formatDec(totP1Block/60)})` : '--'}</b></td><td class="text-center summary-total-bg"><b>${totP2Block > 0 ? `${minsToTime(totP2Block)} (${formatDec(totP2Block/60)})` : '--'}</b></td><td class="text-center summary-total-bg"><b>${totP1Air > 0 ? `${minsToTime(totP1Air)} (${formatDec(totP1Air/60)})` : '--'}</b></td><td class="text-center summary-total-bg"><b>${totP2Air > 0 ? `${minsToTime(totP2Air)} (${formatDec(totP2Air/60)})` : '--'}</b></td><td class="text-center summary-total-bg" style="line-height:1.2;"><b>${totP1PFStr}</b></td><td class="text-center summary-total-bg" style="line-height:1.2;"><b>${totP2PFStr}</b></td><td class="text-center summary-total-bg"><b>${totP1Dep}</b></td><td class="text-center summary-total-bg"><b>${totP2Dep}</b></td></tr>`;
 }
 t1Html += `</table>`; t2Html += `</table>`; el('p_resumen_operacional_container').innerHTML = t1Html + t2Html;
 const sinObs = el('m_sms_sin_obs')?.checked; setTxt('sms_p_fecha', val('m_fecha_gen')); setTxt('sms_p_pov', val('m_pov')); setTxt('sms_p_matricula', val('m_matricula')); setTxt('sms_p_material', val('m_material'));
