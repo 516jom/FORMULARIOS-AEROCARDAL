@@ -306,10 +306,10 @@ Volver a la app
 <!-- LOS 5 BOTONES DE ACCIÓN (FAB) -->
 <div class="fab-container">
 <button class="btn btn-danger" style="padding: 10px 14px;" onclick="clearAllData()">🗑️ Limpiar</button>
-<button class="btn btn-outline" style="border-color:var(--warning); color:var(--warning); padding: 10px 14px;" onclick="ensureAuth(accionLeer)">📂 Drive</button>
+<button class="btn btn-outline" style="border-color:var(--warning); color:var(--warning); padding: 10px 14px;" onclick="ensureAuth(accionLeer)">📂 Cargar</button>
 <button class="btn btn-outline" style="border-color:var(--success); color:var(--success); padding: 10px 14px;" onclick="ensureAuth(accionGuardar)">💾 Guardar</button>
-<button class="btn-print" style="background:#4285F4; color:white; padding: 10px 14px;" onclick="ensureAuth(accionGenerarPDF)">☁️ PDF Drive</button>
-<button class="btn-print" style="background:var(--accent); color:black; padding: 10px 14px;" onclick="prepararImpresionNativa()">🖨️ PDF Nativo</button>
+<button class="btn-print" style="background:#4285F4; color:white; padding: 10px 14px;" onclick="ensureAuth(accionGenerarPDF)">☁️ GenerarPDF (IPAD)</button>
+<button class="btn-print" style="background:var(--accent); color:black; padding: 10px 14px;" onclick="prepararImpresionNativa()">🖨️ Imprimir (PC)</button>
 </div>
 <!-- LAYOUT DE IMPRESIÓN (PDF) -->
 <div id="print-layout">
@@ -597,7 +597,7 @@ triggerUpdate();
 }
 const pilotosDB = {
 "JA": { "nombre": "José Arellano G.", "rut": "8.621.855-0", "licencia": "1641" },
-"SS": { "nombre": "Sebastian Saez X.", "rut": "99.999.999-9", "licencia": "9999" },
+"SS": { "nombre": "Sebastian Saez X.", "rut": "99.999.999-9", "licencia": "3535" },
 "FC": { "nombre": "Felipe Casampere G.", "rut": "15.781.258-0", "licencia": "2114" },
 "AC": { "nombre": "Alfredo Castro C.", "rut": "7.155.617-4", "licencia": "920" },
 "RE": { "nombre": "Ricardo Espinosa U.", "rut": "6.827.727-2", "licencia": "674" },
@@ -606,14 +606,14 @@ const pilotosDB = {
 "EI": { "nombre": "Esteban Inostroza L.", "rut": "12.120.521-1", "licencia": "1256" },
 "AK": { "nombre": "Alexander Kaufmann R.", "rut": "6.926.596-0", "licencia": "4185" },
 "EM": { "nombre": "Enrique Mancini A.", "rut": "19.310.398-7", "licencia": "4148" },
-"NM": { "nombre": "Nicolás Mohr S.", "rut": "18239044-5", "licencia": "8888" },
+"NM": { "nombre": "Nicolás Mohr S.", "rut": "18239044-5", "licencia": "2064" },
 "CM": { "nombre": "Claudio Muñoz P.", "rut": "7.999.795-1", "licencia": "921" },
 "FE": { "nombre": "Francisco Esquivel C.", "rut": "88.888.888-8", "licencia": "1899" },
 "JO": { "nombre": "José Oyarzún M.", "rut": "16.239.897-0", "licencia": "2387" },
 "FCH":{ "nombre": "Fernando Chacana X.", "rut": "66.666.666-6", "licencia": "2604" },
 "MS": { "nombre": "Mauricio Solano P.", "rut": "14.322.271-3", "licencia": "1657" },
 "CV": { "nombre": "Cristhian Vázquez F.", "rut": "15.549.870-6", "licencia": "3435" },
-"MV": { "nombre": "Matías Vega C.", "rut": "77.777.777-7", "licencia": "7777" },
+"MV": { "nombre": "Matías Vega C.", "rut": "77.777.777-7", "licencia": "2420" },
 "KW": { "nombre": "Klaus Wobbe S.", "rut": "14.103.915-6", "licencia": "1741" },
 "CB": { "nombre": "Cristobal Briones B.", "rut": "10.345.076-4", "licencia": "2740" }
 };
