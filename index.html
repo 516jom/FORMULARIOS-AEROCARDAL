@@ -100,13 +100,14 @@ ESTILOS DE IMPRESIÓN NATIVA Y PDF (NEGRO ABSOLUTO Y SALTO DE PÁGINA ESTRICTO)
 #print-layout { display: none; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 9px; line-height: 1.35; background: white; color: black; width: 100%; max-width: 800px; margin: 0 auto; }
 
 /* FORZAR NEGRO ABSOLUTO (BLINDAJE PARA IOS WEB-KIT TEXT FILL) */
-#print-layout td, #print-layout span, #print-layout div, #print-layout th, #print-layout b, #print-layout strong { 
+#print-layout * { 
   color: #000000 !important; 
   -webkit-text-fill-color: #000000 !important; 
-  box-sizing: border-box; 
+  -webkit-font-smoothing: none !important; /* Previene afinamiento de fuentes en Retina/iOS */
+  text-rendering: geometricPrecision !important;
   opacity: 1 !important;
 }
-#print-layout table, #print-layout td, #print-layout th { border-color: black !important; }
+#print-layout table, #print-layout td, #print-layout th { border-color: black !important; box-sizing: border-box; }
 
 .pdf-page { background: white; width: 100%; box-sizing: border-box; }
 
@@ -155,7 +156,7 @@ Volver a la app
 
 <header>
 <h1>AEROCARDAL - PLANIFICACIÓN OPERACIONAL</h1>
-<div class="subtitle">VERSIÓN 8.4 (NEGRO ABSOLUTO EN TEXTOS IOS)</div>
+<div class="subtitle">VERSIÓN 8.5 (BLINDAJE TOTAL ETIQUETAS IOS)</div>
 </header>
 <main id="mobile-ui" class="container">
 <!-- CABECERA GENERAL -->
@@ -259,7 +260,7 @@ Volver a la app
 <button class="btn-print" style="background:var(--accent); color:black; padding: 10px 14px;" onclick="prepararImpresionNativa()">🖨️ Imprimir (PC)</button>
 </div>
 
-<!-- LAYOUT DE IMPRESIÓN (PDF) ESTRUCTURA MODULAR -->
+<!-- LAYOUT DE IMPRESIÓN (PDF) ESTRUCTURA MODULAR CON ESTILOS INLINE BLINDADOS -->
 <div id="print-layout">
   <!-- PÁGINA 1: CONSOLIDADO -->
   <div class="pdf-page" id="print_op_container" style="text-transform: uppercase;">
@@ -270,12 +271,12 @@ Volver a la app
         <td colspan="1" style="border-left: none; width: 20%;"></td>
       </tr>
       <tr>
-        <td style="width: 25%;"><b>FECHA:</b> <span id="p_fecha_gen"></span></td>
-        <td style="width: 20%;"><b>P.O.V.: N°</b> <span id="p_pov"></span></td>
-        <td style="width: 25%;"><b>MATERIAL:</b> <span id="p_material" class="bold"></span></td>
-        <td colspan="2"><b>MATRICULA:</b> <span id="p_matricula" class="bold"></span></td>
+        <td style="width: 25%; color: #000000 !important;"><b style="color: #000000 !important;">FECHA:</b> <span id="p_fecha_gen" style="color: #000000 !important; font-weight: bold;"></span></td>
+        <td style="width: 20%; color: #000000 !important;"><b style="color: #000000 !important;">P.O.V.: N°</b> <span id="p_pov" style="color: #000000 !important; font-weight: bold;"></span></td>
+        <td style="width: 25%; color: #000000 !important;"><b style="color: #000000 !important;">MATERIAL:</b> <span id="p_material" style="color: #000000 !important; font-weight: bold;"></span></td>
+        <td colspan="2" style="color: #000000 !important;"><b style="color: #000000 !important;">MATRICULA:</b> <span id="p_matricula" style="color: #000000 !important; font-weight: bold;"></span></td>
       </tr>
-      <tr><td colspan="5" class="gray-bg" style="text-align:left;"><b>FOLIO BIT:</b> <span id="p_folio_gen" class="bold"></span></td></tr>
+      <tr><td colspan="5" class="gray-bg" style="text-align:left; color: #000000 !important;"><b style="color: #000000 !important;">FOLIO BIT:</b> <span id="p_folio_gen" style="color: #000000 !important; font-weight: bold;"></span></td></tr>
     </table>
     <div id="print-tramos-container"></div>
     <div id="print-params-container" style="margin-top: 15px;"></div>
@@ -506,8 +507,8 @@ let pSmsHtml = `
 <td colspan="2" class="no-border-x" style="vertical-align:bottom; padding-bottom:4px;"><div class="main-title">ÍNDICE DE SEGURIDAD OPERACIONAL (SMS)</div></td>
 <td colspan="1" style="border-left:none; width:20%;"></td>
 </tr>
-<tr><td style="width:25%;"><b>FECHA:</b> <span id="sms_p_fecha"></span></td><td style="width:20%;"><b>P.O.V.: N°</b> <span id="sms_p_pov"></span></td><td style="width:25%;"><b>MATERIAL:</b> <span id="sms_p_material" class="bold"></span></td><td colspan="2"><b>MATRICULA:</b> <span id="sms_p_matricula" class="bold"></span></td></tr>
-<tr><td colspan="5" class="gray-bg" style="text-align:left;"><b>TRIPULACIÓN:</b> <span id="sms_p_tripulacion" class="bold"></span></td></tr>
+<tr><td style="width:25%; color:#000000!important;"><b style="color:#000000!important;">FECHA:</b> <span id="sms_p_fecha" style="color:#000000!important; font-weight:bold;"></span></td><td style="width:20%; color:#000000!important;"><b style="color:#000000!important;">P.O.V.: N°</b> <span id="sms_p_pov" style="color:#000000!important; font-weight:bold;"></span></td><td style="width:25%; color:#000000!important;"><b style="color:#000000!important;">MATERIAL:</b> <span id="sms_p_material" style="color:#000000!important; font-weight:bold;"></span></td><td colspan="2" style="color:#000000!important;"><b style="color:#000000!important;">MATRICULA:</b> <span id="sms_p_matricula" style="color:#000000!important; font-weight:bold;"></span></td></tr>
+<tr><td colspan="5" class="gray-bg" style="text-align:left; color:#000000!important;"><b style="color:#000000!important;">TRIPULACIÓN:</b> <span id="sms_p_tripulacion" style="color:#000000!important; font-weight:bold;"></span></td></tr>
 </table>
 <table style="width:100%; border-collapse:collapse; border:none; table-layout:fixed; margin-top:4px;">
 <tr>
@@ -529,8 +530,14 @@ let startIdx = 1; for (let prev = 0; prev < cIdx; prev++) { startIdx += smsData[
 cat.items.forEach((item, itemIdx) => { let realIdx = startIdx + itemIdx; pSmsHtml += `<tr><td class="text-center">${realIdx}</td><td>${item}</td><td class="tick-cell" id="p_sms_${realIdx}"></td></tr>`; });
 });
 pSmsHtml += `</table>
-<div style="border:1px solid black; padding:8px; height:250px; margin-bottom:5px; overflow:hidden;"><b>Observaciones:</b><br><span id="p_sms_obs"></span></div>
-<div style="padding-top:2px;"><b>Nombre y firma:</b><span id="sms_p_nombre" style="border-bottom:1px solid black; display:inline-block; width:220px; height:14px;" class="bold"></span></div>
+<div style="border:1px solid black; padding:8px; height:100px; margin-bottom:5px; overflow:hidden; color:#000000!important;">
+<b style="color:#000000!important;">Observaciones:</b><br>
+<span id="p_sms_obs" style="color:#000000!important; font-weight:bold;"></span>
+</div>
+<div style="padding-top:2px; color:#000000!important;">
+<b style="color:#000000!important;">Nombre y firma:</b>
+<span id="sms_p_nombre" style="border-bottom:1px solid black; display:inline-block; width:220px; height:14px; color:#000000!important; font-weight:bold;"></span>
+</div>
 </td></tr></table></div>`;
 el('print-sms-wrapper').innerHTML = pSmsHtml;
 }
@@ -598,8 +605,12 @@ function getPrintLegHTML(id, index) {
 return `<table class="print-table" id="print_leg_${id}">
 <tr><td colspan="6" class="tramo-title-darkgray"><b>${ordinals[index] || index + '°'} TRAMO</b></td></tr>
 <tr class="header-cell">
-<td class="col-fecha"><b>FECHA</b> <span id="p_t${id}_fecha" style="font-weight:normal;"></span><br><span class="text-xs" style="font-weight:normal;"><b>FOLIO:</b> <span id="p_t${id}_folio"></span></span></td>
-<td class="col-horo"><b>HOROMETRO</b></td><td class="col-block"><b>BLOCK TIME</b></td><td class="col-air"><b>AIR TIME</b></td><td class="col-fuel"><b>COMBUSTIBLE</b></td><td class="col-land"><b>ATERRIZAJE</b></td>
+<td class="col-fecha" style="color:#000000!important;"><b style="color:#000000!important;">FECHA</b> <span id="p_t${id}_fecha" style="font-weight:bold; color:#000000!important;"></span><br><span class="text-xs" style="color:#000000!important;"><b style="color:#000000!important;">FOLIO:</b> <span id="p_t${id}_folio" style="font-weight:bold; color:#000000!important;"></span></span></td>
+<td class="col-horo" style="color:#000000!important;"><b style="color:#000000!important;">HOROMETRO</b></td>
+<td class="col-block" style="color:#000000!important;"><b style="color:#000000!important;">BLOCK TIME</b></td>
+<td class="col-air" style="color:#000000!important;"><b style="color:#000000!important;">AIR TIME</b></td>
+<td class="col-fuel" style="color:#000000!important;"><b style="color:#000000!important;">COMBUSTIBLE</b></td>
+<td class="col-land" style="color:#000000!important;"><b style="color:#000000!important;">ATERRIZAJE</b></td>
 </tr>
 <tr>
 <td style="padding:0; vertical-align:top;"><table class="tramo-grid" style="border:none;"><tr><td class="text-left no-border-t no-border-x">Destino: <span id="p_t${id}_dest" class="bold"></span></td></tr><tr><td class="text-left no-border-x">Desde: <span id="p_t${id}_desde" class="bold"></span></td></tr><tr><td class="text-left no-border-b no-border-x">Distancia: <span id="p_t${id}_dist" class="bold"></span></td></tr></table></td>
@@ -610,10 +621,10 @@ return `<table class="print-table" id="print_leg_${id}">
 <td style="padding:0; vertical-align:top;"><table class="tramo-grid" style="border:none; height:100%;"><tr><td class="no-border-t no-border-x text-center bold text-xs" style="height:50%;" id="p_t${id}_dn_text"></td></tr><tr><td class="no-border-x text-center text-xs" style="background:#f0f0f0;"><b>APP. IFR</b></td></tr><tr><td class="no-border-b no-border-x text-center bold text-xs" style="height:50%;" id="p_t${id}_pnp_text"></td></tr></table></td>
 </tr>
 <tr><td colspan="6" style="padding:3px 5px;">
-<span style="display:inline-block; width:15%; font-weight:bold; color:#000000!important;">PAX: <span id="p_t${id}_pax" class="bold"></span></span>
-<span style="display:inline-block; width:20%; font-weight:bold; color:#000000!important;">PF: <span id="p_t${id}_pf" class="bold"></span></span>
-<span style="display:inline-block; width:20%; font-weight:bold; color:#000000!important;">PM: <span id="p_t${id}_pm" class="bold"></span></span>
-<span style="display:inline-block; width:40%; font-weight:bold; color:#000000!important;" id="p_t${id}_winds_wrapper">WINDS: <span id="p_t${id}_winds" class="bold"></span></span>
+<span style="display:inline-block; width:15%; font-weight:bold; color:#000000!important;">PAX: <span id="p_t${id}_pax" style="font-weight:bold; color:#000000!important;"></span></span>
+<span style="display:inline-block; width:20%; font-weight:bold; color:#000000!important;">PF: <span id="p_t${id}_pf" style="font-weight:bold; color:#000000!important;"></span></span>
+<span style="display:inline-block; width:20%; font-weight:bold; color:#000000!important;">PM: <span id="p_t${id}_pm" style="font-weight:bold; color:#000000!important;"></span></span>
+<span style="display:inline-block; width:40%; font-weight:bold; color:#000000!important;" id="p_t${id}_winds_wrapper">WINDS: <span id="p_t${id}_winds" style="font-weight:bold; color:#000000!important;"></span></span>
 </td></tr>
 </table>`;
 }
@@ -757,19 +768,31 @@ let pSecHtml = `
 <td colspan="2" class="no-border-x" style="vertical-align:bottom; padding-bottom:4px;"><div class="main-title">INSPECCIÓN DE SEGURIDAD DE AERONAVES</div></td>
 <td colspan="1" style="border-left:none; width:20%;"></td>
 </tr>
-<tr><td style="width:25%;"><b>FECHA:</b> <span class="bold">${dateKey}</span></td><td style="width:20%;"><b>P.O.V.: N°</b> <span id="sec_p_vuelo_${dateKey}" class="bold"></span></td><td style="width:25%;"><b>MATERIAL:</b> <span id="sec_p_material_${dateKey}" class="bold"></span></td><td colspan="2"><b>MATRICULA:</b> <span id="sec_p_matricula_${dateKey}" class="bold"></span></td></tr>
-<tr><td colspan="2" class="gray-bg text-left"><b>ESTACIONAMIENTO:</b> <span id="sec_p_estacionamiento_${dateKey}" class="bold"></span></td><td class="gray-bg text-left"><b>ORIGEN:</b> <span id="sec_p_origen_${dateKey}" class="bold"></span></td><td colspan="2" class="gray-bg text-left"><b>DESTINO:</b> <span id="sec_p_destino_${dateKey}" class="bold"></span></td></tr>
-<tr><td colspan="2"><b>H. INICIO:</b> <span id="sec_p_hinicio_${dateKey}" class="bold">${currentHInicio}</span></td><td><b>H. TÉRMINO:</b> <span id="sec_p_htermino_${dateKey}" class="bold">${currentHTermino}</span></td><td colspan="2"><b>ESTADO ALERTA:</b> <span id="sec_p_alerta_${dateKey}" class="bold"></span></td></tr>
+<tr><td style="width:25%; color:#000000!important;"><b style="color:#000000!important;">FECHA:</b> <span class="bold" style="color:#000000!important;">${dateKey}</span></td><td style="width:20%; color:#000000!important;"><b style="color:#000000!important;">P.O.V.: N°</b> <span id="sec_p_vuelo_${dateKey}" style="color:#000000!important; font-weight:bold;"></span></td><td style="width:25%; color:#000000!important;"><b style="color:#000000!important;">MATERIAL:</b> <span id="sec_p_material_${dateKey}" style="color:#000000!important; font-weight:bold;"></span></td><td colspan="2" style="color:#000000!important;"><b style="color:#000000!important;">MATRICULA:</b> <span id="sec_p_matricula_${dateKey}" style="color:#000000!important; font-weight:bold;"></span></td></tr>
+<tr><td colspan="2" class="gray-bg text-left" style="color:#000000!important;"><b style="color:#000000!important;">ESTACIONAMIENTO:</b> <span id="sec_p_estacionamiento_${dateKey}" style="color:#000000!important; font-weight:bold;"></span></td><td class="gray-bg text-left" style="color:#000000!important;"><b style="color:#000000!important;">ORIGEN:</b> <span id="sec_p_origen_${dateKey}" style="color:#000000!important; font-weight:bold;"></span></td><td colspan="2" class="gray-bg text-left" style="color:#000000!important;"><b style="color:#000000!important;">DESTINO:</b> <span id="sec_p_destino_${dateKey}" style="color:#000000!important; font-weight:bold;"></span></td></tr>
+<tr><td colspan="2" style="color:#000000!important;"><b style="color:#000000!important;">H. INICIO:</b> <span id="sec_p_hinicio_${dateKey}" style="color:#000000!important; font-weight:bold;">${currentHInicio}</span></td><td style="color:#000000!important;"><b style="color:#000000!important;">H. TÉRMINO:</b> <span id="sec_p_htermino_${dateKey}" style="color:#000000!important; font-weight:bold;">${currentHTermino}</span></td><td colspan="2" style="color:#000000!important;"><b style="color:#000000!important;">ESTADO ALERTA:</b> <span id="sec_p_alerta_${dateKey}" style="color:#000000!important; font-weight:bold;"></span></td></tr>
 </table>
 <table class="print-form-table" style="border-bottom:none; margin-top:4px;">`;
 secData.forEach(item => { let splitIdx = item.text.indexOf(':'); let title = splitIdx > -1 ? item.text.substring(0, splitIdx + 1) : item.text; let desc = splitIdx > -1 ? item.text.substring(splitIdx + 1) : ""; pSecHtml += `<tr><td style="text-align:justify;"><b>${item.id}. ${title}</b><br>${desc}</td><td style="width:35px;" class="tick-cell" id="p_sec_${dateKey}_${item.id}"></td></tr>`; });
 pSecHtml += `</table>
 <table class="print-form-table" style="border-top:none;">
 <tr>
-<td style="width:40%; vertical-align:top; height:50px;"><div class="bold" style="margin-bottom:4px;">III. COMANDANTE DE LA AERONAVE:</div><div class="text-center" style="margin-bottom:8px;"><b>NOMBRE Y APELLIDOS</b></div><div class="text-center"><span id="sec_p_nombre_${dateKey}" class="bold text-md"></span></div></td>
-<td style="width:20%; vertical-align:top;"><div class="text-center" style="margin-bottom:20px;"><b>RUT</b></div><div class="text-center"><span id="sec_p_rut_${dateKey}" class="bold text-md"></span></div></td>
-<td style="width:20%; vertical-align:top;"><div class="text-center" style="margin-bottom:20px;"><b>LICENCIA</b></div><div class="text-center"><span id="sec_p_licencia_${dateKey}" class="bold text-md"></span></div></td>
-<td style="width:20%; vertical-align:top;"><div class="text-center"><b>FIRMA</b></div></td>
+<td style="width:40%; vertical-align:top; height:50px; color:#000000!important;">
+<div style="margin-bottom:4px; font-weight:bold; color:#000000!important;">III. COMANDANTE DE LA AERONAVE:</div>
+<div class="text-center" style="margin-bottom:8px; font-weight:bold; color:#000000!important;">NOMBRE Y APELLIDOS</div>
+<div class="text-center"><span id="sec_p_nombre_${dateKey}" style="font-weight:bold; color:#000000!important; font-size:9.5px;"></span></div>
+</td>
+<td style="width:20%; vertical-align:top; color:#000000!important;">
+<div class="text-center" style="margin-bottom:20px; font-weight:bold; color:#000000!important;">RUT</div>
+<div class="text-center"><span id="sec_p_rut_${dateKey}" style="font-weight:bold; color:#000000!important; font-size:9.5px;"></span></div>
+</td>
+<td style="width:20%; vertical-align:top; color:#000000!important;">
+<div class="text-center" style="margin-bottom:20px; font-weight:bold; color:#000000!important;">LICENCIA</div>
+<div class="text-center"><span id="sec_p_licencia_${dateKey}" style="font-weight:bold; color:#000000!important; font-size:9.5px;"></span></div>
+</td>
+<td style="width:20%; vertical-align:top; color:#000000!important;">
+<div class="text-center" style="font-weight:bold; color:#000000!important;">FIRMA</div>
+</td>
 </tr>
 </table></div>`;
 printHtml += pSecHtml;
