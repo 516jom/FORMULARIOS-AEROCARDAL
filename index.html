@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<index>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -529,7 +529,7 @@ let startIdx = 1; for (let prev = 0; prev < cIdx; prev++) { startIdx += smsData[
 cat.items.forEach((item, itemIdx) => { let realIdx = startIdx + itemIdx; pSmsHtml += `<tr><td class="text-center">${realIdx}</td><td>${item}</td><td class="tick-cell" id="p_sms_${realIdx}"></td></tr>`; });
 });
 pSmsHtml += `</table>
-<div style="border:1px solid black; padding:8px; height:100px; margin-bottom:5px; overflow:hidden;"><b>Observaciones:</b><br><span id="p_sms_obs"></span></div>
+<div style="border:1px solid black; padding:8px; height:250px; margin-bottom:5px; overflow:hidden;"><b>Observaciones:</b><br><span id="p_sms_obs"></span></div>
 <div style="padding-top:2px;"><b>Nombre y firma:</b><span id="sms_p_nombre" style="border-bottom:1px solid black; display:inline-block; width:220px; height:14px;" class="bold"></span></div>
 </td></tr></table></div>`;
 el('print-sms-wrapper').innerHTML = pSmsHtml;
