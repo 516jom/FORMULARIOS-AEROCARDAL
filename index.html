@@ -1,4 +1,6 @@
-<!DOCTYPE html><html lang="es"><head>
+<index>
+<html lang="es">
+<head>
 <meta charset="UTF-8">
 <meta id="viewport-meta" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Planificación Operacional - Aerocardal</title>
@@ -16,8 +18,7 @@ VARIABLES Y ESTILOS TEMA OSCURO (ESCALA DE GRISES)
 --accent: #FFFFFF; --accent-hover: #CCCCCC;
 --warning: #AAAAAA; --danger: #666666; --success: #DDDDDD;
 }
-* { 
-box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+* { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
 body { margin: 0; padding: 0; background-color: var(--bg-main); color: var(--text-main); -webkit-font-smoothing: antialiased; }
 header { background-color: var(--bg-card); border-bottom: 1px solid var(--border-color); padding: 0.8rem 1rem; text-align: center; position: sticky; top: 0; z-index: 10; }
 h1 { margin: 0; font-size: 1.2rem; font-weight: 700; color: var(--accent); letter-spacing: 1px;}
@@ -34,11 +35,13 @@ details.card[open] summary .arrow::after, details.param-section[open] summary .a
 details.card summary:hover, details.param-section summary:hover { background-color: rgba(255,255,255,0.1); }
 
 /* GRILLAS CON RESTRICCIÓN ESTRUCTURAL DE ANCHO (FIX SUPERPOSICIÓN IPAD) */
+.grid-header { display: grid; grid-template-columns: 0.7fr 1fr 1fr; gap: 0.8rem; }
 .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.8rem; }
 .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.8rem; }
 .grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.5rem; }
 .grid-6 { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.5rem; }
 @media (max-width: 600px) { 
+  .grid-header { grid-template-columns: 1fr; }
   .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } 
   .grid-3 { grid-template-columns: minmax(0, 1fr); } 
   .grid-6 { grid-template-columns: repeat(3, minmax(0, 1fr)); } 
@@ -46,7 +49,7 @@ details.card summary:hover, details.param-section summary:hover { background-col
 .form-group { margin-bottom: 0.8rem; min-width: 0; width: 100%; }
 .form-group label { display: flex; justify-content: space-between; align-items: center; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.35rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 input[type="text"], input[type="number"], input[type="date"], select, textarea {
-width: 100%; max-width: 100%; box-sizing: border-border-box; padding: 10px 12px; font-size: 1rem; color: var(--text-main);
+width: 100%; box-sizing: border-box; padding: 10px 12px; font-size: 1rem; color: var(--text-main);
 border: 1px solid var(--border-color); border-radius: 6px; background-color: var(--bg-input);
 transition: all 0.2s;
 }
@@ -87,10 +90,11 @@ ESTILOS DE IMPRESIÓN Y SALTO DE PÁGINA (COMPATIBLE SAFARI IPAD)
 ======================================================= */
 @media print {
 @page { size: letter portrait; margin: 6mm; }
-body { background-color: white; color: black; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; }
+body { background-color: white; color: black; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; display: block !important; }
 #mobile-ui, header, .fab-container, #loading-overlay { display: none !important; }
-#print-layout { display: block !important; width: 100% !important; }
+#print-layout { display: block !important; width: 100% !important; position: relative !important; float: none !important; }
 }
+
 #print-layout { display: none; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 9px; line-height: 1.35; background: white; color: black; }
 #print-layout td, #print-layout span, #print-layout div, #print-layout th { color: black; }
 #print-layout table, #print-layout td, #print-layout th { border-color: black; }
@@ -101,8 +105,16 @@ body { background-color: white; color: black; -webkit-print-color-adjust: exact;
   clear: both !important;
   page-break-before: always !important; 
   break-before: page !important; 
+  position: relative !important;
+  float: none !important;
   height: auto !important;
   padding-top: 5px; 
+}
+.print-section-wrapper {
+  display: block !important;
+  width: 100% !important;
+  page-break-inside: avoid !important;
+  break-inside: avoid !important;
 }
 
 .print-table { width: 100%; border-collapse: collapse; border: 1px solid black; margin-bottom: 6px; page-break-inside: avoid; break-inside: avoid; table-layout: fixed; }
@@ -195,16 +207,19 @@ Volver a la app
 </div>
 <header>
 <h1>AEROCARDAL - PLANIFICACIÓN OPERACIONAL</h1>
-<div class="subtitle">VERSIÓN 7.0 (UI SUMMARY LOGBOOK EDITION)</div>
+<div class="subtitle">VERSIÓN 7.1 (UI & PRINT FIX)</div>
 </header>
 <main id="mobile-ui" class="container">
 <!-- CABECERA GENERAL -->
 <div class="card">
 <div class="card-header"><span>📋 CABECERA DEL VUELO (OBLIGATORIA PARA CLOUD)</span></div>
-<div class="card-content grid-3">
+<div class="card-content">
+<div class="grid-header">
 <div class="form-group"><label style="color:var(--accent);">Fecha del Vuelo</label><input type="date" id="m_fecha_gen" onchange="triggerUpdate()"></div>
 <div class="form-group"><label style="color:var(--accent);">Folio BIT</label><input type="text" id="m_folio_gen" placeholder="Folio Único..." oninput="triggerUpdate()"></div>
 <div class="form-group"><label style="color:#4285F4; text-shadow: 0 0 5px rgba(66,133,244,0.5);">P.O.V. N° (Carpeta)</label><input type="text" id="m_pov" oninput="triggerUpdate()" placeholder="Ej: 1234"></div>
+</div>
+<div class="grid-3">
 <div class="form-group">
 <label style="color:var(--accent);">Matrícula (3 últimas letras)</label>
 <div style="display:flex; gap:5px; align-items:center;">
@@ -227,6 +242,7 @@ Volver a la app
 <label>FO (Iniciales)</label>
 <input type="text" id="m_sic_ini" placeholder="Ej: EI" oninput="lookupPilots()" style="text-transform: uppercase;">
 <div id="ui_sic_name" style="font-size:0.65rem; color:var(--text-muted); margin-top:4px; height:12px;"></div>
+</div>
 </div>
 </div>
 </div> 
@@ -313,7 +329,7 @@ Volver a la app
 </div>
 <!-- LAYOUT DE IMPRESIÓN (PDF) -->
 <div id="print-layout">
-<div id="print_op_container" style="text-transform: uppercase;">
+<div id="print_op_container" class="print-section-wrapper" style="text-transform: uppercase;">
 <table class="print-table" style="border-bottom: none;">
 <tr>
 <td colspan="2" class="no-border-x" style="width: 30%;"><div class="logo-text">AEROCARDAL</div></td>
@@ -528,7 +544,7 @@ printDiv.style.display = 'block';
 printDiv.style.width = '800px'; 
 window.scrollTo(0, 0);
 
-// 3. Tiempo de renderizado para recalcular layout en WebKit
+// 3. Tiempo de renderizado para recalcular layout en WebKit y DOM Tree
 await new Promise(resolve => setTimeout(resolve, 800));
 
 const opt = {
@@ -549,7 +565,8 @@ jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
 try {
 return await html2pdf().set(opt).from(printDiv).output('blob');
 } finally {
-// 4. Restauración de UI
+// 4. Restauración de UI controlada con delay extra para evitar repintado cruzado
+await new Promise(resolve => setTimeout(resolve, 100));
 vpMeta.setAttribute('content', originalVp);
 printDiv.style.display = 'none';
 printDiv.style.width = '';
@@ -699,7 +716,7 @@ smsHtml += `<div class="form-category-title">${cat.cat}</div>`;
 cat.items.forEach(item => { smsHtml += `<label class="checkbox-item"><input type="checkbox" id="m_sms_${globalIndex}" onchange="triggerUpdate()"> <span>${globalIndex}. ${item}</span></label>`; globalIndex++; });
 });
 el('sms_form_container').innerHTML = smsHtml;
-let pSmsHtml = `<div id="print_sms_container" class="page-break"
+let pSmsHtml = `<div id="print_sms_container" class="page-break print-section-wrapper"
 style="font-family:Arial, sans-serif; box-sizing:border-box;">
 <table class="print-table" style="border-bottom:none;">
 <tr>
@@ -1088,7 +1105,7 @@ WINDS:
 }
 function getPrintParamsHTML(id, index) {
 return `
-<div id="p_t${id}_params_wrapper" style="display:none;">
+<div id="p_t${id}_params_wrapper" style="display:none;" class="print-section-wrapper">
 <table class="print-table" id="p_t${id}_tbl_params">
 <tr>
 <td colspan="6" class="tramo-title-gray">
@@ -1473,7 +1490,7 @@ webHtml += `</div>
 </details>`;
 
 let pSecHtml = `<div id="print_sec_container_${dateKey}"
-class="page-break"
+class="page-break print-section-wrapper"
 style="font-family:Arial, sans-serif; box-sizing:border-box; margin-top: 10px;">
 <table class="print-table" style="border-bottom:none;">
 <tr>
