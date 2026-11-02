@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<index>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -87,7 +87,7 @@ hr.divider { border: 0; border-top: 1px solid var(--border-color); margin: 12px 
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
 /* =======================================================
-ESTILOS DE IMPRESIÓN Y SALTO DE PÁGINA ANCLADO EN "AEROCARDAL"
+ESTILOS DE IMPRESIÓN - AISLAMIENTO TOTAL POR PÁGINAS
 ======================================================= */
 @media print {
 @page { size: letter portrait; margin: 6mm; }
@@ -100,29 +100,19 @@ body { background-color: white; color: black; -webkit-print-color-adjust: exact;
 #print-layout td, #print-layout span, #print-layout div, #print-layout th { color: black; box-sizing: border-box; }
 #print-layout table, #print-layout td, #print-layout th { border-color: black; }
 
-/* NUEVA CLASE EXCLUSIVA PARA EL SALTO DE PÁGINA (A PETICIÓN DEL USUARIO) */
-.salto-pagina {
-  page-break-before: always !important;
-  break-before: page !important;
-  display: block !important;
-  height: 0px !important;
-  width: 100% !important;
-  clear: both !important;
-  margin: 0 !important;
-  padding: 0 !important;
+/* NUEVA CLASE ESTRUCTURAL: AISLA LOS CONTENEDORES PARA EVITAR COLAPSO DE MEMORIA EN IOS */
+.pdf-page {
+  background: white;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .print-table { width: 100%; border-collapse: collapse; border: 1px solid black; margin-bottom: 6px; page-break-inside: avoid; break-inside: avoid; table-layout: fixed; }
 .print-table th, .print-table td, .tramo-grid td { border: 1px solid black; padding: 3px 5px; vertical-align: middle; font-size: 9px; }
 .logo-text { font-size: 15px; font-weight: 900; font-style: italic; letter-spacing: -0.5px; }
 .main-title { font-size: 13px; font-weight: bold; text-align: center; letter-spacing: 0.5px; text-transform: uppercase; }
-.summary-title-pdf,
-.tramo-title-darkgray {
-background-color: #E0E0E0 !important; color: black !important; text-align: center; font-weight: bold; padding: 3px; letter-spacing: 1px; font-size: 11px; text-transform: uppercase; border: 1px solid black;
-}
-.tramo-title-gray {
-background-color: #F0F0F0 !important; color: black !important; text-align: center; font-weight: bold; padding: 3px; letter-spacing: 0.5px; font-size: 10px; text-transform: uppercase; border: 1px solid black;
-}
+.summary-title-pdf, .tramo-title-darkgray { background-color: #E0E0E0 !important; color: black !important; text-align: center; font-weight: bold; padding: 3px; letter-spacing: 1px; font-size: 11px; text-transform: uppercase; border: 1px solid black; }
+.tramo-title-gray { background-color: #F0F0F0 !important; color: black !important; text-align: center; font-weight: bold; padding: 3px; letter-spacing: 0.5px; font-size: 10px; text-transform: uppercase; border: 1px solid black; }
 .header-cell, .gray-bg { background-color: #F5F5F5 !important; font-weight: bold; text-align: center; font-size: 8.5px; color: black !important; }
 .summary-total-bg { background-color: #EBEBEB !important; font-weight: bold; font-size: 9px !important; }
 
@@ -163,7 +153,7 @@ Volver a la app
 
 <header>
 <h1>AEROCARDAL - PLANIFICACIÓN OPERACIONAL</h1>
-<div class="subtitle">VERSIÓN 7.3 (ANCHOR "AEROCARDAL" PAGE BREAK)</div>
+<div class="subtitle">VERSIÓN 8.0 (RENDERIZADO MODULAR AISLADO ANTI-CRASH IOS)</div>
 </header>
 <main id="mobile-ui" class="container">
 <!-- CABECERA GENERAL -->
@@ -267,30 +257,34 @@ Volver a la app
 <button class="btn-print" style="background:var(--accent); color:black; padding: 10px 14px;" onclick="prepararImpresionNativa()">🖨️ Imprimir (PC)</button>
 </div>
 
-<!-- LAYOUT DE IMPRESIÓN (PDF) -->
+<!-- LAYOUT DE IMPRESIÓN (PDF) ESTRUCTURA MODULAR -->
 <div id="print-layout">
-<div id="print_op_container" style="text-transform: uppercase;">
-<!-- Aquí la primera cabecera no lleva salto porque es la página 1 -->
-<table class="print-table" style="border-bottom: none;">
-<tr>
-<td colspan="2" class="no-border-x" style="width: 30%;"><div class="logo-text">AEROCARDAL</div></td>
-<td colspan="2" class="no-border-x" style="vertical-align: bottom; padding-bottom: 4px;"><div class="main-title">PLANIFICACIÓN OPERACIONAL</div></td>
-<td colspan="1" style="border-left: none; width: 20%;"></td>
-</tr>
-<tr>
-<td style="width: 25%;">FECHA: <span id="p_fecha_gen"></span></td>
-<td style="width: 20%;">P.O.V.: N° <span id="p_pov"></span></td>
-<td style="width: 25%;">MATERIAL: <span id="p_material" class="bold"></span></td>
-<td colspan="2">MATRICULA: <span id="p_matricula" class="bold"></span></td>
-</tr>
-<tr><td colspan="5" class="gray-bg" style="text-align:left;">FOLIO BIT: <span id="p_folio_gen" class="bold"></span></td></tr>
-</table>
-<div id="print-tramos-container"></div>
-<div id="print-params-container" style="margin-top: 15px;"></div>
-<div id="p_resumen_operacional_container"></div>
-</div>
-<!-- Los siguientes formularios (SMS y SEC) recibirán el .salto-pagina dinámicamente en JS -->
-<div id="print-sec-forms-wrapper"></div>
+  <!-- PÁGINA 1: CONSOLIDADO (Aislada estructuralmente con .pdf-page) -->
+  <div class="pdf-page" id="print_op_container" style="text-transform: uppercase;">
+    <table class="print-table" style="border-bottom: none;">
+      <tr>
+        <td colspan="2" class="no-border-x" style="width: 30%;"><div class="logo-text">AEROCARDAL</div></td>
+        <td colspan="2" class="no-border-x" style="vertical-align: bottom; padding-bottom: 4px;"><div class="main-title">PLANIFICACIÓN OPERACIONAL</div></td>
+        <td colspan="1" style="border-left: none; width: 20%;"></td>
+      </tr>
+      <tr>
+        <td style="width: 25%;">FECHA: <span id="p_fecha_gen"></span></td>
+        <td style="width: 20%;">P.O.V.: N° <span id="p_pov"></span></td>
+        <td style="width: 25%;">MATERIAL: <span id="p_material" class="bold"></span></td>
+        <td colspan="2">MATRICULA: <span id="p_matricula" class="bold"></span></td>
+      </tr>
+      <tr><td colspan="5" class="gray-bg" style="text-align:left;">FOLIO BIT: <span id="p_folio_gen" class="bold"></span></td></tr>
+    </table>
+    <div id="print-tramos-container"></div>
+    <div id="print-params-container" style="margin-top: 15px;"></div>
+    <div id="p_resumen_operacional_container"></div>
+  </div>
+
+  <!-- PÁGINA 2: SMS (Será inyectado aquí) -->
+  <div id="print-sms-wrapper"></div>
+  
+  <!-- PÁGINAS 3+: SEC FORMS (Serán inyectados aquí) -->
+  <div id="print-sec-forms-wrapper"></div>
 </div>
 
 <!-- SCRIPT PRINCIPAL -->
@@ -303,6 +297,7 @@ const DRIVE_API_URL = 'https://www.googleapis.com/drive/v3/files';
 let tokenClient;
 let accessToken = null;
 let pendingAction = null;
+
 function initDrive() {
 if (!window.google) return;
 tokenClient = google.accounts.oauth2.initTokenClient({
@@ -320,6 +315,7 @@ function mostrarCargando(texto) { el('loading-spinner').style.display = 'block';
 function ocultarCargando() { el('loading-overlay').style.display = 'none'; }
 function cerrarOverlay() { ocultarCargando(); }
 function mostrarModalPDF(link) { el('loading-spinner').style.display = 'none'; el('loading-text').innerText = "✅ ¡Documento listo en Google Drive!"; const btn = el('btn-open-pdf'); btn.style.display = 'block'; btn.onclick = () => window.open(link, '_blank'); el('btn-close-overlay').style.display = 'block'; }
+
 async function getOrCreateFolder(povName) {
 const folderName = `POV_${povName}`;
 const query = encodeURIComponent(`name='${folderName}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
@@ -348,6 +344,7 @@ try { let res = await fetch(url, { method: existingFileId ? 'PATCH' : 'POST', he
 reader.onerror = () => reject(new Error("Error leyendo el archivo")); reader.readAsDataURL(blob);
 });
 }
+
 async function accionGuardar() {
 mostrarCargando("Guardando progreso en Drive...");
 try { let pov = val('m_pov'); let folderId = await getOrCreateFolder(pov); let file = await findFileInFolder('Progreso.json', folderId); let dataBlob = new Blob([getAllData()], { type: "application/json" }); await uploadFileRaw(dataBlob, 'Progreso.json', folderId, file ? file.id : null); alert("✅ Progreso guardado exitosamente en la carpeta de Drive."); } catch(e) { alert("❌ Error: " + e.message); accessToken = null; } finally { ocultarCargando(); }
@@ -357,16 +354,13 @@ mostrarCargando("Buscando progreso en Drive...");
 try { let pov = val('m_pov'); let folderId = await getOrCreateFolder(pov); let file = await findFileInFolder('Progreso.json', folderId); if (!file) { alert("⚠️ No se encontró ningún progreso guardado para este POV."); ocultarCargando(); return; } let res = await fetch(`${DRIVE_API_URL}/${file.id}?alt=media`, { headers: { 'Authorization': 'Bearer ' + accessToken } }); let content = await res.json(); loadDataIntoApp(content); alert("✅ Progreso recuperado."); } catch(e) { alert("❌ Error: " + e.message); accessToken = null; } finally { ocultarCargando(); }
 }
 
-// =======================================================
-// IMPRESIÓN NATIVA
-// =======================================================
 function prepararImpresionNativa() { updateAll(); setTimeout(() => { window.print(); }, 300); }
 
 // =======================================================
-// IMPRESIÓN HACIA DRIVE (USANDO LA NUEVA CLASE .salto-pagina)
+// NUEVO MOTOR MODULAR DE PDF (ANTI-CRASH IOS)
 // =======================================================
 async function accionGenerarPDF() {
-mostrarCargando("Renderizando PDF para Drive...\n(Espera unos segundos)");
+mostrarCargando("Ensamblando PDF por páginas...\n(Bypass memoria iPad)");
 setTimeout(async () => {
 try {
 let pov = val('m_pov'); let pdfBlob = await generarBlobPDF();
@@ -385,31 +379,53 @@ mostrarModalPDF(finalData.webViewLink);
 
 async function generarBlobPDF() {
 updateAll();
-const printDiv = el('print-layout'); const mainUi = el('mobile-ui'); const header = document.querySelector('header'); const fab = document.querySelector('.fab-container'); const vpMeta = el('viewport-meta');
+const mainUi = el('mobile-ui'); const header = document.querySelector('header'); const fab = document.querySelector('.fab-container'); const vpMeta = el('viewport-meta');
+const printLayout = el('print-layout');
 const originalScroll = window.scrollY; const originalVp = vpMeta.getAttribute('content');
 
 if(mainUi) mainUi.style.display = 'none'; if(header) header.style.display = 'none'; if(fab) fab.style.display = 'none';
 vpMeta.setAttribute('content', 'width=800, initial-scale=1.0');
-printDiv.style.display = 'block'; printDiv.style.width = '800px'; 
+printLayout.style.display = 'block'; printLayout.style.width = '800px'; 
 window.scrollTo(0, 0);
 
+// Dar tiempo al navegador para recalcular el DOM
 await new Promise(resolve => setTimeout(resolve, 800));
 
-// CONFIGURACIÓN DE HTML2PDF.JS PARA BUSCAR EXCLUSIVAMENTE .salto-pagina
+// Capturar TODAS las páginas que hemos aislado estructuralmente
+const pages = document.querySelectorAll('.pdf-page');
+
+// Configuración Base de html2pdf
 const opt = {
 margin: [5, 5, 5, 5],
 filename: 'temp.pdf',
 image: { type: 'jpeg', quality: 0.98 },
-pagebreak: { mode: ['css', 'legacy'], before: '.salto-pagina', avoid: ['tr', 'table'] },
-html2canvas: { scale: 2, useCORS: true, logging: false, width: 800, windowWidth: 800 },
+// Si la página del Consolidado necesita dividirse, esta regla lo permitirá sin colapsar las demás
+pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', 'table'] },
+// Escala reducida a 1.5 para ahorrar 40% de memoria VRAM en el iPad
+html2canvas: { scale: 1.5, useCORS: true, logging: false, width: 800, windowWidth: 800 },
 jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
 };
 
 try {
-return await html2pdf().set(opt).from(printDiv).output('blob');
+if (pages.length === 0) throw new Error("No se detectaron páginas para renderizar.");
+
+// PROCESAMIENTO SECUENCIAL ESTRUCTURAL:
+// En vez de alimentar todo el bloque de golpe (lo que crashea el Canvas de iOS),
+// alimentamos cada '.pdf-page' por separado al motor, añadiendo manual "addPage()".
+let worker = html2pdf().set(opt).from(pages[0]).toPdf();
+
+for (let i = 1; i < pages.length; i++) {
+  worker = worker.get('pdf').then(pdf => {
+    pdf.addPage();
+  }).from(pages[i]).toContainer().toCanvas().toPdf();
+}
+
+return await worker.output('blob');
+
 } finally {
+// Restauración de UI
 await new Promise(resolve => setTimeout(resolve, 100));
-vpMeta.setAttribute('content', originalVp); printDiv.style.display = 'none'; printDiv.style.width = '';
+vpMeta.setAttribute('content', originalVp); printLayout.style.display = 'none'; printLayout.style.width = '';
 if(mainUi) mainUi.style.display = ''; if(header) header.style.display = ''; if(fab) fab.style.display = 'flex'; window.scrollTo(0, originalScroll);
 }
 }
@@ -498,9 +514,9 @@ cat.items.forEach(item => { smsHtml += `<label class="checkbox-item"><input type
 });
 el('sms_form_container').innerHTML = smsHtml;
 
-// INYECCIÓN CLAVE: .salto-pagina ANTES DE LA CABECERA AEROCARDAL
-let pSmsHtml = `<div class="salto-pagina"></div>
-<div id="print_sms_container" style="font-family:Arial, sans-serif; box-sizing:border-box;">
+// FORMULARIO SMS ENVUELTO EN SU PROPIO .pdf-page
+let pSmsHtml = `
+<div class="pdf-page" id="print_sms_container" style="font-family:Arial, sans-serif; box-sizing:border-box;">
 <table class="print-table" style="border-bottom:none;">
 <tr>
 <td colspan="2" class="no-border-x" style="width:30%;"><div class="logo-text">AEROCARDAL</div></td>
@@ -533,7 +549,7 @@ pSmsHtml += `</table>
 <div style="border:1px solid black; padding:8px; height:360px; margin-bottom:5px;"><b>Observaciones:</b><br><span id="p_sms_obs"></span></div>
 <div style="padding-top:2px;"><b>Nombre y firma:</b><span id="sms_p_nombre" style="border-bottom:1px solid black; display:inline-block; width:220px; height:14px;" class="bold"></span></div>
 </td></tr></table></div>`;
-el('print-layout').insertAdjacentHTML('beforeend', pSmsHtml);
+el('print-sms-wrapper').innerHTML = pSmsHtml;
 }
 
 function triggerUpdate() { if (updateRAF) cancelAnimationFrame(updateRAF); updateRAF = requestAnimationFrame(updateAll); }
@@ -705,7 +721,6 @@ let fIniRaw = firstLeg.fuelOn, fIni = isNaN(fIniRaw) ? 0 : fIniRaw, fFinRaw = la
 dailyStats.push({ date: dateKey, start: startDuty, end: endDuty, duration: dur, block: dayBlock, air: dayAir, fuelUsed: dayFuelUsed, fuelInit: fIni, fuelFinal: fFin, fuelRefuel: dayRefuel, pax: dayPax.join(' '), p1, p2, hIni: firstLeg.horoBot||'--', hFin: lastLeg.horoTop||'--' });
 });
 
-// UI Resumen Tramos
 let tramosTableHtml = `<table style="width:100%; min-width: 600px; border-collapse:collapse; font-size:0.75rem; text-align:center; background:var(--bg-input); border:none; white-space:nowrap;"><thead><tr style="background:rgba(255,255,255,0.05); border-bottom:1px solid var(--border-color);"><th style="text-align:left; padding:8px; border-right:1px solid var(--border-color); color:var(--accent);">PARÁMETRO</th>`;
 legIds.forEach((id, idx) => { tramosTableHtml += `<th style="padding:8px; border-right:1px solid rgba(255,255,255,0.05); color:var(--accent);">TRAMO ${idx+1}</th>`; }); tramosTableHtml += `</tr></thead><tbody>`;
 const rowDefs = [
@@ -714,7 +729,6 @@ const rowDefs = [
 rowDefs.forEach((r, idx) => { let bBottom = (idx === rowDefs.length - 1) ? '' : 'border-bottom:1px solid rgba(255,255,255,0.05);'; tramosTableHtml += `<tr><td style="text-align:left; padding:6px 8px; font-weight:bold; color:var(--text-muted); border-right:1px solid var(--border-color); ${bBottom}">${r.label}</td>`; legIds.forEach(id => { tramosTableHtml += `<td style="padding:6px 8px; border-right:1px solid rgba(255,255,255,0.05); color:var(--text-main); ${bBottom}">${r.get(id)}</td>`; }); tramosTableHtml += `</tr>`; }); tramosTableHtml += `</tbody></table>`;
 if(el('ui_resumen_tramos')) el('ui_resumen_tramos').innerHTML = tramosTableHtml;
 
-// UI Resumen Diario
 let dailyTableHtml = `<table style="width:100%; min-width: 800px; border-collapse:collapse; font-size:0.75rem; text-align:center; background:var(--bg-input); border:none; white-space:nowrap;"><thead><tr style="background:rgba(255,255,255,0.05); border-bottom:1px solid var(--border-color);"><th rowspan="2" style="padding:8px; text-align:left; border-right:1px solid var(--border-color); color:var(--accent);">FECHA</th><th rowspan="2" style="padding:8px; border-right:1px solid var(--border-color); color:var(--accent);">PAX POR<br>TRAMO</th><th rowspan="2" style="padding:8px; border-right:1px solid var(--border-color); color:var(--accent);">TOTAL<br>AIRTIME</th><th colspan="4" style="padding:4px; border-right:1px solid var(--border-color); color:var(--text-muted);">FUEL</th><th colspan="2" style="padding:4px; border-right:1px solid var(--border-color); color:var(--text-muted);">HOROMETRO</th><th colspan="3" style="padding:4px; color:var(--text-muted);">DUTY</th></tr><tr style="background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border-color);"><th style="padding:4px; border-right:1px solid rgba(255,255,255,0.05); font-size:0.65rem; color:var(--text-muted);">INICIO</th><th style="padding:4px; border-right:1px solid rgba(255,255,255,0.05); font-size:0.65rem; color:var(--text-muted);">USADO</th><th style="padding:4px; border-right:1px solid rgba(255,255,255,0.05); font-size:0.65rem; color:var(--text-muted);">REMANENTE</th><th style="padding:4px; border-right:1px solid var(--border-color); font-size:0.65rem; color:var(--text-muted);">CARGADO</th><th style="padding:4px; border-right:1px solid rgba(255,255,255,0.05); font-size:0.65rem; color:var(--text-muted);">INICIAL</th><th style="padding:4px; border-right:1px solid var(--border-color); font-size:0.65rem; color:var(--text-muted);">FINAL</th><th style="padding:4px; border-right:1px solid rgba(255,255,255,0.05); font-size:0.65rem; color:var(--text-muted);">INICIAL</th><th style="padding:4px; border-right:1px solid rgba(255,255,255,0.05); font-size:0.65rem; color:var(--text-muted);">FINAL</th><th style="padding:4px; font-size:0.65rem; color:var(--text-muted);">TOTAL</th></tr></thead><tbody>`;
 dailyStats.forEach((dp, idx) => { let bBottom = (idx === dailyStats.length - 1) ? '' : 'border-bottom:1px solid rgba(255,255,255,0.05);'; let fIni = Math.round(dp.fuelInit || 0), fUsed = Math.round(dp.fuelUsed || 0), fRem = Math.round(dp.fuelFinal || 0), fRef = Math.round(dp.fuelRefuel || 0); let aStr = dp.air > 0 ? `${minsToTime(dp.air)} (${formatDec(dp.air/60).replace('.', ',')})` : '--:--'; let dutyTotalStr = dp.duration > 0 ? `${minsToTime(dp.duration)}` : '--:--'; dailyTableHtml += `<tr><td style="padding:6px 8px; text-align:left; ${bBottom} border-right:1px solid var(--border-color); font-weight:bold;">${dp.date}</td><td style="padding:6px 8px; ${bBottom} border-right:1px solid var(--border-color);">${dp.pax || '(0)'}</td><td style="padding:6px 8px; ${bBottom} border-right:1px solid var(--border-color); color:var(--accent); font-weight:bold;">${aStr}</td><td style="padding:6px 8px; ${bBottom} border-right:1px solid rgba(255,255,255,0.05);">${fIni}</td><td style="padding:6px 8px; ${bBottom} border-right:1px solid rgba(255,255,255,0.05); color:var(--danger);">${fUsed}</td><td style="padding:6px 8px; ${bBottom} border-right:1px solid rgba(255,255,255,0.05); color:var(--accent);">${fRem}</td><td style="padding:6px 8px; ${bBottom} border-right:1px solid var(--border-color); color:var(--success);">+${fRef}</td><td style="padding:6px 8px; ${bBottom} border-right:1px solid rgba(255,255,255,0.05);">${dp.hIni}</td><td style="padding:6px 8px; ${bBottom} border-right:1px solid var(--border-color);">${dp.hFin}</td><td style="padding:6px 8px; ${bBottom} border-right:1px solid rgba(255,255,255,0.05);">${dp.start || '--:--'}</td><td style="padding:6px 8px; ${bBottom} border-right:1px solid rgba(255,255,255,0.05);">${dp.end || '--:--'}</td><td style="padding:6px 8px; ${bBottom}">${dutyTotalStr}</td></tr>`; }); dailyTableHtml += `</tbody></table>`;
 if(el('ui_resumen_diario')) el('ui_resumen_diario').innerHTML = dailyTableHtml;
@@ -738,15 +752,15 @@ let st = secManualState[dateKey]; let dayLegs = legsByDate[dateKey] || [];
 let autoHInicio = dayLegs.length > 0 && dayLegs[0].tOut ? dayLegs[0].tOut : ''; let autoHTermino = dayLegs.length > 0 && dayLegs[dayLegs.length-1].tIn ? dayLegs[dayLegs.length-1].tIn : '';
 let autoOrigen = dayLegs.length > 0 ? dayLegs[0].desde : ''; let autoDestino = dayLegs.length > 0 ? dayLegs[dayLegs.length-1].dest : '';
 let currentHInicio = st.hinicioManual && st.customHInicio !== undefined ? st.customHInicio : autoHInicio; let currentHTermino = st.hterminoManual && st.customHTermino !== undefined ? st.customHTermino : autoHTermino;
-let defaultEst = (autoOrigen.trim().toUpperCase() === 'SCEL') ? 'AER0CARDAL' : ''; let currentEst = st.estacionamiento !== undefined ? st.estacionamiento : defaultEst;
+let defaultEst = (autoOrigen.trim().toUpperCase() === 'SCEL') ? 'AEROCARDAL' : ''; let currentEst = st.estacionamiento !== undefined ? st.estacionamiento : defaultEst;
 let currentAlerta = st.alerta !== undefined ? st.alerta : '';
 webHtml += `<details class="card" style="border-color: var(--accent);"><summary style="display:flex; justify-content:space-between; align-items:center;"><span style="flex:1;">🔎 INSPECCIÓN DE SEGURIDAD (${dateKey}) <span class="arrow"></span></span><div style="display:flex; align-items:center; gap:12px; padding-left:10px; border-left:1px solid var(--border-color);" onclick="event.stopPropagation();"><label style="font-size:0.75rem; color:var(--accent); display:flex; align-items:center; gap:5px; margin:0; cursor:pointer;"><input type="checkbox" id="m_sec_sin_obs_${dateKey}" ${st.sinObs ? 'checked' : ''} onchange="toggleSecSinObs('${dateKey}')"> <span>Sin obs</span></label></div></summary><div class="card-content"><div style="margin-bottom: 12px; padding:10px; background:rgba(255,255,255,0.03); border-radius:6px;"><div class="grid-3"><div class="form-group"><label>Origen</label><input type="text" id="m_sec_origen_${dateKey}" value="${autoOrigen}" oninput="triggerUpdate()"></div><div class="form-group"><label>Destino</label><input type="text" id="m_sec_destino_${dateKey}" value="${autoDestino}" oninput="triggerUpdate()"></div><div class="form-group"><label>Estacionamiento</label><input type="text" id="m_sec_est_${dateKey}" value="${currentEst}" oninput="secManualState['${dateKey}'].estacionamiento=this.value; triggerUpdate()"></div></div><div class="grid-3" style="margin-top:5px;"><div class="form-group"><label style="display:flex; justify-content:space-between;"><span>Inicio (Out)</span><span style="cursor:pointer; color:var(--success); font-size:0.65rem;" onclick="resetSecTime('${dateKey}', 'hinicio')">🔄 Auto</span></label><input type="text" class="time-input" id="m_sec_hinicio_${dateKey}" value="${currentHInicio}" maxlength="5" inputmode="numeric" oninput="secManualState['${dateKey}'].hinicioManual=true; secManualState['${dateKey}'].customHInicio=this.value; formatTime(this)" onblur="validateTime(this)"></div><div class="form-group"><label style="display:flex; justify-content:space-between;"><span>Término (In)</span><span style="cursor:pointer; color:var(--success); font-size:0.65rem;" onclick="resetSecTime('${dateKey}', 'htermino')">🔄 Auto</span></label><input type="text" class="time-input" id="m_sec_htermino_${dateKey}" value="${currentHTermino}" maxlength="5" inputmode="numeric" oninput="secManualState['${dateKey}'].hterminoManual=true; secManualState['${dateKey}'].customHTermino=this.value; formatTime(this)" onblur="validateTime(this)"></div><div class="form-group"><label>Alerta</label><input type="text" id="m_sec_alerta_${dateKey}" value="${currentAlerta}" oninput="secManualState['${dateKey}'].alerta=this.value; triggerUpdate()"></div></div></div><div id="sec_form_container_${dateKey}">`;
 secData.forEach(item => { let isChecked = st[item.id] !== undefined ? st[item.id] : st.sinObs; webHtml += `<label class="checkbox-item"><input type="checkbox" id="m_sec_${dateKey}_${item.id}" ${isChecked ? 'checked' : ''} ${st.sinObs ? 'disabled' : ''} onchange="handleSecCheckboxChange('${dateKey}', '${item.id}')"> <span><b>${item.id}.</b> ${item.text}</span></label>`; });
 webHtml += `</div><div class="signature-block"><div>III. COMANDANTE DE LA AERONAVE:</div><div class="grid-3" style="margin-top:8px;"><div>Nombre: <strong id="sec_ui_nombre_${dateKey}" style="color:var(--accent);">______________________</strong></div><div>RUT: <strong id="sec_ui_rut_${dateKey}" style="color:var(--accent);">______________________</strong></div><div>Licencia: <strong id="sec_ui_licencia_${dateKey}" style="color:var(--accent);">______________________</strong></div></div></div></div></details>`;
 
-// INYECCIÓN CLAVE: .salto-pagina ANTES DE LA CABECERA AEROCARDAL DE INSPECCIÓN
-let pSecHtml = `<div class="salto-pagina"></div>
-<div id="print_sec_container_${dateKey}" style="font-family:Arial, sans-serif; box-sizing:border-box; margin-top: 10px;">
+// FORMULARIOS SEC ENVUELTOS EN SU PROPIO .pdf-page
+let pSecHtml = `
+<div class="pdf-page" id="print_sec_container_${dateKey}" style="font-family:Arial, sans-serif; box-sizing:border-box;">
 <table class="print-table" style="border-bottom:none;">
 <tr>
 <td colspan="2" class="no-border-x" style="width:30%;"><div class="logo-text">AEROCARDAL</div></td>
