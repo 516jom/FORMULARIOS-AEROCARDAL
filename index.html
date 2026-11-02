@@ -1,4 +1,4 @@
-<index>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -95,9 +95,19 @@ ESTILOS DE IMPRESIÓN NATIVA Y PDF (NEGRO ABSOLUTO Y SALTO DE PÁGINA ESTRICTO)
   
   #print-layout { display: block !important; width: 100% !important; max-width: none !important; position: relative !important; float: none !important; }
   
-  /* SALTO DE PÁGINA ESTRICTO PARA WINDOWS ENTRE CADA BLOQUE PDF */
-  .pdf-page { page-break-after: always !important; break-after: page !important; width: 100% !important; overflow: visible !important; display: block !important; }
-  .pdf-page:last-of-type { page-break-after: auto !important; break-after: auto !important; }
+  /* SALTO DE PÁGINA ESTRICTO BLINDADO CONTRA DESBORDAMIENTOS (OVERFLOWS) DE WINDOWS */
+  .pdf-page { 
+    page-break-after: always !important; 
+    break-after: page !important; 
+    page-break-inside: avoid !important; /* CRÍTICO: Prohíbe a Chrome intentar cortar tablas a la mitad */
+    break-inside: avoid !important; 
+    width: 100% !important; 
+    overflow: hidden !important; 
+    display: block !important; 
+    clear: both !important;
+    margin-bottom: 10px !important;
+  }
+  .pdf-page:last-of-type { page-break-after: auto !important; break-after: auto !important; margin-bottom: 0 !important; }
 }
 
 #print-layout { display: none; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 9px; line-height: 1.35; background: white; color: black; width: 100%; max-width: 800px; margin: 0 auto; }
@@ -153,7 +163,7 @@ Volver a la app
 
 <header>
 <h1>AEROCARDAL - PLANIFICACIÓN OPERACIONAL</h1>
-<div class="subtitle">VERSIÓN 8.2 (NEGRO ABSOLUTO EN PDF + SALTO DE PÁGINA WINDOWS CORREGIDO)</div>
+<div class="subtitle">VERSIÓN 8.3 (CORRECCIÓN DESBORDAMIENTO WINDOWS)</div>
 </header>
 <main id="mobile-ui" class="container">
 <!-- CABECERA GENERAL -->
@@ -497,6 +507,7 @@ cat.items.forEach(item => { smsHtml += `<label class="checkbox-item"><input type
 el('sms_form_container').innerHTML = smsHtml;
 
 // FORMULARIO SMS ENVUELTO EN SU PROPIO .pdf-page (AISLADO PARA SALTO DE PÁGINA)
+// ATENCIÓN: Altura de "Observaciones" reducida a 100px para que Chrome no se vuelva loco con desbordamientos
 let pSmsHtml = `
 <div class="pdf-page" id="print_sms_container" style="font-family:Arial, sans-serif; box-sizing:border-box;">
 <table class="print-table" style="border-bottom:none;">
@@ -528,7 +539,7 @@ let startIdx = 1; for (let prev = 0; prev < cIdx; prev++) { startIdx += smsData[
 cat.items.forEach((item, itemIdx) => { let realIdx = startIdx + itemIdx; pSmsHtml += `<tr><td class="text-center">${realIdx}</td><td>${item}</td><td class="tick-cell" id="p_sms_${realIdx}"></td></tr>`; });
 });
 pSmsHtml += `</table>
-<div style="border:1px solid black; padding:8px; height:360px; margin-bottom:5px;"><b>Observaciones:</b><br><span id="p_sms_obs"></span></div>
+<div style="border:1px solid black; padding:8px; height:100px; margin-bottom:5px; overflow:hidden;"><b>Observaciones:</b><br><span id="p_sms_obs"></span></div>
 <div style="padding-top:2px;"><b>Nombre y firma:</b><span id="sms_p_nombre" style="border-bottom:1px solid black; display:inline-block; width:220px; height:14px;" class="bold"></span></div>
 </td></tr></table></div>`;
 el('print-sms-wrapper').innerHTML = pSmsHtml;
