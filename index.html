@@ -1,4 +1,4 @@
-<index>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -87,13 +87,19 @@ hr.divider { border: 0; border-top: 1px solid var(--border-color); margin: 12px 
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
 /* =======================================================
-ESTILOS DE IMPRESIÓN - AISLAMIENTO TOTAL POR PÁGINAS
+ESTILOS DE IMPRESIÓN NATIVA Y PDF
 ======================================================= */
 @media print {
-@page { size: letter portrait; margin: 6mm; }
-body { background-color: white; color: black; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; display: block !important; }
-#mobile-ui, header, .fab-container, #loading-overlay { display: none !important; }
-#print-layout { display: block !important; width: 100% !important; position: relative !important; float: none !important; }
+  @page { size: letter portrait; margin: 6mm; }
+  body { background-color: white !important; color: black !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; display: block !important; }
+  #mobile-ui, header, .fab-container, #loading-overlay { display: none !important; }
+  
+  /* Restricción eliminada para Windows Print */
+  #print-layout { display: block !important; width: 100% !important; max-width: none !important; position: relative !important; float: none !important; }
+  
+  /* ESTA REGLA ARREGLA EL PROBLEMA DE WINDOWS: Obliga a cada bloque a imprimir en una página nueva */
+  .pdf-page { page-break-after: always !important; break-after: page !important; width: 100% !important; overflow: visible !important; }
+  .pdf-page:last-of-type { page-break-after: auto !important; break-after: auto !important; }
 }
 
 #print-layout { display: none; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 9px; line-height: 1.35; background: white; color: black; width: 100%; max-width: 800px; margin: 0 auto; }
@@ -153,7 +159,7 @@ Volver a la app
 
 <header>
 <h1>AEROCARDAL - PLANIFICACIÓN OPERACIONAL</h1>
-<div class="subtitle">VERSIÓN 8.0 (RENDERIZADO MODULAR AISLADO ANTI-CRASH IOS)</div>
+<div class="subtitle">VERSIÓN 8.1 (WINDOWS PRINT ARREGLADO + FUENTES ULTRA NÍTIDAS)</div>
 </header>
 <main id="mobile-ui" class="container">
 <!-- CABECERA GENERAL -->
@@ -357,10 +363,10 @@ try { let pov = val('m_pov'); let folderId = await getOrCreateFolder(pov); let f
 function prepararImpresionNativa() { updateAll(); setTimeout(() => { window.print(); }, 300); }
 
 // =======================================================
-// NUEVO MOTOR MODULAR DE PDF (ANTI-CRASH IOS)
+// NUEVO MOTOR MODULAR DE PDF (ANTI-CRASH IOS) CON NITIDEZ ULTRA
 // =======================================================
 async function accionGenerarPDF() {
-mostrarCargando("Ensamblando PDF por páginas...\n(Bypass memoria iPad)");
+mostrarCargando("Ensamblando PDF por páginas...\n(Alta Resolución iOS)");
 setTimeout(async () => {
 try {
 let pov = val('m_pov'); let pdfBlob = await generarBlobPDF();
@@ -391,18 +397,17 @@ window.scrollTo(0, 0);
 // Dar tiempo al navegador para recalcular el DOM
 await new Promise(resolve => setTimeout(resolve, 800));
 
-// Capturar TODAS las páginas que hemos aislado estructuralmente
+// Capturar TODAS las páginas aisladas
 const pages = document.querySelectorAll('.pdf-page');
 
 // Configuración Base de html2pdf
 const opt = {
 margin: [5, 5, 5, 5],
 filename: 'temp.pdf',
-image: { type: 'jpeg', quality: 0.98 },
-// Si la página del Consolidado necesita dividirse, esta regla lo permitirá sin colapsar las demás
-pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', 'table'] },
-// Escala reducida a 1.5 para ahorrar 40% de memoria VRAM en el iPad
-html2canvas: { scale: 1.5, useCORS: true, logging: false, width: 800, windowWidth: 800 },
+image: { type: 'jpeg', quality: 1.0 }, // Máxima calidad de compresión
+pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', 'table'] }, // Mantenemos avoid para que no corte filas por la mitad si un consolidado es súper largo
+// ESCALA SUBIDA A 3 PARA MÁXIMA NITIDEZ DE FUENTES. (Como lo procesamos por página, la RAM del iPad lo aguanta sin problemas)
+html2canvas: { scale: 3, useCORS: true, logging: false, width: 800, windowWidth: 800, letterRendering: true },
 jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
 };
 
@@ -410,8 +415,6 @@ try {
 if (pages.length === 0) throw new Error("No se detectaron páginas para renderizar.");
 
 // PROCESAMIENTO SECUENCIAL ESTRUCTURAL:
-// En vez de alimentar todo el bloque de golpe (lo que crashea el Canvas de iOS),
-// alimentamos cada '.pdf-page' por separado al motor, añadiendo manual "addPage()".
 let worker = html2pdf().set(opt).from(pages[0]).toPdf();
 
 for (let i = 1; i < pages.length; i++) {
