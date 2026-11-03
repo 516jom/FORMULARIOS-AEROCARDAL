@@ -146,7 +146,7 @@ Volver a la app
 
 <header>
 <h1>AEROCARDAL - PLANIFICACIÓN OPERACIONAL</h1>
-<div class="subtitle">VERSIÓN 8.7 (PDF AJUSTADO PF Y COMBUSTIBLE)</div>
+<div class="subtitle">VERSIÓN 8.9 (TRIPULACIÓN MÚLTIPLE & DEP/AT SPLIT)</div>
 </header>
 <main id="mobile-ui" class="container">
 <!-- CABECERA GENERAL -->
@@ -462,8 +462,18 @@ function updateFormFooters() {
 const nom = capitanActual.nombre || "______________________", rut = capitanActual.rut || "______________________", lic = capitanActual.licencia || "______________________";
 setTxt('sms_ui_nombre', nom);
 document.querySelectorAll('[id^="sec_ui_nombre_"]').forEach(el => el.textContent = nom); document.querySelectorAll('[id^="sec_ui_rut_"]').forEach(el => el.textContent = rut); document.querySelectorAll('[id^="sec_ui_licencia_"]').forEach(el => el.textContent = lic);
-const nPIC = formatNameForSMS(capitanActual.nombre), nSIC = formatNameForSMS(foActual.nombre);
-setTxt('sms_p_tripulacion', (nPIC ? nPIC + (nSIC ? " / " + nSIC : "") : "")); setTxt('sms_p_nombre', nom === "______________________" ? "" : nom);
+
+const nPIC = formatNameForSMS(capitanActual.nombre);
+const nSIC = formatNameForSMS(foActual.nombre);
+const nSIC2 = formatNameForSMS(fo2Actual.nombre);
+
+let tripArr = [];
+if(nPIC) tripArr.push(nPIC);
+if(nSIC) tripArr.push(nSIC);
+if(nSIC2) tripArr.push(nSIC2);
+
+setTxt('sms_p_tripulacion', tripArr.join(" / "));
+setTxt('sms_p_nombre', nom === "______________________" ? "" : nom);
 }
 function toggleSinObservaciones() { const isChecked = el('m_sms_sin_obs')?.checked; for(let i = 1; i <= 47; i++) { const cb = el(`m_sms_${i}`); if(cb) { if(isChecked) cb.checked = false; cb.disabled = isChecked; } } triggerUpdate(); }
 function toggleSecSinObs(dateKey) {
@@ -595,8 +605,8 @@ return `<div class="card" id="leg_card_${id}">
 <div class="grid-4" style="margin-bottom: 8px;">
 <div class="form-group"><label>Desde <span class="link-btn" id="lbtn_desde_${id}" onclick="toggleLink(${id}, 'desde')">🔗</span></label><input type="text" id="m_t${id}_desde" data-linked="true" value="${defaultOrigin}" style="text-transform: uppercase;" oninput="triggerUpdate()"></div>
 <div class="form-group"><label>Destino</label><input type="text" id="m_t${id}_dest" oninput="triggerUpdate()" style="text-transform: uppercase;"></div>
-<div class="form-group"><label>PF</label><input type="text" id="m_t${id}_pf" placeholder="Ej: RE" oninput="triggerUpdate()"></div>
-<div class="form-group"><label>PM</label><input type="text" id="m_t${id}_pm" placeholder="Ej: EI" oninput="triggerUpdate()"></div>
+<div class="form-group"><label>PF</label><input type="text" id="m_t${id}_pf" placeholder="Ej: RE/EI" oninput="triggerUpdate()"></div>
+<div class="form-group"><label>PM</label><input type="text" id="m_t${id}_pm" placeholder="Ej: EI/MV" oninput="triggerUpdate()"></div>
 </div>
 <div class="time-sequence-box">
 <div style="font-size:0.72rem; color:var(--text-main); margin-bottom:8px; font-weight:bold;">SECUENCIA HORARIA (ESTRICTA 24H)</div>
@@ -771,13 +781,36 @@ const bStr = bDiff > 0 ? `${minsToTime(bDiff)} (${formatDec(bDiff/60)})` : ''; c
 setVal(`m_t${id}_block_diff`, bStr); setVal(`m_t${id}_air_diff`, aStr); setTxt(`ui_t${id}_block_diff`, bStr || '--:--'); setTxt(`ui_t${id}_air_diff`, aStr || '--:--');
 totalBlockMins += bDiff; totalAirMins += aDiff;
 const lPax = parseInt(val(`m_t${id}_pax`)) || 0; totalPax += lPax; paxArray.push(`(${lPax})`);
-const pf = val(`m_t${id}_pf`).trim().toUpperCase() || "SIN NOMBRE", pm = val(`m_t${id}_pm`).trim().toUpperCase();
+
+const pfRaw = val(`m_t${id}_pf`).trim().toUpperCase() || "SIN NOMBRE";
+const pmRaw = val(`m_t${id}_pm`).trim().toUpperCase();
+
+const pfArr = pfRaw.split('/').map(s => s.trim()).filter(Boolean);
+const pmArr = pmRaw.split('/').map(s => s.trim()).filter(Boolean);
+const pfCount = pfArr.length || 1;
+const pmCount = pmArr.length || 1;
+
 legDetails.push({ id, date: tDate, desde, dest, tOut, tIn });
 if(!legsByDate[tDate]) legsByDate[tDate] = [];
-legsByDate[tDate].push({ id, desde, dest, tOut, tOff, tOn, tIn, bDiff, aDiff, fDiff: diffF||0, pax: lPax, pf, pm, horoBot: hBot.value, horoTop: hTop.value, fuelOn: valOn, fuelOff: valOff });
-const initPilot = () => ({ pf_time: 0, pf_air: 0, landings: 0, pm_time: 0, pm_air: 0 });
-if (!pilotStats[pf]) pilotStats[pf] = initPilot(); pilotStats[pf].pf_time += bDiff; pilotStats[pf].pf_air += aDiff; if (bDiff > 0 || aDiff > 0) pilotStats[pf].landings += 1; 
-if (pm) { if (!pilotStats[pm]) pilotStats[pm] = initPilot(); pilotStats[pm].pm_time += bDiff; pilotStats[pm].pm_air += aDiff; }
+legsByDate[tDate].push({ 
+    id, desde, dest, tOut, tOff, tOn, tIn, bDiff, aDiff, fDiff: diffF||0, pax: lPax, 
+    pf: pfRaw, pm: pmRaw, pfArr, pmArr, pfCount, pmCount,
+    horoBot: hBot.value, horoTop: hTop.value, fuelOn: valOn, fuelOff: valOff 
+});
+
+const initPilot = () => ({ pf_time: 0, pf_air: 0, pm_time: 0, pm_air: 0 });
+
+pfArr.forEach(p => {
+    if (!pilotStats[p]) pilotStats[p] = initPilot();
+    pilotStats[p].pf_time += (bDiff / pfCount);
+    pilotStats[p].pf_air += (aDiff / pfCount);
+});
+
+pmArr.forEach(p => {
+    if (!pilotStats[p]) pilotStats[p] = initPilot();
+    pilotStats[p].pm_time += (bDiff / pmCount);
+    pilotStats[p].pm_air += (aDiff / pmCount);
+});
 });
 if(legDetails.length > 1) { for(let idx = 0; idx < legDetails.length - 1; idx++) { let curr = legDetails[idx], next = legDetails[idx+1]; if(curr.date !== next.date && curr.dest && curr.dest !== 'SCEL' && next.desde === curr.dest) { if(!legsByDate[next.date]) legsByDate[next.date] = []; } } }
 let activeDates = Object.keys(legsByDate).sort(); if(activeDates.length === 0 && gDate) activeDates = [gDate]; if(activeDates.length === 0) activeDates = [new Date().toISOString().split('T')[0]];
@@ -787,13 +820,36 @@ activeDates.forEach((dateKey, index) => {
 let dayLegs = legsByDate[dateKey] || []; if(dayLegs.length === 0) return;
 let startDuty = "", endDuty = "", dayBlock = 0, dayAir = 0, dayFuelUsed = 0, dayRefuel = 0, dayPax = [];
 let firstLeg = dayLegs[0], lastLeg = dayLegs[dayLegs.length - 1];
-let p1 = { block: 0, air: 0, dep: 0, pf_block: 0, pf_air: 0 }, p2 = { block: 0, air: 0, dep: 0, pf_block: 0, pf_air: 0 }, p3 = { block: 0, air: 0, dep: 0, pf_block: 0, pf_air: 0 };
+let p1 = { block: 0, air: 0, dep: 0, arr: 0, pf_block: 0, pf_air: 0 }, 
+    p2 = { block: 0, air: 0, dep: 0, arr: 0, pf_block: 0, pf_air: 0 }, 
+    p3 = { block: 0, air: 0, dep: 0, arr: 0, pf_block: 0, pf_air: 0 };
+
 dayLegs.forEach(leg => {
-dayBlock += (leg.bDiff || 0); dayAir += (leg.aDiff || 0); dayFuelUsed += (leg.fDiff || 0); dayRefuel += getLegRefuelTotal(leg.id); if (leg.pax >= 0) dayPax.push(`(${leg.pax})`);
-if (picIni) { if (leg.pf === picIni) { p1.block += leg.bDiff; p1.air += leg.aDiff; p1.pf_block += leg.bDiff; p1.pf_air += leg.aDiff; if(leg.bDiff>0) p1.dep++; } else if (leg.pm === picIni) { p1.block += leg.bDiff; p1.air += leg.aDiff; } }
-if (sicIni) { if (leg.pf === sicIni) { p2.block += leg.bDiff; p2.air += leg.aDiff; p2.pf_block += leg.bDiff; p2.pf_air += leg.aDiff; if(leg.bDiff>0) p2.dep++; } else if (leg.pm === sicIni) { p2.block += leg.bDiff; p2.air += leg.aDiff; } }
-if (sic2Ini) { if (leg.pf === sic2Ini) { p3.block += leg.bDiff; p3.air += leg.aDiff; p3.pf_block += leg.bDiff; p3.pf_air += leg.aDiff; if(leg.bDiff>0) p3.dep++; } else if (leg.pm === sic2Ini) { p3.block += leg.bDiff; p3.air += leg.aDiff; } }
+    dayBlock += (leg.bDiff || 0); dayAir += (leg.aDiff || 0); dayFuelUsed += (leg.fDiff || 0); dayRefuel += getLegRefuelTotal(leg.id); if (leg.pax >= 0) dayPax.push(`(${leg.pax})`);
+    
+    const procesarPilotoDia = (ini, pObj) => {
+        if (!ini) return;
+        if (leg.pfArr && leg.pfArr.includes(ini)) {
+            let bShare = leg.bDiff / leg.pfCount; let aShare = leg.aDiff / leg.pfCount;
+            pObj.block += bShare; pObj.air += aShare; pObj.pf_block += bShare; pObj.pf_air += aShare;
+            
+            // Lógica cronológica para separar DEP y AT
+            if (leg.bDiff > 0) {
+                if (leg.pfArr[0] === ini) pObj.dep++;
+                if (leg.pfArr[leg.pfArr.length - 1] === ini) pObj.arr++;
+            }
+        }
+        if (leg.pmArr && leg.pmArr.includes(ini)) {
+            let bShare = leg.bDiff / leg.pmCount; let aShare = leg.aDiff / leg.pmCount;
+            pObj.block += bShare; pObj.air += aShare;
+        }
+    };
+
+    procesarPilotoDia(picIni, p1);
+    procesarPilotoDia(sicIni, p2);
+    procesarPilotoDia(sic2Ini, p3);
 });
+
 if (index === 0) { startDuty = val('duty_start'); if (globalEndEl.dataset.manual === "true" && globalEndEl.value.length === 5) { endDuty = globalEndEl.value; } else if (lastLeg.tIn) { endDuty = addMins(lastLeg.tIn, 30); globalEndEl.value = endDuty; } } 
 else { if (firstLeg.tOff) startDuty = addMins(firstLeg.tOff, -60); if (lastLeg.tIn) endDuty = addMins(lastLeg.tIn, 30); }
 let dur = (startDuty && endDuty) ? timeDiffMins(startDuty, endDuty) : 0; totalDutyMinsAllDays += dur;
@@ -911,18 +967,21 @@ let sic2Ini = val('m_sic2_ini').trim().toUpperCase() || 'FO2';
 let hasSic2 = val('m_sic2_ini').trim() !== '';
 
 let totDuty = 0, totBlock = 0, totAir = 0, totFuel = 0, totPax = ""; 
-let totP1Block = 0, totP1Air = 0, totP1Dep = 0, totP1PFBlock = 0, totP1PFAir = 0; 
-let totP2Block = 0, totP2Air = 0, totP2Dep = 0, totP2PFBlock = 0, totP2PFAir = 0;
-let totP3Block = 0, totP3Air = 0, totP3Dep = 0, totP3PFBlock = 0, totP3PFAir = 0;
+let totP1Block = 0, totP1Air = 0, totP1Dep = 0, totP1Arr = 0, totP1PFBlock = 0, totP1PFAir = 0; 
+let totP2Block = 0, totP2Air = 0, totP2Dep = 0, totP2Arr = 0, totP2PFBlock = 0, totP2PFAir = 0;
+let totP3Block = 0, totP3Air = 0, totP3Dep = 0, totP3Arr = 0, totP3PFBlock = 0, totP3PFAir = 0;
 
 dailyStats.forEach(ds => {
     totDuty += ds.duration; totBlock += ds.block; totAir += ds.air; totFuel += ds.fuelUsed;
     totPax += (totPax && ds.pax ? " " : "") + ds.pax;
-    totP1Block += ds.p1.block; totP1Air += ds.p1.air; totP1Dep += ds.p1.dep;
+    
+    totP1Block += ds.p1.block; totP1Air += ds.p1.air; totP1Dep += ds.p1.dep; totP1Arr += ds.p1.arr;
     totP1PFBlock += ds.p1.pf_block; totP1PFAir += ds.p1.pf_air;
-    totP2Block += ds.p2.block; totP2Air += ds.p2.air; totP2Dep += ds.p2.dep;
+    
+    totP2Block += ds.p2.block; totP2Air += ds.p2.air; totP2Dep += ds.p2.dep; totP2Arr += ds.p2.arr;
     totP2PFBlock += ds.p2.pf_block; totP2PFAir += ds.p2.pf_air;
-    totP3Block += ds.p3.block; totP3Air += ds.p3.air; totP3Dep += ds.p3.dep;
+    
+    totP3Block += ds.p3.block; totP3Air += ds.p3.air; totP3Dep += ds.p3.dep; totP3Arr += ds.p3.arr;
     totP3PFBlock += ds.p3.pf_block; totP3PFAir += ds.p3.pf_air;
 });
 
@@ -938,7 +997,7 @@ let t1Html = `<table class="print-table" style="margin-top:0; border-top:none; t
 <td style="width:10%;" class="text-center"><b>HOROMETRO</b></td>
 <td style="width:8%;" class="text-center"><b>AIRTIME</b></td>
 <td style="width:8%;" class="text-center"><b>BLOCK</b></td>
-<td colspan="${pfCols}" style="width:${pfWidth};" class="text-center"><b>HORAS PF (DEP/AT)</b></td>
+<td colspan="${pfCols}" style="width:${pfWidth};" class="text-center"><b>HORAS PF (DEP / AT)</b></td>
 <td colspan="4" style="width:${fuelWidth};" class="text-center"><b>COMBUSTIBLE</b></td>
 <td rowspan="2" style="width:5%; vertical-align:middle;" class="text-center"><b>PAX<br>(P)</b></td>
 </tr>
@@ -948,9 +1007,9 @@ let t1Html = `<table class="print-table" style="margin-top:0; border-top:none; t
 <td class="text-center"><b>INICIAL-FINAL</b></td>
 <td class="text-center"><b>TOTAL</b></td>
 <td class="text-center"><b>TOTAL</b></td>
-<td class="text-center"><b>CAP: ${picIni} (DEP/AT: ${totP1Dep})</b></td>
-<td class="text-center"><b>FO: ${sicIni} (DEP/AT: ${totP2Dep})</b></td>
-${hasSic2 ? `<td class="text-center"><b>FO2: ${sic2Ini} (DEP/AT: ${totP3Dep})</b></td>` : ''}
+<td class="text-center"><b>CAP: ${picIni} (DEP:${totP1Dep} AT:${totP1Arr})</b></td>
+<td class="text-center"><b>FO: ${sicIni} (DEP:${totP2Dep} AT:${totP2Arr})</b></td>
+${hasSic2 ? `<td class="text-center"><b>FO2: ${sic2Ini} (DEP:${totP3Dep} AT:${totP3Arr})</b></td>` : ''}
 <td class="text-center"><b>INICIAL</b></td>
 <td class="text-center"><b>FINAL</b></td>
 <td class="text-center"><b>USADO</b></td>
@@ -978,7 +1037,6 @@ let p3PFStr = (ds.p3.pf_block > 0 || ds.p3.pf_air > 0) ? `<div style="line-heigh
 t1Html += `<tr class="compact-td"><td class="text-center bold">${fDate}</td><td class="text-center">${ds.start || '--'} - ${ds.end || '--'}</td><td class="text-center bold">${dStr}</td><td class="text-center">${ds.hIni} - ${ds.hFin}</td><td class="text-center bold">${aStr}</td><td class="text-center bold">${bStr}</td><td class="text-center">${p1PFStr}</td><td class="text-center">${p2PFStr}</td>${hasSic2 ? `<td class="text-center">${p3PFStr}</td>` : ''}<td class="text-center">${Math.round(ds.fuelInit)}</td><td class="text-center">${Math.round(ds.fuelFinal)}</td><td class="text-center bold">${Math.round(ds.fuelUsed)}</td><td class="text-center">${Math.round(ds.fuelRefuel)}</td><td class="text-center">${ds.pax}</td></tr>`;
 });
 
-// Condicional estricto: Sólo renderizar si hay más de 1 día de vuelo
 if (dailyStats.length > 1) { 
 let p1TotAirDec = totP1PFAir > 0 ? formatDec(totP1PFAir/60).replace('.', ',') : '0,0'; 
 let p1TotBlkDec = totP1PFBlock > 0 ? formatDec(totP1PFBlock/60).replace('.', ',') : '0,0';
