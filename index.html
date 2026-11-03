@@ -25,7 +25,7 @@ h1 { margin: 0; font-size: 1.2rem; font-weight: 700; color: var(--accent); lette
 .subtitle { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; font-weight: bold; }
 .container { padding: 1rem 1rem 150px 1rem; max-width: 900px; margin: 0 auto; }
 .card { background: var(--bg-card); margin-bottom: 1.2rem; border-radius: 10px; border: 1px solid var(--border-color); overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-.card-header { padding: 0.85rem 1rem; font-size: 1rem; font-weight: 600; background-color: rgba(255,255,255,0.05); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+.card-header { padding: 0.85rem 1rem; font-size: 1rem; font-weight: 600; background-color: rgba(255,255,255,0.05); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
 .card-content { padding: 1rem; }
 details.card summary, details.param-section summary { padding: 0.85rem 1rem; font-size: 1rem; font-weight: 600; background-color: rgba(255,255,255,0.05); cursor: pointer; user-select: none; outline: none; border-bottom: 1px solid transparent; transition: background 0.2s;}
 details.card summary::-webkit-details-marker, details.param-section summary::-webkit-details-marker { display:none; }
@@ -34,7 +34,7 @@ details.card[open] summary { border-bottom: 1px solid var(--border-color); }
 details.card[open] summary .arrow::after, details.param-section[open] summary .arrow::after { content: "▲"; }
 details.card summary:hover, details.param-section summary:hover { background-color: rgba(255,255,255,0.1); }
 
-.grid-header { display: grid; grid-template-columns: 0.6fr 1fr 1fr; gap: 0.8rem; }
+.grid-header { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
 .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.8rem; }
 .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.8rem; }
 .grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.5rem; }
@@ -77,6 +77,7 @@ hr.divider { border: 0; border-top: 1px solid var(--border-color); margin: 12px 
 .btn-print { font-weight: bold; border-radius: 6px; border: none; }
 .checkbox-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; font-size: 0.8rem; line-height: 1.3; }
 .checkbox-item input[type="checkbox"] { flex-shrink: 0; margin-top: 2px; width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer;}
+.radio-group input[type="radio"] { accent-color: var(--accent); cursor: pointer; width: 16px; height: 16px; margin: 0; }
 .form-category-title { font-size: 0.75rem; font-weight: bold; color: var(--accent); margin: 15px 0 8px 0; background: rgba(255,255,255,0.05); padding: 6px; border-radius: 4px; border-left: 3px solid var(--accent);}
 .signature-block { margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border-color); font-size: 0.85rem; color: var(--text-muted); }
 
@@ -86,7 +87,7 @@ hr.divider { border: 0; border-top: 1px solid var(--border-color); margin: 12px 
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
 /* =======================================================
-ESTILOS DE IMPRESIÓN NATIVA Y PDF (NEGRO ABSOLUTO Y SALTO DE PÁGINA ESTRICTO)
+ESTILOS DE IMPRESIÓN NATIVA Y PDF
 ======================================================= */
 @media print {
   @page { size: letter portrait; margin: 6mm; }
@@ -98,19 +99,10 @@ ESTILOS DE IMPRESIÓN NATIVA Y PDF (NEGRO ABSOLUTO Y SALTO DE PÁGINA ESTRICTO)
 }
 
 #print-layout { display: none; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 9px; line-height: 1.35; background: white; color: black; width: 100%; max-width: 800px; margin: 0 auto; }
-
-/* FORZAR NEGRO ABSOLUTO (BLINDAJE PARA IOS WEB-KIT TEXT FILL) */
-#print-layout * { 
-  color: #000000 !important; 
-  -webkit-text-fill-color: #000000 !important; 
-  -webkit-font-smoothing: none !important; /* Previene afinamiento de fuentes en Retina/iOS */
-  text-rendering: geometricPrecision !important;
-  opacity: 1 !important;
-}
+#print-layout * { color: #000000 !important; -webkit-text-fill-color: #000000 !important; -webkit-font-smoothing: none !important; text-rendering: geometricPrecision !important; opacity: 1 !important; }
 #print-layout table, #print-layout td, #print-layout th { border-color: black !important; box-sizing: border-box; }
 
 .pdf-page { background: white; width: 100%; box-sizing: border-box; }
-
 .print-table { width: 100%; border-collapse: collapse; border: 1px solid black; margin-bottom: 6px; page-break-inside: avoid; break-inside: avoid; table-layout: fixed; }
 .print-table th, .print-table td, .tramo-grid td { border: 1px solid black; padding: 3px 5px; vertical-align: middle; font-size: 9px; }
 .logo-text { font-size: 15px; font-weight: 900; font-style: italic; letter-spacing: -0.5px; color: #000000 !important; }
@@ -119,10 +111,8 @@ ESTILOS DE IMPRESIÓN NATIVA Y PDF (NEGRO ABSOLUTO Y SALTO DE PÁGINA ESTRICTO)
 .tramo-title-gray { background-color: #F0F0F0 !important; color: #000000 !important; text-align: center; font-weight: bold; padding: 3px; letter-spacing: 0.5px; font-size: 10px; text-transform: uppercase; border: 1px solid black; }
 .header-cell, .gray-bg { background-color: #F5F5F5 !important; font-weight: bold; text-align: center; font-size: 8.5px; color: #000000 !important; }
 .summary-total-bg { background-color: #EBEBEB !important; font-weight: bold; font-size: 9px !important; color: #000000 !important; }
-
 .compact-th td { padding: 1px 1px !important; line-height: 1.0; font-size: 8px !important; font-weight: bold !important; color: #000000 !important; }
 .compact-td td { padding: 1px 1px !important; font-size: 8.5px !important; color: #000000 !important; }
-
 .cell-data { height: 16px; font-weight: bold; text-align: center; font-size: 9.5px; color: #000000 !important; }
 .bold { font-weight: bold; font-size: 9.5px; color: #000000 !important; }
 .print-form-table { width: 100%; border-collapse: collapse; border: 1px solid black; font-size: 9px; page-break-inside: avoid; break-inside: avoid; }
@@ -156,7 +146,7 @@ Volver a la app
 
 <header>
 <h1>AEROCARDAL - PLANIFICACIÓN OPERACIONAL</h1>
-<div class="subtitle">VERSIÓN 8.5 (BLINDAJE TOTAL ETIQUETAS IOS)</div>
+<div class="subtitle">VERSIÓN 8.7 (PDF AJUSTADO PF Y COMBUSTIBLE)</div>
 </header>
 <main id="mobile-ui" class="container">
 <!-- CABECERA GENERAL -->
@@ -165,7 +155,6 @@ Volver a la app
 <div class="card-content">
 <div class="grid-header">
 <div class="form-group"><label style="color:var(--accent);">Fecha del Vuelo</label><input type="date" id="m_fecha_gen" onchange="triggerUpdate()"></div>
-<div class="form-group"><label style="color:var(--accent);">Folio BIT</label><input type="text" id="m_folio_gen" placeholder="Folio Único..." oninput="triggerUpdate()"></div>
 <div class="form-group"><label style="color:#4285F4; text-shadow: 0 0 5px rgba(66,133,244,0.5);">P.O.V. N°</label><input type="text" id="m_pov" oninput="triggerUpdate()" placeholder="Ej: 1234"></div>
 </div>
 <div class="grid-3">
@@ -231,7 +220,7 @@ Volver a la app
 <div class="card-content">
   <div class="summary-title" style="color: var(--accent); margin-bottom: 4px;">📝 DETALLE POR TRAMO</div>
   <div style="overflow-x: auto; margin-bottom: 15px; border-radius:8px; border:1px solid var(--border-color);" id="ui_resumen_tramos"></div>
-  <div class="summary-title" style="color: var(--accent); margin-bottom: 4px;">📅 CONSOLIDADO DIARIO</div>
+  <div class="summary-title" style="color: var(--accent); margin-bottom: 4px;">📅 CONSOLIDADO POR DIA</div>
   <div style="overflow-x: auto; margin-bottom: 15px; border-radius:8px; border:1px solid var(--border-color);" id="ui_resumen_diario"></div>
   <details class="param-section" style="background: rgba(255,255,255,0.02); border: 1px dashed var(--border-color); border-radius: 8px;">
     <summary style="display:flex; justify-content:space-between; align-items:center; padding: 12px;">
@@ -260,7 +249,7 @@ Volver a la app
 <button class="btn-print" style="background:var(--accent); color:black; padding: 10px 14px;" onclick="prepararImpresionNativa()">🖨️ Imprimir (PC)</button>
 </div>
 
-<!-- LAYOUT DE IMPRESIÓN (PDF) ESTRUCTURA MODULAR CON ESTILOS INLINE BLINDADOS -->
+<!-- LAYOUT DE IMPRESIÓN (PDF) -->
 <div id="print-layout">
   <!-- PÁGINA 1: CONSOLIDADO -->
   <div class="pdf-page" id="print_op_container" style="text-transform: uppercase;">
@@ -276,7 +265,6 @@ Volver a la app
         <td style="width: 25%; color: #000000 !important;"><b style="color: #000000 !important;">MATERIAL:</b> <span id="p_material" style="color: #000000 !important; font-weight: bold;"></span></td>
         <td colspan="2" style="color: #000000 !important;"><b style="color: #000000 !important;">MATRICULA:</b> <span id="p_matricula" style="color: #000000 !important; font-weight: bold;"></span></td>
       </tr>
-      <tr><td colspan="5" class="gray-bg" style="text-align:left; color: #000000 !important;"><b style="color: #000000 !important;">FOLIO BIT:</b> <span id="p_folio_gen" style="color: #000000 !important; font-weight: bold;"></span></td></tr>
     </table>
     <div id="print-tramos-container"></div>
     <div id="print-params-container" style="margin-top: 15px;"></div>
@@ -549,7 +537,24 @@ const timeToMins = t => { if (!t || !t.includes(':')) return null; const [h, m] 
 const minsToTime = m => { if (m === null || isNaN(m)) return "--:--"; m = (m % 1440 + 1440) % 1440; return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`; };
 const timeDiffMins = (start, end) => { const s = timeToMins(start), e = timeToMins(end); if (s === null || e === null) return 0; return e - s < 0 ? (e - s) + 1440 : e - s; };
 const addMins = (t, mins) => { if (!t || !t.includes(':')) return ""; let [h, m] = t.split(':').map(Number); let total = h * 60 + m + mins; total = ((total % 1440) + 1440) % 1440; return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`; };
+
 function toggleLink(id, field) { const input = el(`m_t${id}_${field}`), btn = el(`lbtn_${field}_${id}`); const isLinked = input.dataset.linked === "true"; input.dataset.linked = !isLinked; input.readOnly = !isLinked; input.classList.toggle('inherited-input', !isLinked); btn.textContent = isLinked ? "🔓" : "🔗"; btn.title = isLinked ? "Restablecer herencia" : "Desvincular"; if(isLinked) triggerUpdate(); }
+
+function syncFolioDown(sourceId) {
+    const sourceVal = val(`m_t${sourceId}_folio`);
+    let startSync = false;
+    legIds.forEach(id => {
+        if (id === sourceId) {
+            startSync = true;
+        } else if (startSync) {
+            const elTarget = el(`m_t${id}_folio`);
+            if (elTarget && elTarget.dataset.manual !== 'true') {
+                elTarget.value = sourceVal;
+            }
+        }
+    });
+}
+
 function addRefuelRecord(id) { (refuelData[id] = refuelData[id] || []).push({ id: Date.now(), amount: '', time: '' }); renderRefuels(id); }
 function removeRefuelRecord(legId, recordId) { refuelData[legId] = refuelData[legId].filter(r => r.id !== recordId); renderRefuels(legId); }
 function updateRefuelRecord(legId, recordId, field, value) { const rec = refuelData[legId].find(r => r.id === recordId); if(rec) rec[field] = value; triggerUpdate(); }
@@ -559,7 +564,19 @@ const getLegRefuelTotal = id => (refuelData[id] || []).reduce((sum, r) => sum + 
 function getLegHTML(id, index, defaultOrigin = '') {
 refuelData[id] = [];
 return `<div class="card" id="leg_card_${id}">
-<div class="card-header"><span>🛫 ${ordinals[index] || index + '°'} TRAMO (Leg #${index})</span>${index > 1 ? `<button class="btn btn-danger" onclick="removeLeg(${id})">Eliminar</button>` : ''}</div>
+<div class="card-header">
+    <span style="display:flex; align-items:center; gap:10px;">
+        🛫 ${ordinals[index] || index + '°'} TRAMO (Leg #${index})
+    </span>
+    <div style="display:flex; align-items:center; gap:8px;">
+        <div style="display:flex; align-items:center; gap:5px; background:rgba(255,255,255,0.05); padding:2px 8px; border-radius:6px; border:1px solid var(--border-color);">
+            <label style="font-size:0.6rem; color:var(--text-muted); margin:0;">FECHA:</label>
+            <input type="date" id="m_t${id}_fecha" data-linked="true" style="border:none; background:transparent; padding:0; width:105px; color:var(--accent); font-size:0.8rem; box-shadow:none; outline:none;" onchange="triggerUpdate()">
+            <span class="link-btn" id="lbtn_fecha_${id}" onclick="toggleLink(${id}, 'fecha')" style="font-size:0.8rem; margin-left:3px;">🔗</span>
+        </div>
+        ${index > 1 ? `<button class="btn btn-danger" onclick="removeLeg(${id})" style="padding:4px 8px;">Eliminar</button>` : ''}
+    </div>
+</div>
 <div class="card-content">
 <div class="grid-4" style="margin-bottom: 8px;">
 <div class="form-group"><label>Desde <span class="link-btn" id="lbtn_desde_${id}" onclick="toggleLink(${id}, 'desde')">🔗</span></label><input type="text" id="m_t${id}_desde" data-linked="true" value="${defaultOrigin}" style="text-transform: uppercase;" oninput="triggerUpdate()"></div>
@@ -597,7 +614,23 @@ return `<div class="card" id="leg_card_${id}">
 <div class="grid-2" style="margin-top:10px;"><div class="form-group"><label>METEOROLOGÍA</label><textarea id="m_t${id}_meteo" oninput="triggerUpdate()"></textarea></div><div class="form-group"><label>AUTORIZACIÓN ATC</label><textarea id="m_t${id}_atc" oninput="triggerUpdate()"></textarea></div></div>
 </div></details>
 <input type="hidden" id="m_t${id}_horo_diff"><input type="hidden" id="m_t${id}_block_diff"><input type="hidden" id="m_t${id}_air_diff"><input type="hidden" id="m_t${id}_fuel_diff">
-<hr class="divider"><div class="grid-4"><div class="form-group"><label>Fecha <span class="link-btn" id="lbtn_fecha_${id}" onclick="toggleLink(${id}, 'fecha')">🔗</span></label><input type="date" id="m_t${id}_fecha" data-linked="true"></div><div class="form-group"><label>Folio BIT <span class="link-btn" id="lbtn_folio_${id}" onclick="toggleLink(${id}, 'folio')">🔗</span></label><input type="text" id="m_t${id}_folio" data-linked="true"></div><div class="form-group"><label>Vientos</label><input type="text" id="m_t${id}_winds" oninput="triggerUpdate()"></div><div class="form-group"><label>Aterrizaje</label><div style="display:flex; gap:6px; margin-top:2px;"><select id="m_t${id}_dn" onchange="triggerUpdate()"><option value="">D/N</option><option value="D">Diurno (D)</option><option value="N">Nocturno (N)</option></select><select id="m_t${id}_pnp" onchange="triggerUpdate()"><option value="">APP</option><option value="P">P</option><option value="NP">NP</option></select></div></div></div>
+<hr class="divider">
+<div class="grid-3">
+    <div class="form-group"><label>Folio BIT</label><input type="text" id="m_t${id}_folio" placeholder="Folio Único..." oninput="this.dataset.manual='true'; syncFolioDown(${id}); triggerUpdate();"></div>
+    <div class="form-group"><label>Vientos</label><input type="text" id="m_t${id}_winds" oninput="triggerUpdate()"></div>
+    <div class="form-group"><label>Aterrizaje / APP</label>
+        <div style="display:flex; gap:10px; margin-top:2px;">
+            <div class="radio-group" style="display:flex; gap:5px; background:var(--bg-input); padding:6px; border-radius:6px; border:1px solid var(--border-color);">
+                <label style="display:flex; align-items:center; gap:3px; font-size:0.75rem;"><input type="radio" name="dn_${id}" id="m_t${id}_dn_d" value="D" onchange="triggerUpdate()"> D</label>
+                <label style="display:flex; align-items:center; gap:3px; font-size:0.75rem;"><input type="radio" name="dn_${id}" id="m_t${id}_dn_n" value="N" onchange="triggerUpdate()"> N</label>
+            </div>
+            <div class="radio-group" style="display:flex; gap:5px; background:var(--bg-input); padding:6px; border-radius:6px; border:1px solid var(--border-color);">
+                <label style="display:flex; align-items:center; gap:3px; font-size:0.75rem;"><input type="radio" name="pnp_${id}" id="m_t${id}_pnp_p" value="P" onchange="triggerUpdate()"> P</label>
+                <label style="display:flex; align-items:center; gap:3px; font-size:0.75rem;"><input type="radio" name="pnp_${id}" id="m_t${id}_pnp_np" value="NP" onchange="triggerUpdate()"> NP</label>
+            </div>
+        </div>
+    </div>
+</div>
 </div></div>`;
 }
 
@@ -653,28 +686,59 @@ function addLeg(defaultOrigin = '') {
 const id = nextLegId++, index = legIds.push(id);
 el('tramos-container').insertAdjacentHTML('beforeend', getLegHTML(id, index, defaultOrigin));
 el('print-tramos-container').insertAdjacentHTML('beforeend', getPrintLegHTML(id, index)); el('print-params-container').insertAdjacentHTML('beforeend', getPrintParamsHTML(id, index));
-if(index === 1) { const dLink = el(`m_t${id}_desde`), dBtn = el(`lbtn_desde_${id}`); if(dLink) { dLink.dataset.linked = "false"; dLink.classList.remove('inherited-input'); } if(dBtn) dBtn.style.display = "none"; } 
-else { const dLink = el(`m_t${id}_desde`); if(dLink) { dLink.dataset.linked = "true"; dLink.readOnly = true; dLink.classList.add('inherited-input'); } }
-['fecha', 'folio'].forEach(f => { const field = el(`m_t${id}_${f}`); if(field) { field.dataset.linked = "true"; field.readOnly = true; field.classList.add('inherited-input'); } });
+
+if(index === 1) { 
+    const dLink = el(`m_t${id}_desde`), dBtn = el(`lbtn_desde_${id}`); 
+    if(dLink) { dLink.dataset.linked = "false"; dLink.classList.remove('inherited-input'); } 
+    if(dBtn) dBtn.style.display = "none"; 
+    
+    const fLink = el(`m_t${id}_fecha`), fBtnDate = el(`lbtn_fecha_${id}`);
+    if(fLink) { fLink.dataset.linked = "false"; fLink.classList.remove('inherited-input'); }
+    if(fBtnDate) fBtnDate.style.display = "none";
+} else { 
+    const dLink = el(`m_t${id}_desde`); 
+    if(dLink) { dLink.dataset.linked = "true"; dLink.readOnly = true; dLink.classList.add('inherited-input'); } 
+    
+    const fLink = el(`m_t${id}_fecha`);
+    if(fLink) { fLink.dataset.linked = "true"; fLink.readOnly = true; fLink.classList.add('inherited-input'); }
+    
+    const prevId = legIds[index - 2];
+    if (prevId) {
+        setVal(`m_t${id}_folio`, val(`m_t${prevId}_folio`));
+    }
+}
 triggerUpdate();
 }
+
 function removeLeg(id) {
 if (!confirm("¿Eliminar tramo? Actualizará continuidad.")) return;
 legIds = legIds.filter(l => l !== id); el(`leg_card_${id}`).remove();
 const pContLegs = el('print-tramos-container'), pContParams = el('print-params-container'); pContLegs.innerHTML = ""; pContParams.innerHTML = "";
-legIds.forEach((lId, i) => { pContLegs.insertAdjacentHTML('beforeend', getPrintLegHTML(lId, i + 1)); pContParams.insertAdjacentHTML('beforeend', getPrintParamsHTML(lId, i + 1)); el(`leg_card_${lId}`).querySelector('.card-header span').innerHTML = `🛫 ${ordinals[i + 1] || (i+1) + '°'} TRAMO (Leg #${i+1})`; });
-if(legIds.length > 0) { const fId = legIds[0], dLink = el(`m_t${fId}_desde`), dBtn = el(`lbtn_desde_${fId}`); if(dLink) { dLink.dataset.linked = "false"; dLink.readOnly = false; dLink.classList.remove('inherited-input'); } if(dBtn) dBtn.style.display = "none"; }
+legIds.forEach((lId, i) => { 
+    pContLegs.insertAdjacentHTML('beforeend', getPrintLegHTML(lId, i + 1)); 
+    pContParams.insertAdjacentHTML('beforeend', getPrintParamsHTML(lId, i + 1)); 
+    el(`leg_card_${lId}`).querySelector('.card-header > span').innerHTML = `🛫 ${ordinals[i + 1] || (i+1) + '°'} TRAMO (Leg #${i+1})`; 
+});
+if(legIds.length > 0) { 
+    const fId = legIds[0];
+    const dLink = el(`m_t${fId}_desde`), dBtn = el(`lbtn_desde_${fId}`); 
+    if(dLink) { dLink.dataset.linked = "false"; dLink.readOnly = false; dLink.classList.remove('inherited-input'); } 
+    if(dBtn) dBtn.style.display = "none"; 
+
+    const fLink = el(`m_t${fId}_fecha`), fBtnDate = el(`lbtn_fecha_${fId}`);
+    if(fLink) { fLink.dataset.linked = "false"; fLink.readOnly = false; fLink.classList.remove('inherited-input'); }
+    if(fBtnDate) fBtnDate.style.display = "none";
+}
 triggerUpdate();
 }
 function resetSecTime(dateKey, type) { secManualState[dateKey] = secManualState[dateKey] || {}; if(type === 'hinicio') secManualState[dateKey].hinicioManual = false; if(type === 'htermino') secManualState[dateKey].hterminoManual = false; triggerUpdate(); }
 
 function updateAll() {
 let totalAirMins = 0, totalBlockMins = 0, totalPax = 0, totalFuelUsed = 0, globalRefuel = 0;
-const pilotStats = {}, paxArray = []; const gDate = val('m_fecha_gen'), gFolio = val('m_folio_gen');
+const pilotStats = {}, paxArray = []; const gDate = val('m_fecha_gen');
 let legsByDate = {}; let legDetails = [];
 legIds.forEach((id, i) => {
 if (el(`m_t${id}_fecha`)?.dataset.linked === "true") setVal(`m_t${id}_fecha`, gDate);
-if (el(`m_t${id}_folio`)?.dataset.linked === "true") setVal(`m_t${id}_folio`, gFolio);
 if (i > 0 && el(`m_t${id}_desde`)?.dataset.linked === "true") setVal(`m_t${id}_desde`, val(`m_t${legIds[i-1]}_dest`));
 const tDate = val(`m_t${id}_fecha`) || gDate || new Date().toISOString().split('T')[0];
 const desde = val(`m_t${id}_desde`).toUpperCase(), dest = val(`m_t${id}_dest`).toUpperCase();
@@ -801,7 +865,7 @@ container.innerHTML = webHtml; printContainer.innerHTML = printHtml; updateFormF
 }
 
 function syncPrintData(air, block, initF, refF, usedF, finF, strPax, activeDates, dailyStats) {
-['fecha_gen', 'folio_gen', 'pov', 'material', 'matricula'].forEach(f => setTxt(`p_${f}`, val(`m_${f}`)));
+['fecha_gen', 'pov', 'material', 'matricula'].forEach(f => setTxt(`p_${f}`, val(`m_${f}`)));
 const stdFields = ['fecha','folio','dest','desde','dist','pax','pf','pm','winds','time_out','time_off','time_on','time_in','block_diff','air_diff','horo_top','horo_bot','horo_diff','fuel_on','fuel_off','fuel_diff'];
 const prmFields = ['fl','mach','isa','oat','gspd','ff','n1','n2','oilt','oilp','itt','obs'];
 const wpfFields = ['wp1','wp2','wp3','wp4','cp1','cp2','cp3','cp4','cr1','cr2','cr3','cr4'];
@@ -811,22 +875,42 @@ const windsVal = val(`m_t${id}_winds`).trim(); if(el(`p_t${id}_winds_wrapper`)) 
 const hasPrm = prmFields.some(f => val(`m_t${id}_${f}`).trim() !== ""); const hasFuel = wpfFields.some(f => val(`m_t${id}_${f}`).trim() !== ""); const hasMet = val(`m_t${id}_meteo`).trim() !== "", hasAtc = val(`m_t${id}_atc`).trim() !== "";
 prmFields.concat(wpfFields).forEach(f => setTxt(`p_t${id}_${f}`, val(`m_t${id}_${f}`))); setTxt(`p_t${id}_meteo`, val(`m_t${id}_meteo`)); setTxt(`p_t${id}_atc`, val(`m_t${id}_atc`));
 if(el(`p_t${id}_tbl_params`)) el(`p_t${id}_tbl_params`).style.display = hasPrm ? "table" : "none"; if(el(`p_t${id}_tbl_fuel`)) el(`p_t${id}_tbl_fuel`).style.display = hasFuel ? "table" : "none"; if(el(`p_t${id}_tbl_meteo`)) el(`p_t${id}_tbl_meteo`).style.display = hasMet ? "table" : "none"; if(el(`p_t${id}_tbl_atc`)) el(`p_t${id}_tbl_atc`).style.display = hasAtc ? "table" : "none"; if(el(`p_t${id}_params_wrapper`)) el(`p_t${id}_params_wrapper`).style.display = (hasPrm||hasFuel||hasMet||hasAtc) ? "block" : "none";
-const dnVal = val(`m_t${id}_dn`), pnpVal = val(`m_t${id}_pnp`); setTxt(`p_t${id}_dn_text`, dnVal === 'D' ? 'DIURNO' : (dnVal === 'N' ? 'NOCTURNO' : '')); setTxt(`p_t${id}_pnp_text`, pnpVal === 'P' ? 'PRECISIÓN' : (pnpVal === 'NP' ? 'NO PRECISIÓN' : ''));
+
+// Lectura de Radio Buttons para Impresión PDF
+const dnVal = document.querySelector(`input[name="dn_${id}"]:checked`)?.value || '';
+const pnpVal = document.querySelector(`input[name="pnp_${id}"]:checked`)?.value || '';
+setTxt(`p_t${id}_dn_text`, dnVal === 'D' ? 'DIURNO' : (dnVal === 'N' ? 'NOCTURNO' : '')); 
+setTxt(`p_t${id}_pnp_text`, pnpVal === 'P' ? 'PRECISIÓN' : (pnpVal === 'NP' ? 'NO PRECISIÓN' : ''));
 });
+
 let picIni = val('m_pic_ini').trim().toUpperCase() || 'CAP'; let sicIni = val('m_sic_ini').trim().toUpperCase() || 'FO';
-let t1Html = `<table class="print-table" style="margin-top:0; border-top:none; text-transform:uppercase; table-layout: fixed; width: 100%;"><tr><td colspan="13" class="summary-title-pdf"><b>CONSOLIDADO DIARIO</b></td></tr><tr class="gray-bg compact-th"><td rowspan="2" style="width:6%; vertical-align:middle;" class="text-center"><b>FECHA</b></td><td style="width:9%;" class="text-center"><b>DUTY</b></td><td style="width:9%;" class="text-center"><b>HORO</b></td><td style="width:7%;" class="text-center"><b>DUTY</b></td><td style="width:7%;" class="text-center"><b>AIRTIME</b></td><td style="width:7%;" class="text-center"><b>BLOCK</b></td><td colspan="2" style="width:22%;" class="text-center"><b>HORAS PF (DEP/AT)</b></td><td colspan="4" style="width:28%;" class="text-center"><b>COMBUSTIBLE</b></td><td rowspan="2" style="width:5%; vertical-align:middle;" class="text-center"><b>PAX</b></td></tr><tr class="gray-bg compact-th"><td class="text-center"><b>INICIO-FIN</b></td><td class="text-center"><b>INIC-FINAL</b></td><td class="text-center"><b>TOTAL</b></td><td class="text-center"><b>TOTAL</b></td><td class="text-center"><b>TOTAL</b></td><td class="text-center"><b>CAP: ${picIni}</b></td><td class="text-center"><b>FO: ${sicIni}</b></td><td class="text-center"><b>INICIAL</b></td><td class="text-center"><b>FINAL</b></td><td class="text-center"><b>USADO</b></td><td class="text-center"><b>RECARGA</b></td></tr>`;
+let t1Html = `<table class="print-table" style="margin-top:0; border-top:none; text-transform:uppercase; table-layout: fixed; width: 100%;"><tr><td colspan="13" class="summary-title-pdf"><b>CONSOLIDADO POR DIA</b></td></tr><tr class="gray-bg compact-th"><td rowspan="2" style="width:6%; vertical-align:middle;" class="text-center"><b>FECHA</b></td><td style="width:9%;" class="text-center"><b>DUTY</b></td><td style="width:9%;" class="text-center"><b>HORO</b></td><td style="width:7%;" class="text-center"><b>DUTY</b></td><td style="width:7%;" class="text-center"><b>AIRTIME</b></td><td style="width:7%;" class="text-center"><b>BLOCK</b></td><td colspan="2" style="width:22%;" class="text-center"><b>HORAS PF (DEP/AT)</b></td><td colspan="4" style="width:28%;" class="text-center"><b>COMBUSTIBLE</b></td><td rowspan="2" style="width:5%; vertical-align:middle;" class="text-center"><b>PAX</b></td></tr><tr class="gray-bg compact-th"><td class="text-center"><b>INICIO-FIN</b></td><td class="text-center"><b>INIC-FINAL</b></td><td class="text-center"><b>TOTAL</b></td><td class="text-center"><b>TOTAL</b></td><td class="text-center"><b>TOTAL</b></td><td class="text-center"><b>CAP: ${picIni}</b></td><td class="text-center"><b>FO: ${sicIni}</b></td><td class="text-center"><b>INICIAL</b></td><td class="text-center"><b>FINAL</b></td><td class="text-center"><b>USADO</b></td><td class="text-center"><b>RECARGA</b></td></tr>`;
 let totDuty = 0, totBlock = 0, totAir = 0, totFuel = 0, totPax = ""; let totP1Block = 0, totP1Air = 0, totP1Dep = 0, totP1PFBlock = 0, totP1PFAir = 0; let totP2Block = 0, totP2Air = 0, totP2Dep = 0, totP2PFBlock = 0, totP2PFAir = 0;
 dailyStats.forEach(ds => {
 let shortDate = ds.date.length >= 10 ? ds.date.substring(5) : ds.date; let dStr = ds.duration > 0 ? `${minsToTime(ds.duration)}<br>(${formatDec(ds.duration/60)})` : '--:--'; let bStr = ds.block > 0 ? `${minsToTime(ds.block)}<br>(${formatDec(ds.block/60)})` : '--:--'; let aStr = ds.air > 0 ? `${minsToTime(ds.air)}<br>(${formatDec(ds.air/60)})` : '--:--';
 totDuty += ds.duration; totBlock += ds.block; totAir += ds.air; totFuel += ds.fuelUsed; totPax += (totPax ? " " : "") + ds.pax;
-let p1B = ds.p1.block > 0 ? `${minsToTime(ds.p1.block)} (${formatDec(ds.p1.block/60)})` : '--:--'; let p1A = ds.p1.air > 0 ? `${minsToTime(ds.p1.air)} (${formatDec(ds.p1.air/60)})` : '--:--'; let p2B = ds.p2.block > 0 ? `${minsToTime(ds.p2.block)} (${formatDec(ds.p2.block/60)})` : '--:--'; let p2A = ds.p2.air > 0 ? `${minsToTime(ds.p2.air)} (${formatDec(ds.p2.air/60)})` : '--:--';
-let p1PFStr = ds.p1.pf_block > 0 || ds.p1.pf_air > 0 ? `<div style="line-height:1.2; font-size:7.5px;">DEP/AT: <b>${ds.p1.dep}</b><br>AIR: ${p1A}<br>BLK: ${p1B}</div>` : '--'; let p2PFStr = ds.p2.pf_block > 0 || ds.p2.pf_air > 0 ? `<div style="line-height:1.2; font-size:7.5px;">DEP/AT: <b>${ds.p2.dep}</b><br>AIR: ${p2A}<br>BLK: ${p2B}</div>` : '--';
-t1Html += `<tr class="compact-td"><td class="text-center bold">${shortDate}</td><td class="text-center">${ds.start || '--'} - ${ds.end || '--'}</td><td class="text-center">${ds.hIni} - ${ds.hFin}</td><td class="text-center bold" style="line-height:1.1;">${dStr}</td><td class="text-center bold" style="line-height:1.1;">${aStr}</td><td class="text-center bold" style="line-height:1.1;">${bStr}</td><td class="text-center">${p1PFStr}</td><td class="text-center">${p2PFStr}</td><td class="text-center">${formatDec(ds.fuelInit)}</td><td class="text-center">${formatDec(ds.fuelFinal)}</td><td class="text-center bold">${formatDec(ds.fuelUsed)}</td><td class="text-center">${formatDec(ds.fuelRefuel)}</td><td class="text-center">${ds.pax}</td></tr>`;
+
+let p1A_dec = ds.p1.pf_air > 0 ? formatDec(ds.p1.pf_air/60).replace('.', ',') : '--'; 
+let p1B_dec = ds.p1.pf_block > 0 ? formatDec(ds.p1.pf_block/60).replace('.', ',') : '--';
+let p1PFStr = ds.p1.pf_block > 0 || ds.p1.pf_air > 0 ? `<div style="line-height:1.2; font-size:7.5px;">DEP/AT: <b>${ds.p1.dep}</b><br>AIR: ${p1A_dec}<br>BLK: ${p1B_dec}</div>` : '--'; 
+
+let p2A_dec = ds.p2.pf_air > 0 ? formatDec(ds.p2.pf_air/60).replace('.', ',') : '--'; 
+let p2B_dec = ds.p2.pf_block > 0 ? formatDec(ds.p2.pf_block/60).replace('.', ',') : '--';
+let p2PFStr = ds.p2.pf_block > 0 || ds.p2.pf_air > 0 ? `<div style="line-height:1.2; font-size:7.5px;">DEP/AT: <b>${ds.p2.dep}</b><br>AIR: ${p2A_dec}<br>BLK: ${p2B_dec}</div>` : '--';
+
+t1Html += `<tr class="compact-td"><td class="text-center bold">${shortDate}</td><td class="text-center">${ds.start || '--'} - ${ds.end || '--'}</td><td class="text-center">${ds.hIni} - ${ds.hFin}</td><td class="text-center bold" style="line-height:1.1;">${dStr}</td><td class="text-center bold" style="line-height:1.1;">${aStr}</td><td class="text-center bold" style="line-height:1.1;">${bStr}</td><td class="text-center">${p1PFStr}</td><td class="text-center">${p2PFStr}</td><td class="text-center">${Math.round(ds.fuelInit)}</td><td class="text-center">${Math.round(ds.fuelFinal)}</td><td class="text-center bold">${Math.round(ds.fuelUsed)}</td><td class="text-center">${Math.round(ds.fuelRefuel)}</td><td class="text-center">${ds.pax}</td></tr>`;
 totP1Block += ds.p1.block; totP1Air += ds.p1.air; totP1Dep += ds.p1.dep; totP1PFBlock += ds.p1.pf_block; totP1PFAir += ds.p1.pf_air; totP2Block += ds.p2.block; totP2Air += ds.p2.air; totP2Dep += ds.p2.dep; totP2PFBlock += ds.p2.pf_block; totP2PFAir += ds.p2.pf_air;
 });
 if (dailyStats.length > 1) {
-let totP1PFStr = totP1PFBlock > 0 || totP1PFAir > 0 ? `<div style="line-height:1.2; font-size:7.5px;">DEP/AT: <b>${totP1Dep}</b><br>AIR: ${minsToTime(totP1PFAir)} (${formatDec(totP1PFAir/60)})<br>BLK: ${minsToTime(totP1PFBlock)} (${formatDec(totP1PFBlock/60)})</div>` : '--'; let totP2PFStr = totP2PFBlock > 0 || totP2PFAir > 0 ? `<div style="line-height:1.2; font-size:7.5px;">DEP/AT: <b>${totP2Dep}</b><br>AIR: ${minsToTime(totP2PFAir)} (${formatDec(totP2PFAir/60)})<br>BLK: ${minsToTime(totP2PFBlock)} (${formatDec(totP2PFBlock/60)})</div>` : '--';
-t1Html += `<tr class="compact-td"><td class="text-center summary-total-bg" colspan="3"><b>TOTALES ACUMULADOS</b></td><td class="text-center summary-total-bg" style="line-height:1.1;"><b>${totDuty > 0 ? `${minsToTime(totDuty)}<br>(${formatDec(totDuty/60)})` : '--'}</b></td><td class="text-center summary-total-bg" style="line-height:1.1;"><b>${totAir > 0 ? `${minsToTime(totAir)}<br>(${formatDec(totAir/60)})` : '--'}</b></td><td class="text-center summary-total-bg" style="line-height:1.1;"><b>${totBlock > 0 ? `${minsToTime(totBlock)}<br>(${formatDec(totBlock/60)})` : '--'}</b></td><td class="text-center summary-total-bg"><b>${totP1PFStr}</b></td><td class="text-center summary-total-bg"><b>${totP2PFStr}</b></td><td class="text-center summary-total-bg"><b>${formatDec(initF)}</b></td><td class="text-center summary-total-bg"><b>${formatDec(finF)}</b></td><td class="text-center summary-total-bg"><b>${formatDec(totFuel)}</b></td><td class="text-center summary-total-bg"><b>${formatDec(refF)}</b></td><td class="text-center summary-total-bg"><b>${totPax}</b></td></tr>`;
+let p1TotAirDec = totP1PFAir > 0 ? formatDec(totP1PFAir/60).replace('.', ',') : '--'; 
+let p1TotBlkDec = totP1PFBlock > 0 ? formatDec(totP1PFBlock/60).replace('.', ',') : '--';
+let totP1PFStr = totP1PFBlock > 0 || totP1PFAir > 0 ? `<div style="line-height:1.2; font-size:7.5px;">DEP/AT: <b>${totP1Dep}</b><br>AIR: ${p1TotAirDec}<br>BLK: ${p1TotBlkDec}</div>` : '--'; 
+
+let p2TotAirDec = totP2PFAir > 0 ? formatDec(totP2PFAir/60).replace('.', ',') : '--'; 
+let p2TotBlkDec = totP2PFBlock > 0 ? formatDec(totP2PFBlock/60).replace('.', ',') : '--';
+let totP2PFStr = totP2PFBlock > 0 || totP2PFAir > 0 ? `<div style="line-height:1.2; font-size:7.5px;">DEP/AT: <b>${totP2Dep}</b><br>AIR: ${p2TotAirDec}<br>BLK: ${p2TotBlkDec}</div>` : '--';
+
+t1Html += `<tr class="compact-td"><td class="text-center summary-total-bg" colspan="3"><b>TOTALES ACUMULADOS</b></td><td class="text-center summary-total-bg" style="line-height:1.1;"><b>${totDuty > 0 ? `${minsToTime(totDuty)}<br>(${formatDec(totDuty/60)})` : '--'}</b></td><td class="text-center summary-total-bg" style="line-height:1.1;"><b>${totAir > 0 ? `${minsToTime(totAir)}<br>(${formatDec(totAir/60)})` : '--'}</b></td><td class="text-center summary-total-bg" style="line-height:1.1;"><b>${totBlock > 0 ? `${minsToTime(totBlock)}<br>(${formatDec(totBlock/60)})` : '--'}</b></td><td class="text-center summary-total-bg"><b>${totP1PFStr}</b></td><td class="text-center summary-total-bg"><b>${totP2PFStr}</b></td><td class="text-center summary-total-bg"><b>${Math.round(initF)}</b></td><td class="text-center summary-total-bg"><b>${Math.round(finF)}</b></td><td class="text-center summary-total-bg"><b>${Math.round(totFuel)}</b></td><td class="text-center summary-total-bg"><b>${Math.round(refF)}</b></td><td class="text-center summary-total-bg"><b>${totPax}</b></td></tr>`;
 }
 t1Html += `</table>`; el('p_resumen_operacional_container').innerHTML = t1Html;
 const sinObs = el('m_sms_sin_obs')?.checked; setTxt('sms_p_fecha', val('m_fecha_gen')); setTxt('sms_p_pov', val('m_pov')); setTxt('sms_p_matricula', val('m_matricula')); setTxt('sms_p_material', val('m_material'));
@@ -840,12 +924,25 @@ setTxt(`sec_p_nombre_${dateKey}`, capitanActual.nombre || ""); setTxt(`sec_p_rut
 
 function getAllData() {
 let data = { globals: {}, legs: legIds.length, legData: {}, refuelData: refuelData, secManualState: secManualState };
-let globalFields = ['duty_start', 'duty_end', 'm_fecha_gen', 'm_folio_gen', 'm_pov', 'm_material', 'm_matricula', 'm_matricula_suffix', 'm_pic_ini', 'm_sic_ini', 'm_sms_obs', 'm_sms_sin_obs'];
+let globalFields = ['duty_start', 'duty_end', 'm_fecha_gen', 'm_pov', 'm_material', 'm_matricula', 'm_matricula_suffix', 'm_pic_ini', 'm_sic_ini', 'm_sms_obs', 'm_sms_sin_obs'];
 for(let i=1; i<=47; i++) globalFields.push(`m_sms_${i}`);
 globalFields.forEach(id => { let element = el(id); if (element) { if(element.type === 'checkbox') data.globals[id] = element.checked; else data.globals[id] = element.value; } });
-legIds.forEach(id => { data.legData[id] = {}; let inputs = document.querySelectorAll(`#leg_card_${id} input, #leg_card_${id} select, #leg_card_${id} textarea`); inputs.forEach(input => { if(input.id) data.legData[id][input.id] = { value: input.value, linked: input.dataset.linked || "false" }; }); });
+legIds.forEach(id => { 
+    data.legData[id] = {}; 
+    let inputs = document.querySelectorAll(`#leg_card_${id} input, #leg_card_${id} select, #leg_card_${id} textarea`); 
+    inputs.forEach(input => { 
+        if(input.id) {
+            if (input.type === 'radio' || input.type === 'checkbox') {
+                data.legData[id][input.id] = { checked: input.checked, linked: input.dataset.linked || "false" };
+            } else {
+                data.legData[id][input.id] = { value: input.value, linked: input.dataset.linked || "false" };
+            }
+        }
+    }); 
+});
 return JSON.stringify(data);
 }
+
 function autoSave() { localStorage.setItem('aerocardal_flight_data', getAllData()); }
 function clearAllData() { if(!confirm("⚠️ ¿Estás seguro de LIMPIAR TODOS los datos? Perderás el progreso local.")) return; localStorage.removeItem('aerocardal_flight_data'); window.location.reload(); }
 
@@ -868,13 +965,32 @@ let currentId = legIds[i]; let savedId = savedIds[i]; if(!savedId) continue; let
 for (let inputId in savedLeg) {
 let targetId = inputId.replace(`_t${savedId}_`, `_t${currentId}_`); let element = el(targetId);
 if (element) {
-element.value = savedLeg[inputId].value;
-if (savedLeg[inputId].linked) { element.dataset.linked = savedLeg[inputId].linked; if(savedLeg[inputId].linked === "false") { element.readOnly = false; element.classList.remove('inherited-input'); let btn = el(`lbtn_${targetId.split('_').pop()}_${currentId}`); if(btn) { btn.textContent = "🔓"; btn.title = "Restablecer herencia"; } } else { element.readOnly = true; element.classList.add('inherited-input'); let btn = el(`lbtn_${targetId.split('_').pop()}_${currentId}`); if(btn) { btn.textContent = "🔗"; btn.title = "Desvincular"; } } }
+    if (element.type === 'radio' || element.type === 'checkbox') {
+        element.checked = savedLeg[inputId].checked === true;
+    } else {
+        element.value = savedLeg[inputId].value || "";
+    }
+    
+    if (savedLeg[inputId].linked) { 
+        element.dataset.linked = savedLeg[inputId].linked; 
+        if(savedLeg[inputId].linked === "false") { 
+            element.readOnly = false; 
+            element.classList.remove('inherited-input'); 
+            let btn = el(`lbtn_${targetId.split('_').pop()}_${currentId}`); 
+            if(btn) { btn.textContent = "🔓"; btn.title = "Restablecer herencia"; } 
+        } else { 
+            element.readOnly = true; 
+            element.classList.add('inherited-input'); 
+            let btn = el(`lbtn_${targetId.split('_').pop()}_${currentId}`); 
+            if(btn) { btn.textContent = "🔗"; btn.title = "Desvincular"; } 
+        } 
+    }
 }
 }
 }
 }
 lookupAircraft(); toggleSinObservaciones(); lookupPilots(); 
 }
+
 window.onload = () => { buildForms(); let saved = localStorage.getItem('aerocardal_flight_data'); if (saved) { if(confirm("Se encontró un vuelo en progreso guardado localmente en este iPad. ¿Deseas recuperarlo?")) { loadDataIntoApp(JSON.parse(saved)); } else { localStorage.removeItem('aerocardal_flight_data'); addLeg('SCEL'); toggleSinObservaciones(); lookupPilots(); } } else { addLeg('SCEL'); toggleSinObservaciones(); lookupPilots(); } };
 </script></body></html>
