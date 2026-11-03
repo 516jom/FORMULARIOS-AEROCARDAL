@@ -146,15 +146,15 @@ Volver a la app
 
 <header>
 <h1>AEROCARDAL - PLANIFICACIÓN OPERACIONAL</h1>
-<div class="subtitle">VERSIÓN 8.9 (TRIPULACIÓN MÚLTIPLE & DEP/AT SPLIT)</div>
+<div class="subtitle">VERSIÓN 1.0 (MARCHA BLANCA TRIPULACIONES)</div>
 </header>
 <main id="mobile-ui" class="container">
 <!-- CABECERA GENERAL -->
 <div class="card">
-<div class="card-header"><span>📋 CABECERA DEL VUELO</span></div>
+<div class="card-header"><span>📋 DATOS DEL VUELO</span></div>
 <div class="card-content">
 <div class="grid-header">
-<div class="form-group"><label style="color:var(--accent);">Fecha del Vuelo</label><input type="date" id="m_fecha_gen" onchange="triggerUpdate()"></div>
+<div class="form-group"><label style="color:var(--accent);">Fecha</label><input type="date" id="m_fecha_gen" onchange="triggerUpdate()"></div>
 <div class="form-group"><label style="color:#4285F4; text-shadow: 0 0 5px rgba(66,133,244,0.5);">P.O.V. N°</label><input type="text" id="m_pov" oninput="triggerUpdate()" placeholder="Ej: 1234"></div>
 </div>
 <div class="grid-3">
@@ -170,16 +170,16 @@ Volver a la app
 <div class="form-group"><label style="color:var(--accent);">Material / Aeronave</label><input type="text" id="m_material" placeholder="Auto..." readonly class="inherited-input"></div>
 <div class="form-group">
 <label style="color:var(--accent);">Capitán (Iniciales)</label>
-<input type="text" id="m_pic_ini" placeholder="Ej: RE" oninput="lookupPilots()" style="text-transform: uppercase;">
+<input type="text" id="m_pic_ini" placeholder="Ej: XX" oninput="lookupPilots()" style="text-transform: uppercase;">
 <div id="ui_pic_name" style="font-size:0.65rem; color:var(--text-muted); margin-top:4px; height:12px;"></div>
 </div>
 <div class="form-group">
 <label>FO (Iniciales)</label>
-<input type="text" id="m_sic_ini" placeholder="Ej: EI" oninput="lookupPilots()" style="text-transform: uppercase;">
+<input type="text" id="m_sic_ini" placeholder="Ej: YY" oninput="lookupPilots()" style="text-transform: uppercase;">
 <div id="ui_sic_name" style="font-size:0.65rem; color:var(--text-muted); margin-top:4px; height:12px;"></div>
 </div>
 <div class="form-group">
-<label>FO 2 (Opcional)</label>
+<label>TRIP. REFORZADA (Opcional)</label>
 <input type="text" id="m_sic2_ini" placeholder="Ej: MV" oninput="lookupPilots()" style="text-transform: uppercase;">
 <div id="ui_sic2_name" style="font-size:0.65rem; color:var(--text-muted); margin-top:4px; height:12px;"></div>
 </div>
@@ -212,7 +212,7 @@ Volver a la app
 <div class="card-content">
 <div id="sms_form_container"></div>
 <div class="form-group" style="margin-top:15px;"><label>Observaciones:</label><textarea id="m_sms_obs" oninput="triggerUpdate()"></textarea></div>
-<div class="signature-block"><div>Nombre y firma comandante Vuelo: <strong id="sms_ui_nombre" style="color:var(--accent);">______________________</strong></div></div>
+<div class="signature-block"><div>Comandante de Aeronave: <strong id="sms_ui_nombre" style="color:var(--accent);">______________________</strong></div></div>
 </div>
 </details>
 
@@ -442,11 +442,11 @@ else { matInput.value = ''; if(fullMatInput) fullMatInput.value = ''; if(msgDiv)
 }
 
 const pilotosDB = {
-"JA": { "nombre": "José Arellano G.", "rut": "8.621.855-0", "licencia": "1641" }, "SS": { "nombre": "Sebastian Saez X.", "rut": "99.999.999-9", "licencia": "3535" }, "FC": { "nombre": "Felipe Casampere G.", "rut": "15.781.258-0", "licencia": "2114" }, "AC": { "nombre": "Alfredo Castro C.", "rut": "7.155.617-4", "licencia": "920" },
-"RE": { "nombre": "Ricardo Espinosa U.", "rut": "6.827.727-2", "licencia": "674" }, "IF": { "nombre": "Iván Fabry R.", "rut": "6.111.339-8", "licencia": "1359" }, "FG": { "nombre": "Felipe Guínez A.", "rut": "15.771.343-4", "licencia": "2217" }, "EI": { "nombre": "Esteban Inostroza L.", "rut": "12.120.521-1", "licencia": "1256" },
-"AK": { "nombre": "Alexander Kaufmann R.", "rut": "6.926.596-0", "licencia": "4185" }, "EM": { "nombre": "Enrique Mancini A.", "rut": "19.310.398-7", "licencia": "4148" }, "NM": { "nombre": "Nicolás Mohr S.", "rut": "18239044-5", "licencia": "2064" }, "CM": { "nombre": "Claudio Muñoz P.", "rut": "7.999.795-1", "licencia": "921" },
-"FE": { "nombre": "Francisco Esquivel C.", "rut": "88.888.888-8", "licencia": "1899" }, "JO": { "nombre": "José Oyarzún M.", "rut": "16.239.897-0", "licencia": "2387" }, "FCH":{ "nombre": "Fernando Chacana X.", "rut": "66.666.666-6", "licencia": "2604" }, "MS": { "nombre": "Mauricio Solano P.", "rut": "14.322.271-3", "licencia": "1657" },
-"CV": { "nombre": "Cristhian Vázquez F.", "rut": "15.549.870-6", "licencia": "3435" }, "MV": { "nombre": "Matías Vega C.", "rut": "77.777.777-7", "licencia": "2420" }, "KW": { "nombre": "Klaus Wobbe S.", "rut": "14.103.915-6", "licencia": "1741" }, "CB": { "nombre": "Cristobal Briones B.", "rut": "10.345.076-4", "licencia": "2740" }
+"JA": { "nombre": "José Arellano G.", "rut": "8.621.855-0", "licencia": "TLA 1641" }, "SS": { "nombre": "Sebastian Saez X.", "rut": "99.999.999-9", "licencia": "PCA3535" }, "FC": { "nombre": "Felipe Casampere G.", "rut": "15.781.258-0", "licencia": "TLA 2114" }, "AC": { "nombre": "Alfredo Castro C.", "rut": "7.155.617-4", "licencia": "TLA 920" },
+"RE": { "nombre": "Ricardo Espinosa U.", "rut": "6.827.727-2", "licencia": "TLA 674" }, "IF": { "nombre": "Iván Fabry R.", "rut": "6.111.339-8", "licencia": "TLA 1359" }, "FG": { "nombre": "Felipe Guínez A.", "rut": "15.771.343-4", "licencia": "TLA 2217" }, "EI": { "nombre": "Esteban Inostroza L.", "rut": "12.120.521-1", "licencia": "TLA 1256" },
+"AK": { "nombre": "Alexander Kaufmann R.", "rut": "6.926.596-0", "licencia": "PCA 4185" }, "EM": { "nombre": "Enrique Mancini A.", "rut": "19.310.398-7", "licencia": "PCA 4148" }, "NM": { "nombre": "Nicolás Mohr S.", "rut": "18239044-5", "licencia": "TLA 2064" }, "CM": { "nombre": "Claudio Muñoz P.", "rut": "7.999.795-1", "licencia": "TLA 921" },
+"FE": { "nombre": "Francisco Esquivel C.", "rut": "88.888.888-8", "licencia": "TLA 1899" }, "JO": { "nombre": "José Oyarzún M.", "rut": "16.239.897-0", "licencia": "TLA 2387" }, "FCH":{ "nombre": "Fernando Chacana X.", "rut": "66.666.666-6", "licencia": "PCA 2604" }, "MS": { "nombre": "Mauricio Solano P.", "rut": "14.322.271-3", "licencia": "TLA 1657" },
+"CV": { "nombre": "Cristhian Vázquez F.", "rut": "15.549.870-6", "licencia": "PCA 3435" }, "MV": { "nombre": "Matías Vega C.", "rut": "77.777.777-7", "licencia": "TLA 2420" }, "KW": { "nombre": "Klaus Wobbe S.", "rut": "14.103.915-6", "licencia": "TLA 1741" }, "CB": { "nombre": "Cristobal Briones B.", "rut": "10.345.076-4", "licencia": "TLA 2108" }
 };
 let capitanActual = { nombre: "", rut: "", licencia: "" }; let foActual = { nombre: "" }; let fo2Actual = { nombre: "" };
 
@@ -547,7 +547,7 @@ pSmsHtml += `</table>
 <span id="p_sms_obs" style="color:#000000!important; font-weight:bold;"></span>
 </div>
 <div style="padding-top:2px; color:#000000!important;">
-<b style="color:#000000!important;">Nombre y firma:</b>
+<b style="color:#000000!important;">Firma Comandante de Aeronave:</b>
 <span id="sms_p_nombre" style="border-bottom:1px solid black; display:inline-block; width:220px; padding-bottom: 4px; min-height: 16px; color:#000000!important; font-weight:bold; vertical-align: bottom;"></span>
 </div>
 </td></tr></table></div>`;
@@ -663,7 +663,7 @@ return `<table class="print-table" id="print_leg_${id}">
 <tr><td colspan="6" class="tramo-title-darkgray"><b>${ordinals[index] || index + '°'} TRAMO</b></td></tr>
 <tr class="header-cell">
 <td class="col-fecha" style="color:#000000!important;"><b style="color:#000000!important;">FECHA</b> <span id="p_t${id}_fecha" style="font-weight:bold; color:#000000!important;"></span><br><span class="text-xs" style="color:#000000!important;"><b style="color:#000000!important;">FOLIO:</b> <span id="p_t${id}_folio" style="font-weight:bold; color:#000000!important;"></span></span></td>
-<td class="col-horo" style="color:#000000!important;"><b style="color:#000000!important;">HOROMETRO</b></td>
+<td class="col-horo" style="color:#000000!important;"><b style="color:#000000!important;">HORO</b></td>
 <td class="col-block" style="color:#000000!important;"><b style="color:#000000!important;">BLOCK TIME</b></td>
 <td class="col-air" style="color:#000000!important;"><b style="color:#000000!important;">AIR TIME</b></td>
 <td class="col-fuel" style="color:#000000!important;"><b style="color:#000000!important;">COMBUSTIBLE</b></td>
@@ -994,7 +994,7 @@ let t1Html = `<table class="print-table" style="margin-top:0; border-top:none; t
 <tr class="gray-bg compact-th">
 <td rowspan="2" style="width:7%; vertical-align:middle;" class="text-center"><b>FECHA</b></td>
 <td colspan="2" style="width:16%;" class="text-center"><b>DUTY</b></td>
-<td style="width:10%;" class="text-center"><b>HOROMETRO</b></td>
+<td style="width:10%;" class="text-center"><b>HORO</b></td>
 <td style="width:8%;" class="text-center"><b>AIRTIME</b></td>
 <td style="width:8%;" class="text-center"><b>BLOCK</b></td>
 <td colspan="${pfCols}" style="width:${pfWidth};" class="text-center"><b>HORAS PF (DEP / AT)</b></td>
