@@ -286,6 +286,14 @@ let tokenClient;
 let accessToken = null;
 let pendingAction = null;
 
+const formatDateStr = (dStr) => {
+if (!dStr) return "";
+const parts = dStr.split('-');
+if (parts.length !== 3) return dStr;
+const months = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"];
+return `${parts[2]}-${months[parseInt(parts[1], 10) - 1]}-${parts[0]}`;
+};
+
 function initDrive() {
 if (!window.google) return;
 tokenClient = google.accounts.oauth2.initTokenClient({
@@ -523,7 +531,7 @@ pSmsHtml += `</table>
 <span id="p_sms_obs" style="color:#000000!important; font-weight:bold;"></span>
 </div>
 <div style="padding-top:2px; color:#000000!important;">
-<b style="color:#000000!important;">Nombre y firma:</b>
+<b style="color:#000000!important;">Nombre y firma PIC:</b>
 <span id="sms_p_nombre" style="border-bottom:1px solid black; display:inline-block; width:220px; padding-bottom: 4px; min-height: 16px; color:#000000!important; font-weight:bold; vertical-align: bottom;"></span>
 </div>
 </td></tr></table></div>`;
@@ -693,8 +701,8 @@ if(index === 1) {
     if(dBtn) dBtn.style.display = "none"; 
     
     const fLink = el(`m_t${id}_fecha`), fBtnDate = el(`lbtn_fecha_${id}`);
-    if(fLink) { fLink.dataset.linked = "false"; fLink.classList.remove('inherited-input'); }
-    if(fBtnDate) fBtnDate.style.display = "none";
+    if(fLink) { fLink.dataset.linked = "true"; fLink.readOnly = true; fLink.classList.add('inherited-input'); }
+    if(fBtnDate) fBtnDate.style.display = "inline-block";
 } else { 
     const dLink = el(`m_t${id}_desde`); 
     if(dLink) { dLink.dataset.linked = "true"; dLink.readOnly = true; dLink.classList.add('inherited-input'); } 
@@ -726,8 +734,8 @@ if(legIds.length > 0) {
     if(dBtn) dBtn.style.display = "none"; 
 
     const fLink = el(`m_t${fId}_fecha`), fBtnDate = el(`lbtn_fecha_${fId}`);
-    if(fLink) { fLink.dataset.linked = "false"; fLink.readOnly = false; fLink.classList.remove('inherited-input'); }
-    if(fBtnDate) fBtnDate.style.display = "none";
+    if(fLink) { fLink.dataset.linked = "true"; fLink.readOnly = true; fLink.classList.add('inherited-input'); }
+    if(fBtnDate) fBtnDate.style.display = "inline-block";
 }
 triggerUpdate();
 }
@@ -832,7 +840,7 @@ let pSecHtml = `
 <td colspan="2" class="no-border-x" style="vertical-align:bottom; padding-bottom:4px;"><div class="main-title">INSPECCIÓN DE SEGURIDAD DE AERONAVES</div></td>
 <td colspan="1" style="border-left:none; width:20%;"></td>
 </tr>
-<tr><td style="width:25%; color:#000000!important;"><b style="color:#000000!important;">FECHA:</b> <span class="bold" style="color:#000000!important;">${dateKey}</span></td><td style="width:20%; color:#000000!important;"><b style="color:#000000!important;">P.O.V.: N°</b> <span id="sec_p_vuelo_${dateKey}" style="color:#000000!important; font-weight:bold;"></span></td><td style="width:25%; color:#000000!important;"><b style="color:#000000!important;">MATERIAL:</b> <span id="sec_p_material_${dateKey}" style="color:#000000!important; font-weight:bold;"></span></td><td colspan="2" style="color:#000000!important;"><b style="color:#000000!important;">MATRICULA:</b> <span id="sec_p_matricula_${dateKey}" style="color:#000000!important; font-weight:bold;"></span></td></tr>
+<tr><td style="width:25%; color:#000000!important;"><b style="color:#000000!important;">FECHA:</b> <span class="bold" style="color:#000000!important;">${formatDateStr(dateKey)}</span></td><td style="width:20%; color:#000000!important;"><b style="color:#000000!important;">P.O.V.: N°</b> <span id="sec_p_vuelo_${dateKey}" style="color:#000000!important; font-weight:bold;"></span></td><td style="width:25%; color:#000000!important;"><b style="color:#000000!important;">MATERIAL:</b> <span id="sec_p_material_${dateKey}" style="color:#000000!important; font-weight:bold;"></span></td><td colspan="2" style="color:#000000!important;"><b style="color:#000000!important;">MATRICULA:</b> <span id="sec_p_matricula_${dateKey}" style="color:#000000!important; font-weight:bold;"></span></td></tr>
 <tr><td colspan="2" class="gray-bg text-left" style="color:#000000!important;"><b style="color:#000000!important;">ESTACIONAMIENTO:</b> <span id="sec_p_estacionamiento_${dateKey}" style="color:#000000!important; font-weight:bold;"></span></td><td class="gray-bg text-left" style="color:#000000!important;"><b style="color:#000000!important;">ORIGEN:</b> <span id="sec_p_origen_${dateKey}" style="color:#000000!important; font-weight:bold;"></span></td><td colspan="2" class="gray-bg text-left" style="color:#000000!important;"><b style="color:#000000!important;">DESTINO:</b> <span id="sec_p_destino_${dateKey}" style="color:#000000!important; font-weight:bold;"></span></td></tr>
 <tr><td colspan="2" style="color:#000000!important;"><b style="color:#000000!important;">H. INICIO:</b> <span id="sec_p_hinicio_${dateKey}" style="color:#000000!important; font-weight:bold;">${currentHInicio}</span></td><td style="color:#000000!important;"><b style="color:#000000!important;">H. TÉRMINO:</b> <span id="sec_p_htermino_${dateKey}" style="color:#000000!important; font-weight:bold;">${currentHTermino}</span></td><td colspan="2" style="color:#000000!important;"><b style="color:#000000!important;">ESTADO ALERTA:</b> <span id="sec_p_alerta_${dateKey}" style="color:#000000!important; font-weight:bold;"></span></td></tr>
 </table>
@@ -865,12 +873,14 @@ container.innerHTML = webHtml; printContainer.innerHTML = printHtml; updateFormF
 }
 
 function syncPrintData(air, block, initF, refF, usedF, finF, strPax, activeDates, dailyStats) {
-['fecha_gen', 'pov', 'material', 'matricula'].forEach(f => setTxt(`p_${f}`, val(`m_${f}`)));
+setTxt('p_fecha_gen', formatDateStr(val('m_fecha_gen')));
+['pov', 'material', 'matricula'].forEach(f => setTxt(`p_${f}`, val(`m_${f}`)));
 const stdFields = ['fecha','folio','dest','desde','dist','pax','pf','pm','winds','time_out','time_off','time_on','time_in','block_diff','air_diff','horo_top','horo_bot','horo_diff','fuel_on','fuel_off','fuel_diff'];
 const prmFields = ['fl','mach','isa','oat','gspd','ff','n1','n2','oilt','oilp','itt','obs'];
 const wpfFields = ['wp1','wp2','wp3','wp4','cp1','cp2','cp3','cp4','cr1','cr2','cr3','cr4'];
 legIds.forEach(id => {
-stdFields.forEach(f => setTxt(`p_t${id}_${f}`, val(`m_t${id}_${f}`)));
+setTxt(`p_t${id}_fecha`, formatDateStr(val(`m_t${id}_fecha`)));
+stdFields.forEach(f => { if(f !== 'fecha') setTxt(`p_t${id}_${f}`, val(`m_t${id}_${f}`)); });
 const windsVal = val(`m_t${id}_winds`).trim(); if(el(`p_t${id}_winds_wrapper`)) el(`p_t${id}_winds_wrapper`).style.display = windsVal ? "inline-block" : "none";
 const hasPrm = prmFields.some(f => val(`m_t${id}_${f}`).trim() !== ""); const hasFuel = wpfFields.some(f => val(`m_t${id}_${f}`).trim() !== ""); const hasMet = val(`m_t${id}_meteo`).trim() !== "", hasAtc = val(`m_t${id}_atc`).trim() !== "";
 prmFields.concat(wpfFields).forEach(f => setTxt(`p_t${id}_${f}`, val(`m_t${id}_${f}`))); setTxt(`p_t${id}_meteo`, val(`m_t${id}_meteo`)); setTxt(`p_t${id}_atc`, val(`m_t${id}_atc`));
@@ -884,36 +894,77 @@ setTxt(`p_t${id}_pnp_text`, pnpVal === 'P' ? 'PRECISIÓN' : (pnpVal === 'NP' ? '
 });
 
 let picIni = val('m_pic_ini').trim().toUpperCase() || 'CAP'; let sicIni = val('m_sic_ini').trim().toUpperCase() || 'FO';
-let t1Html = `<table class="print-table" style="margin-top:0; border-top:none; text-transform:uppercase; table-layout: fixed; width: 100%;"><tr><td colspan="13" class="summary-title-pdf"><b>CONSOLIDADO POR DIA</b></td></tr><tr class="gray-bg compact-th"><td rowspan="2" style="width:6%; vertical-align:middle;" class="text-center"><b>FECHA</b></td><td style="width:9%;" class="text-center"><b>DUTY</b></td><td style="width:9%;" class="text-center"><b>HORO</b></td><td style="width:7%;" class="text-center"><b>DUTY</b></td><td style="width:7%;" class="text-center"><b>AIRTIME</b></td><td style="width:7%;" class="text-center"><b>BLOCK</b></td><td colspan="2" style="width:22%;" class="text-center"><b>HORAS PF (DEP/AT)</b></td><td colspan="4" style="width:28%;" class="text-center"><b>COMBUSTIBLE</b></td><td rowspan="2" style="width:5%; vertical-align:middle;" class="text-center"><b>PAX</b></td></tr><tr class="gray-bg compact-th"><td class="text-center"><b>INICIO-FIN</b></td><td class="text-center"><b>INIC-FINAL</b></td><td class="text-center"><b>TOTAL</b></td><td class="text-center"><b>TOTAL</b></td><td class="text-center"><b>TOTAL</b></td><td class="text-center"><b>CAP: ${picIni}</b></td><td class="text-center"><b>FO: ${sicIni}</b></td><td class="text-center"><b>INICIAL</b></td><td class="text-center"><b>FINAL</b></td><td class="text-center"><b>USADO</b></td><td class="text-center"><b>RECARGA</b></td></tr>`;
-let totDuty = 0, totBlock = 0, totAir = 0, totFuel = 0, totPax = ""; let totP1Block = 0, totP1Air = 0, totP1Dep = 0, totP1PFBlock = 0, totP1PFAir = 0; let totP2Block = 0, totP2Air = 0, totP2Dep = 0, totP2PFBlock = 0, totP2PFAir = 0;
+
+let totP1Dep = 0, totP2Dep = 0;
+dailyStats.forEach(ds => { totP1Dep += ds.p1.dep; totP2Dep += ds.p2.dep; });
+
+let t1Html = `<table class="print-table" style="margin-top:0; border-top:none; text-transform:uppercase; table-layout: fixed; width: 100%;">
+<tr><td colspan="13" class="summary-title-pdf"><b>CONSOLIDADO POR DIA</b>[cite: 1]</td></tr>
+<tr class="gray-bg compact-th">
+    <td rowspan="2" style="width:7%; vertical-align:middle;" class="text-center"><b>FECHA</b>[cite: 1]</td>
+    <td colspan="2" style="width:14%;" class="text-center"><b>DUTY</b>[cite: 1]</td>
+    <td style="width:10%;" class="text-center"><b>HOROMETRO</b>[cite: 1]</td>
+    <td style="width:9%;" class="text-center"><b>AIRTIME</b>[cite: 1]</td>
+    <td style="width:9%;" class="text-center"><b>BLOCK</b>[cite: 1]</td>
+    <td colspan="2" style="width:20%;" class="text-center"><b>HORAS PF (DEP/AT)</b>[cite: 1]</td>
+    <td colspan="4" style="width:24%;" class="text-center"><b>COMBUSTIBLE</b>[cite: 1]</td>
+    <td style="width:7%;" class="text-center"><b>PAX</b>[cite: 1]</td>
+</tr>
+<tr class="gray-bg compact-th">
+    <td class="text-center"><b>INICIO-FIN</b>[cite: 1]</td>
+    <td class="text-center"><b>TOTAL</b>[cite: 1]</td>
+    <td class="text-center"><b>INICIAL-FINAL</b>[cite: 1]</td>
+    <td class="text-center"><b>TOTAL</b>[cite: 1]</td>
+    <td class="text-center"><b>TOTAL</b>[cite: 1]</td>
+    <td class="text-center"><b>CAP: ${picIni} (DEP/AT: ${totP1Dep})</b>[cite: 1]</td>
+    <td class="text-center"><b>FO: ${sicIni} (DEP/AT: ${totP2Dep})</b>[cite: 1]</td>
+    <td class="text-center"><b>INICIAL</b>[cite: 1]</td>
+    <td class="text-center"><b>FINAL</b>[cite: 1]</td>
+    <td class="text-center"><b>USADO</b>[cite: 1]</td>
+    <td class="text-center"><b>RECARGA</b>[cite: 1]</td>
+    <td class="text-center"><b>(P)</b>[cite: 1]</td>
+</tr>`;
+
+let totDuty = 0, totBlock = 0, totAir = 0, totFuel = 0, totPaxStr = ""; 
+let totP1Block = 0, totP1Air = 0, totP2Block = 0, totP2Air = 0;
+
 dailyStats.forEach(ds => {
-let shortDate = ds.date.length >= 10 ? ds.date.substring(5) : ds.date; let dStr = ds.duration > 0 ? `${minsToTime(ds.duration)}<br>(${formatDec(ds.duration/60)})` : '--:--'; let bStr = ds.block > 0 ? `${minsToTime(ds.block)}<br>(${formatDec(ds.block/60)})` : '--:--'; let aStr = ds.air > 0 ? `${minsToTime(ds.air)}<br>(${formatDec(ds.air/60)})` : '--:--';
-totDuty += ds.duration; totBlock += ds.block; totAir += ds.air; totFuel += ds.fuelUsed; totPax += (totPax ? " " : "") + ds.pax;
+    let fDate = formatDateStr(ds.date);
+    let dStr = ds.duration > 0 ? `${minsToTime(ds.duration)}<br>(${formatDec(ds.duration/60).replace('.',',')})` : '--:--';
+    let bStr = ds.block > 0 ? `${minsToTime(ds.block)}<br>(${formatDec(ds.block/60).replace('.',',')})` : '--:--';
+    let aStr = ds.air > 0 ? `${minsToTime(ds.air)}<br>(${formatDec(ds.air/60).replace('.',',')})` : '--:--';
+    
+    totDuty += ds.duration; totBlock += ds.block; totAir += ds.air; totFuel += ds.fuelUsed; 
+    totPaxStr += (totPaxStr ? " " : "") + ds.pax;
 
-let p1A_dec = ds.p1.pf_air > 0 ? formatDec(ds.p1.pf_air/60).replace('.', ',') : '--'; 
-let p1B_dec = ds.p1.pf_block > 0 ? formatDec(ds.p1.pf_block/60).replace('.', ',') : '--';
-let p1PFStr = ds.p1.pf_block > 0 || ds.p1.pf_air > 0 ? `<div style="line-height:1.2; font-size:7.5px;">DEP/AT: <b>${ds.p1.dep}</b><br>AIR: ${p1A_dec}<br>BLK: ${p1B_dec}</div>` : '--'; 
+    let p1A_dec = ds.p1.pf_air > 0 ? formatDec(ds.p1.pf_air/60).replace('.', ',') : '--'; 
+    let p1B_dec = ds.p1.pf_block > 0 ? formatDec(ds.p1.pf_block/60).replace('.', ',') : '--';
+    let p1PFStr = ds.p1.pf_block > 0 || ds.p1.pf_air > 0 ? `AIR: ${p1A_dec}<br>BLK: ${p1B_dec}` : '--';[cite: 1]
 
-let p2A_dec = ds.p2.pf_air > 0 ? formatDec(ds.p2.pf_air/60).replace('.', ',') : '--'; 
-let p2B_dec = ds.p2.pf_block > 0 ? formatDec(ds.p2.pf_block/60).replace('.', ',') : '--';
-let p2PFStr = ds.p2.pf_block > 0 || ds.p2.pf_air > 0 ? `<div style="line-height:1.2; font-size:7.5px;">DEP/AT: <b>${ds.p2.dep}</b><br>AIR: ${p2A_dec}<br>BLK: ${p2B_dec}</div>` : '--';
+    let p2A_dec = ds.p2.pf_air > 0 ? formatDec(ds.p2.pf_air/60).replace('.', ',') : '--'; 
+    let p2B_dec = ds.p2.pf_block > 0 ? formatDec(ds.p2.pf_block/60).replace('.', ',') : '--';
+    let p2PFStr = ds.p2.pf_block > 0 || ds.p2.pf_air > 0 ? `AIR: ${p2A_dec}<br>BLK: ${p2B_dec}` : '--';[cite: 1]
 
-t1Html += `<tr class="compact-td"><td class="text-center bold">${shortDate}</td><td class="text-center">${ds.start || '--'} - ${ds.end || '--'}</td><td class="text-center">${ds.hIni} - ${ds.hFin}</td><td class="text-center bold" style="line-height:1.1;">${dStr}</td><td class="text-center bold" style="line-height:1.1;">${aStr}</td><td class="text-center bold" style="line-height:1.1;">${bStr}</td><td class="text-center">${p1PFStr}</td><td class="text-center">${p2PFStr}</td><td class="text-center">${Math.round(ds.fuelInit)}</td><td class="text-center">${Math.round(ds.fuelFinal)}</td><td class="text-center bold">${Math.round(ds.fuelUsed)}</td><td class="text-center">${Math.round(ds.fuelRefuel)}</td><td class="text-center">${ds.pax}</td></tr>`;
-totP1Block += ds.p1.block; totP1Air += ds.p1.air; totP1Dep += ds.p1.dep; totP1PFBlock += ds.p1.pf_block; totP1PFAir += ds.p1.pf_air; totP2Block += ds.p2.block; totP2Air += ds.p2.air; totP2Dep += ds.p2.dep; totP2PFBlock += ds.p2.pf_block; totP2PFAir += ds.p2.pf_air;
+    t1Html += `<tr class="compact-td"><td class="text-center bold">${fDate}</td><td class="text-center">${ds.start || '--'} - ${ds.end || '--'}</td><td class="text-center bold" style="line-height:1.1;">${dStr}</td><td class="text-center">${ds.hIni} - ${ds.hFin}</td><td class="text-center bold" style="line-height:1.1;">${aStr}</td><td class="text-center bold" style="line-height:1.1;">${bStr}</td><td class="text-center" style="line-height:1.2; font-size:7.5px;">${p1PFStr}</td><td class="text-center" style="line-height:1.2; font-size:7.5px;">${p2PFStr}</td><td class="text-center">${Math.round(ds.fuelInit)}</td><td class="text-center">${Math.round(ds.fuelFinal)}</td><td class="text-center bold">${Math.round(ds.fuelUsed)}</td><td class="text-center">${Math.round(ds.fuelRefuel)}</td><td class="text-center">${ds.pax}</td></tr>`;
+    
+    totP1Block += ds.p1.block; totP1Air += ds.p1.air; totP2Block += ds.p2.block; totP2Air += ds.p2.air;
 });
+
+let p1TotAirDec = totP1Air > 0 ? formatDec(totP1Air/60).replace('.', ',') : '--'; 
+let p1TotBlkDec = totP1Block > 0 ? formatDec(totP1Block/60).replace('.', ',') : '--';
+let totP1PFStr = totP1Block > 0 || totP1Air > 0 ? `AIR: ${p1TotAirDec}<br>BLK: ${p1TotBlkDec}` : '--'; 
+
+let p2TotAirDec = totP2Air > 0 ? formatDec(totP2Air/60).replace('.', ',') : '--'; 
+let p2TotBlkDec = totP2Block > 0 ? formatDec(totP2Block/60).replace('.', ',') : '--';
+let totP2PFStr = totP2Block > 0 || totP2Air > 0 ? `AIR: ${p2TotAirDec}<br>BLK: ${p2TotBlkDec}` : '--';
+
 if (dailyStats.length > 1) {
-let p1TotAirDec = totP1PFAir > 0 ? formatDec(totP1PFAir/60).replace('.', ',') : '--'; 
-let p1TotBlkDec = totP1PFBlock > 0 ? formatDec(totP1PFBlock/60).replace('.', ',') : '--';
-let totP1PFStr = totP1PFBlock > 0 || totP1PFAir > 0 ? `<div style="line-height:1.2; font-size:7.5px;">DEP/AT: <b>${totP1Dep}</b><br>AIR: ${p1TotAirDec}<br>BLK: ${p1TotBlkDec}</div>` : '--'; 
-
-let p2TotAirDec = totP2PFAir > 0 ? formatDec(totP2PFAir/60).replace('.', ',') : '--'; 
-let p2TotBlkDec = totP2PFBlock > 0 ? formatDec(totP2PFBlock/60).replace('.', ',') : '--';
-let totP2PFStr = totP2PFBlock > 0 || totP2PFAir > 0 ? `<div style="line-height:1.2; font-size:7.5px;">DEP/AT: <b>${totP2Dep}</b><br>AIR: ${p2TotAirDec}<br>BLK: ${p2TotBlkDec}</div>` : '--';
-
-t1Html += `<tr class="compact-td"><td class="text-center summary-total-bg" colspan="3"><b>TOTALES ACUMULADOS</b></td><td class="text-center summary-total-bg" style="line-height:1.1;"><b>${totDuty > 0 ? `${minsToTime(totDuty)}<br>(${formatDec(totDuty/60)})` : '--'}</b></td><td class="text-center summary-total-bg" style="line-height:1.1;"><b>${totAir > 0 ? `${minsToTime(totAir)}<br>(${formatDec(totAir/60)})` : '--'}</b></td><td class="text-center summary-total-bg" style="line-height:1.1;"><b>${totBlock > 0 ? `${minsToTime(totBlock)}<br>(${formatDec(totBlock/60)})` : '--'}</b></td><td class="text-center summary-total-bg"><b>${totP1PFStr}</b></td><td class="text-center summary-total-bg"><b>${totP2PFStr}</b></td><td class="text-center summary-total-bg"><b>${Math.round(initF)}</b></td><td class="text-center summary-total-bg"><b>${Math.round(finF)}</b></td><td class="text-center summary-total-bg"><b>${Math.round(totFuel)}</b></td><td class="text-center summary-total-bg"><b>${Math.round(refF)}</b></td><td class="text-center summary-total-bg"><b>${totPax}</b></td></tr>`;
+    t1Html += `<tr class="compact-td"><td class="text-center summary-total-bg" colspan="2"><b>TOTALES ACUMULADOS</b>[cite: 1]</td><td class="text-center summary-total-bg" style="line-height:1.1;"><b>${totDuty > 0 ? `${minsToTime(totDuty)}<br>(${formatDec(totDuty/60).replace('.',',')})` : '--'}</b></td><td class="text-center summary-total-bg"></td><td class="text-center summary-total-bg" style="line-height:1.1;"><b>${totAir > 0 ? `${minsToTime(totAir)}<br>(${formatDec(totAir/60).replace('.',',')})` : '--'}</b></td><td class="text-center summary-total-bg" style="line-height:1.1;"><b>${totBlock > 0 ? `${minsToTime(totBlock)}<br>(${formatDec(totBlock/60).replace('.',',')})` : '--'}</b></td><td class="text-center summary-total-bg" style="line-height:1.2; font-size:7.5px;"><b>${totP1PFStr}</b></td><td class="text-center summary-total-bg" style="line-height:1.2; font-size:7.5px;"><b>${totP2PFStr}</b></td><td class="text-center summary-total-bg"><b>${Math.round(initF)}</b></td><td class="text-center summary-total-bg"><b>${Math.round(finF)}</b></td><td class="text-center summary-total-bg"><b>${Math.round(totFuel)}</b></td><td class="text-center summary-total-bg"><b>${Math.round(refF)}</b></td><td class="text-center summary-total-bg"><b>${totPaxStr.trim()}</b></td></tr>`;
 }
+
 t1Html += `</table>`; el('p_resumen_operacional_container').innerHTML = t1Html;
-const sinObs = el('m_sms_sin_obs')?.checked; setTxt('sms_p_fecha', val('m_fecha_gen')); setTxt('sms_p_pov', val('m_pov')); setTxt('sms_p_matricula', val('m_matricula')); setTxt('sms_p_material', val('m_material'));
+
+const sinObs = el('m_sms_sin_obs')?.checked; setTxt('sms_p_fecha', formatDateStr(val('m_fecha_gen'))); setTxt('sms_p_pov', val('m_pov')); setTxt('sms_p_matricula', val('m_matricula')); setTxt('sms_p_material', val('m_material'));
 for(let i=1; i<=47; i++) { const cell = el(`p_sms_${i}`); if(cell) { if(sinObs) { cell.innerHTML = ""; cell.classList.add('strike-cell'); } else { cell.classList.remove('strike-cell'); setTxt(`p_sms_${i}`, el(`m_sms_${i}`)?.checked ? '✓' : ''); } } } setTxt('p_sms_obs', val('m_sms_obs'));
 activeDates.forEach(dateKey => {
 setTxt(`sec_p_vuelo_${dateKey}`, val('m_pov')); setTxt(`sec_p_material_${dateKey}`, val('m_material')); setTxt(`sec_p_matricula_${dateKey}`, val('m_matricula')); setTxt(`sec_p_estacionamiento_${dateKey}`, val(`m_sec_est_${dateKey}`)); setTxt(`sec_p_origen_${dateKey}`, val(`m_sec_origen_${dateKey}`)); setTxt(`sec_p_destino_${dateKey}`, val(`m_sec_destino_${dateKey}`)); setTxt(`sec_p_alerta_${dateKey}`, val(`m_sec_alerta_${dateKey}`));
