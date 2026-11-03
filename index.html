@@ -605,11 +605,11 @@ return `<div class="card" id="leg_card_${id}">
 <div class="grid-4" style="margin-bottom: 8px;">
 <div class="form-group"><label>Desde <span class="link-btn" id="lbtn_desde_${id}" onclick="toggleLink(${id}, 'desde')">🔗</span></label><input type="text" id="m_t${id}_desde" data-linked="true" value="${defaultOrigin}" style="text-transform: uppercase;" oninput="triggerUpdate()"></div>
 <div class="form-group"><label>Destino</label><input type="text" id="m_t${id}_dest" oninput="triggerUpdate()" style="text-transform: uppercase;"></div>
-<div class="form-group"><label>PF</label><input type="text" id="m_t${id}_pf" placeholder="Ej: XX/YY" oninput="triggerUpdate()"></div>
-<div class="form-group"><label>PM</label><input type="text" id="m_t${id}_pm" placeholder="Ej: YY/ZZ" oninput="triggerUpdate()"></div>
+<div class="form-group"><label>PF</label><input type="text" id="m_t${id}_pf" placeholder="Ej: XX o XX/YY" oninput="triggerUpdate()"></div>
+<div class="form-group"><label>PM</label><input type="text" id="m_t${id}_pm" placeholder="Ej: YY o YY/ZZ" oninput="triggerUpdate()"></div>
 </div>
 <div class="time-sequence-box">
-<div style="font-size:0.72rem; color:var(--text-main); margin-bottom:8px; font-weight:bold;">SECUENCIA HORARIA (ESTRICTA 24H)</div>
+<div style="font-size:0.72rem; color:var(--text-main); margin-bottom:8px; font-weight:bold;">SECUENCIA HORARIA (24H)</div>
 <div class="time-sequence-grid">
 <div class="time-step"><label>BLOCK OUT</label><span>Salida Calzos</span><input type="text" class="time-input" placeholder="HH:MM" maxlength="5" inputmode="numeric" id="m_t${id}_time_out" oninput="formatTime(this)" onblur="validateTime(this)"></div>
 <div class="time-step"><label>2. AIR OFF</label><span>Despegue</span><input type="text" class="time-input" placeholder="HH:MM" maxlength="5" inputmode="numeric" id="m_t${id}_time_off" oninput="formatTime(this)" onblur="validateTime(this)"></div>
