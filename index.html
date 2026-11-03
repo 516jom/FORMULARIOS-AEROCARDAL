@@ -663,7 +663,7 @@ return `<table class="print-table" id="print_leg_${id}">
 <tr><td colspan="6" class="tramo-title-darkgray"><b>${ordinals[index] || index + '°'} TRAMO</b></td></tr>
 <tr class="header-cell">
 <td class="col-fecha" style="color:#000000!important;"><b style="color:#000000!important;">FECHA</b> <span id="p_t${id}_fecha" style="font-weight:bold; color:#000000!important;"></span><br><span class="text-xs" style="color:#000000!important;"><b style="color:#000000!important;">FOLIO:</b> <span id="p_t${id}_folio" style="font-weight:bold; color:#000000!important;"></span></span></td>
-<td class="col-horo" style="color:#000000!important;"><b style="color:#000000!important;">HORO</b></td>
+<td class="col-horo" style="color:#000000!important;"><b style="color:#000000!important;">HOROMETRO</b></td>
 <td class="col-block" style="color:#000000!important;"><b style="color:#000000!important;">BLOCK TIME</b></td>
 <td class="col-air" style="color:#000000!important;"><b style="color:#000000!important;">AIR TIME</b></td>
 <td class="col-fuel" style="color:#000000!important;"><b style="color:#000000!important;">COMBUSTIBLE</b></td>
@@ -999,12 +999,12 @@ let t1Html = `<table class="print-table" style="margin-top:0; border-top:none; t
 <td style="width:8%;" class="text-center"><b>BLOCK</b></td>
 <td colspan="${pfCols}" style="width:${pfWidth};" class="text-center"><b>HORAS PF (DEP / AT)</b></td>
 <td colspan="4" style="width:${fuelWidth};" class="text-center"><b>COMBUSTIBLE</b></td>
-<td rowspan="2" style="width:5%; vertical-align:middle;" class="text-center"><b>PAX<br>(P)</b></td>
+<td rowspan="2" style="width:5%; vertical-align:middle;" class="text-center"><b>PAX</b></td>
 </tr>
 <tr class="gray-bg compact-th">
 <td class="text-center"><b>INICIO-FIN</b></td>
 <td class="text-center"><b>TOTAL</b></td>
-<td class="text-center"><b>INICIAL-FINAL</b></td>
+<td class="text-center"><b>INICIO-FIN</b></td>
 <td class="text-center"><b>TOTAL</b></td>
 <td class="text-center"><b>TOTAL</b></td>
 <td class="text-center"><b>CAP: ${picIni} (DEP:${totP1Dep} AT:${totP1Arr})</b></td>
