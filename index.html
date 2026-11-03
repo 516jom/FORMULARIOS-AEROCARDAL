@@ -997,7 +997,7 @@ let t1Html = `<table class="print-table" style="margin-top:0; border-top:none; t
 <td style="width:10%;" class="text-center"><b>HORO</b></td>
 <td style="width:8%;" class="text-center"><b>AIRTIME</b></td>
 <td style="width:8%;" class="text-center"><b>BLOCK</b></td>
-<td colspan="${pfCols}" style="width:${pfWidth};" class="text-center"><b>HORAS PF (DEP / AT)</b></td>
+<td colspan="${pfCols}" style="width:${pfWidth};" class="text-center"><b>PILOT FLYING (TO/LD)</b></td>
 <td colspan="4" style="width:${fuelWidth};" class="text-center"><b>COMBUSTIBLE</b></td>
 <td rowspan="2" style="width:5%; vertical-align:middle;" class="text-center"><b>PAX</b></td>
 </tr>
@@ -1007,9 +1007,9 @@ let t1Html = `<table class="print-table" style="margin-top:0; border-top:none; t
 <td class="text-center"><b>INICIO-FIN</b></td>
 <td class="text-center"><b>TOTAL</b></td>
 <td class="text-center"><b>TOTAL</b></td>
-<td class="text-center"><b>CAP: ${picIni} (DEP:${totP1Dep} AT:${totP1Arr})</b></td>
-<td class="text-center"><b>FO: ${sicIni} (DEP:${totP2Dep} AT:${totP2Arr})</b></td>
-${hasSic2 ? `<td class="text-center"><b>FO2: ${sic2Ini} (DEP:${totP3Dep} AT:${totP3Arr})</b></td>` : ''}
+<td class="text-center"><b>CAP: ${picIni} (TO:${totP1Dep} LD:${totP1Arr})</b></td>
+<td class="text-center"><b>FO: ${sicIni} (TO:${totP2Dep} LD:${totP2Arr})</b></td>
+${hasSic2 ? `<td class="text-center"><b>FO2: ${sic2Ini} (TO:${totP3Dep} LD:${totP3Arr})</b></td>` : ''}
 <td class="text-center"><b>INICIAL</b></td>
 <td class="text-center"><b>FINAL</b></td>
 <td class="text-center"><b>USADO</b></td>
