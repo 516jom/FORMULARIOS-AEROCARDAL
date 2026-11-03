@@ -77,7 +77,7 @@ hr.divider { border: 0; border-top: 1px solid var(--border-color); margin: 12px 
 .btn-print { font-weight: bold; border-radius: 6px; border: none; }
 .checkbox-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; font-size: 0.8rem; line-height: 1.3; }
 .checkbox-item input[type="checkbox"] { flex-shrink: 0; margin-top: 2px; width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer;}
-.radio-group input[type="radio"] { accent-color: var(--accent); cursor: pointer; width: 16px; height: 16px; margin: 0; }
+.radio-group input[type="radio"] { accent-color: #4285F4; cursor: pointer; width: 16px; height: 16px; margin: 0; }
 .form-category-title { font-size: 0.75rem; font-weight: bold; color: var(--accent); margin: 15px 0 8px 0; background: rgba(255,255,255,0.05); padding: 6px; border-radius: 4px; border-left: 3px solid var(--accent);}
 .signature-block { margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border-color); font-size: 0.85rem; color: var(--text-muted); }
 
@@ -177,6 +177,11 @@ Volver a la app
 <label>FO (Iniciales)</label>
 <input type="text" id="m_sic_ini" placeholder="Ej: EI" oninput="lookupPilots()" style="text-transform: uppercase;">
 <div id="ui_sic_name" style="font-size:0.65rem; color:var(--text-muted); margin-top:4px; height:12px;"></div>
+</div>
+<div class="form-group">
+<label>FO 2 (Opcional)</label>
+<input type="text" id="m_sic2_ini" placeholder="Ej: MV" oninput="lookupPilots()" style="text-transform: uppercase;">
+<div id="ui_sic2_name" style="font-size:0.65rem; color:var(--text-muted); margin-top:4px; height:12px;"></div>
 </div>
 </div>
 </div>
@@ -414,13 +419,12 @@ let legIds = [], nextLegId = 1, refuelData = {}; let updateRAF = null; let secMa
 const ordinals = ["", "PRIMER", "SEGUNDO", "TERCER", "CUARTO", "QUINTO", "SEXTO", "SÉPTIMO", "OCTAVO"];
 const formatDec = val => Number(val || 0).toFixed(1);
 
-// FUNCIÓN DE FORMATEO ESTRICTO DE FECHA PDF (DD-MES-AÑO)
+// FUNCIÓN DE FORMATEO ESTRICTO DE FECHA PDF (DD/MM/AA)
 function formatDatePdf(dateStr) {
   if (!dateStr) return '';
   const parts = dateStr.split('-');
   if (parts.length !== 3) return dateStr;
-  const months = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
-  return `${parts[2]}-${months[parseInt(parts[1], 10) - 1]}-${parts[0]}`;
+  return `${parts[2]}/${parts[1]}/${parts[0].slice(-2)}`;
 }
 
 const aeronavesDB = [
@@ -444,13 +448,14 @@ const pilotosDB = {
 "FE": { "nombre": "Francisco Esquivel C.", "rut": "88.888.888-8", "licencia": "1899" }, "JO": { "nombre": "José Oyarzún M.", "rut": "16.239.897-0", "licencia": "2387" }, "FCH":{ "nombre": "Fernando Chacana X.", "rut": "66.666.666-6", "licencia": "2604" }, "MS": { "nombre": "Mauricio Solano P.", "rut": "14.322.271-3", "licencia": "1657" },
 "CV": { "nombre": "Cristhian Vázquez F.", "rut": "15.549.870-6", "licencia": "3435" }, "MV": { "nombre": "Matías Vega C.", "rut": "77.777.777-7", "licencia": "2420" }, "KW": { "nombre": "Klaus Wobbe S.", "rut": "14.103.915-6", "licencia": "1741" }, "CB": { "nombre": "Cristobal Briones B.", "rut": "10.345.076-4", "licencia": "2740" }
 };
-let capitanActual = { nombre: "", rut: "", licencia: "" }; let foActual = { nombre: "" };
+let capitanActual = { nombre: "", rut: "", licencia: "" }; let foActual = { nombre: "" }; let fo2Actual = { nombre: "" };
 
 function formatNameForSMS(fullName) { if(!fullName) return ""; const parts = fullName.split(' '); if(parts.length >= 2) return (parts[0][0] + ". " + parts[1]).toUpperCase(); return fullName.toUpperCase(); }
 function lookupPilots() {
-const picIni = val('m_pic_ini').toUpperCase(), sicIni = val('m_sic_ini').toUpperCase();
+const picIni = val('m_pic_ini').toUpperCase(), sicIni = val('m_sic_ini').toUpperCase(), sic2Ini = val('m_sic2_ini').toUpperCase();
 if (pilotosDB[picIni]) { capitanActual = pilotosDB[picIni]; setTxt('ui_pic_name', `👤 ${capitanActual.nombre}`); } else { capitanActual = { nombre: "", rut: "", licencia: "" }; setTxt('ui_pic_name', picIni ? 'No encontrado' : '&nbsp;'); }
 if (pilotosDB[sicIni]) { foActual = pilotosDB[sicIni]; setTxt('ui_sic_name', `👤 ${foActual.nombre}`); } else { foActual = { nombre: "" }; setTxt('ui_sic_name', sicIni ? 'No encontrado' : '&nbsp;'); }
+if (pilotosDB[sic2Ini]) { fo2Actual = pilotosDB[sic2Ini]; setTxt('ui_sic2_name', `👤 ${fo2Actual.nombre}`); } else { fo2Actual = { nombre: "" }; setTxt('ui_sic2_name', sic2Ini ? 'No encontrado' : '&nbsp;'); }
 updateFormFooters(); triggerUpdate();
 }
 function updateFormFooters() {
@@ -701,7 +706,6 @@ if(index === 1) {
     if(dLink) { dLink.dataset.linked = "false"; dLink.classList.remove('inherited-input'); } 
     if(dBtn) dBtn.style.display = "none"; 
     
-    // La herencia de fecha para el primer tramo se mantiene intacta
     const fBtnDate = el(`lbtn_fecha_${id}`);
     if(fBtnDate) fBtnDate.style.display = "none";
 } else { 
@@ -734,7 +738,6 @@ if(legIds.length > 0) {
     if(dLink) { dLink.dataset.linked = "false"; dLink.readOnly = false; dLink.classList.remove('inherited-input'); } 
     if(dBtn) dBtn.style.display = "none"; 
 
-    // La herencia de fecha para el primer tramo se mantiene intacta tras borrar
     const fBtnDate = el(`lbtn_fecha_${fId}`);
     if(fBtnDate) fBtnDate.style.display = "none";
 }
@@ -778,28 +781,31 @@ if (pm) { if (!pilotStats[pm]) pilotStats[pm] = initPilot(); pilotStats[pm].pm_t
 });
 if(legDetails.length > 1) { for(let idx = 0; idx < legDetails.length - 1; idx++) { let curr = legDetails[idx], next = legDetails[idx+1]; if(curr.date !== next.date && curr.dest && curr.dest !== 'SCEL' && next.desde === curr.dest) { if(!legsByDate[next.date]) legsByDate[next.date] = []; } } }
 let activeDates = Object.keys(legsByDate).sort(); if(activeDates.length === 0 && gDate) activeDates = [gDate]; if(activeDates.length === 0) activeDates = [new Date().toISOString().split('T')[0]];
-let dailyStats = []; let totalDutyMinsAllDays = 0; let globalEndEl = el('duty_end'); let picIni = val('m_pic_ini').trim().toUpperCase(), sicIni = val('m_sic_ini').trim().toUpperCase();
+let dailyStats = []; let totalDutyMinsAllDays = 0; let globalEndEl = el('duty_end'); 
+let picIni = val('m_pic_ini').trim().toUpperCase(), sicIni = val('m_sic_ini').trim().toUpperCase(), sic2Ini = val('m_sic2_ini').trim().toUpperCase();
 activeDates.forEach((dateKey, index) => {
 let dayLegs = legsByDate[dateKey] || []; if(dayLegs.length === 0) return;
 let startDuty = "", endDuty = "", dayBlock = 0, dayAir = 0, dayFuelUsed = 0, dayRefuel = 0, dayPax = [];
 let firstLeg = dayLegs[0], lastLeg = dayLegs[dayLegs.length - 1];
-let p1 = { block: 0, air: 0, dep: 0, pf_block: 0, pf_air: 0 }, p2 = { block: 0, air: 0, dep: 0, pf_block: 0, pf_air: 0 };
+let p1 = { block: 0, air: 0, dep: 0, pf_block: 0, pf_air: 0 }, p2 = { block: 0, air: 0, dep: 0, pf_block: 0, pf_air: 0 }, p3 = { block: 0, air: 0, dep: 0, pf_block: 0, pf_air: 0 };
 dayLegs.forEach(leg => {
 dayBlock += (leg.bDiff || 0); dayAir += (leg.aDiff || 0); dayFuelUsed += (leg.fDiff || 0); dayRefuel += getLegRefuelTotal(leg.id); if (leg.pax >= 0) dayPax.push(`(${leg.pax})`);
 if (picIni) { if (leg.pf === picIni) { p1.block += leg.bDiff; p1.air += leg.aDiff; p1.pf_block += leg.bDiff; p1.pf_air += leg.aDiff; if(leg.bDiff>0) p1.dep++; } else if (leg.pm === picIni) { p1.block += leg.bDiff; p1.air += leg.aDiff; } }
 if (sicIni) { if (leg.pf === sicIni) { p2.block += leg.bDiff; p2.air += leg.aDiff; p2.pf_block += leg.bDiff; p2.pf_air += leg.aDiff; if(leg.bDiff>0) p2.dep++; } else if (leg.pm === sicIni) { p2.block += leg.bDiff; p2.air += leg.aDiff; } }
+if (sic2Ini) { if (leg.pf === sic2Ini) { p3.block += leg.bDiff; p3.air += leg.aDiff; p3.pf_block += leg.bDiff; p3.pf_air += leg.aDiff; if(leg.bDiff>0) p3.dep++; } else if (leg.pm === sic2Ini) { p3.block += leg.bDiff; p3.air += leg.aDiff; } }
 });
 if (index === 0) { startDuty = val('duty_start'); if (globalEndEl.dataset.manual === "true" && globalEndEl.value.length === 5) { endDuty = globalEndEl.value; } else if (lastLeg.tIn) { endDuty = addMins(lastLeg.tIn, 30); globalEndEl.value = endDuty; } } 
 else { if (firstLeg.tOff) startDuty = addMins(firstLeg.tOff, -60); if (lastLeg.tIn) endDuty = addMins(lastLeg.tIn, 30); }
 let dur = (startDuty && endDuty) ? timeDiffMins(startDuty, endDuty) : 0; totalDutyMinsAllDays += dur;
 let fIniRaw = firstLeg.fuelOn, fIni = isNaN(fIniRaw) ? 0 : fIniRaw, fFinRaw = lastLeg.fuelOff, fFin = (isNaN(fFinRaw) ? 0 : fFinRaw) + getLegRefuelTotal(lastLeg.id);
-dailyStats.push({ date: dateKey, start: startDuty, end: endDuty, duration: dur, block: dayBlock, air: dayAir, fuelUsed: dayFuelUsed, fuelInit: fIni, fuelFinal: fFin, fuelRefuel: dayRefuel, pax: dayPax.join(' '), p1, p2, hIni: firstLeg.horoBot||'--', hFin: lastLeg.horoTop||'--' });
+dailyStats.push({ date: dateKey, start: startDuty, end: endDuty, duration: dur, block: dayBlock, air: dayAir, fuelUsed: dayFuelUsed, fuelInit: fIni, fuelFinal: fFin, fuelRefuel: dayRefuel, pax: dayPax.join(' '), p1, p2, p3, hIni: firstLeg.horoBot||'--', hFin: lastLeg.horoTop||'--' });
 });
 
+let hasSic2 = sic2Ini !== '';
 let tramosTableHtml = `<table style="width:100%; min-width: 600px; border-collapse:collapse; font-size:0.75rem; text-align:center; background:var(--bg-input); border:none; white-space:nowrap;"><thead><tr style="background:rgba(255,255,255,0.05); border-bottom:1px solid var(--border-color);"><th style="text-align:left; padding:8px; border-right:1px solid var(--border-color); color:var(--accent);">PARÁMETRO</th>`;
 legIds.forEach((id, idx) => { tramosTableHtml += `<th style="padding:8px; border-right:1px solid rgba(255,255,255,0.05); color:var(--accent);">TRAMO ${idx+1}</th>`; }); tramosTableHtml += `</tr></thead><tbody>`;
 const rowDefs = [
-{ label: "FECHA", get: id => val(`m_t${id}_fecha`) || gDate || '--' }, { label: "CAPITÁN", get: id => picIni || '--' }, { label: "FO", get: id => sicIni || '--' }, { label: "DESDE", get: id => val(`m_t${id}_desde`).toUpperCase() || '--' }, { label: "DESTINO", get: id => val(`m_t${id}_dest`).toUpperCase() || '--' }, { label: "AIR ON", get: id => val(`m_t${id}_time_on`) || '--:--' }, { label: "AIR OFF", get: id => val(`m_t${id}_time_off`) || '--:--' }, { label: "AIRTIME", get: id => { let text = el(`ui_t${id}_air_diff`)?.innerText.split(' ')[0]; return (text && text !== '--:--') ? text : '--:--'; } }, { label: "BLOCK IN", get: id => val(`m_t${id}_time_in`) || '--:--' }, { label: "BLOCK OUT", get: id => val(`m_t${id}_time_out`) || '--:--' }, { label: "BLOCKTIME", get: id => { let text = el(`ui_t${id}_block_diff`)?.innerText.split(' ')[0]; return (text && text !== '--:--') ? text : '--:--'; } }
+{ label: "FECHA", get: id => val(`m_t${id}_fecha`) || gDate || '--' }, { label: "CAPITÁN", get: id => picIni || '--' }, { label: "FO", get: id => sicIni || '--' }, ...(hasSic2 ? [{ label: "FO 2", get: id => sic2Ini || '--' }] : []), { label: "DESDE", get: id => val(`m_t${id}_desde`).toUpperCase() || '--' }, { label: "DESTINO", get: id => val(`m_t${id}_dest`).toUpperCase() || '--' }, { label: "AIR ON", get: id => val(`m_t${id}_time_on`) || '--:--' }, { label: "AIR OFF", get: id => val(`m_t${id}_time_off`) || '--:--' }, { label: "AIRTIME", get: id => { let text = el(`ui_t${id}_air_diff`)?.innerText.split(' ')[0]; return (text && text !== '--:--') ? text : '--:--'; } }, { label: "BLOCK IN", get: id => val(`m_t${id}_time_in`) || '--:--' }, { label: "BLOCK OUT", get: id => val(`m_t${id}_time_out`) || '--:--' }, { label: "BLOCKTIME", get: id => { let text = el(`ui_t${id}_block_diff`)?.innerText.split(' ')[0]; return (text && text !== '--:--') ? text : '--:--'; } }
 ];
 rowDefs.forEach((r, idx) => { let bBottom = (idx === rowDefs.length - 1) ? '' : 'border-bottom:1px solid rgba(255,255,255,0.05);'; tramosTableHtml += `<tr><td style="text-align:left; padding:6px 8px; font-weight:bold; color:var(--text-muted); border-right:1px solid var(--border-color); ${bBottom}">${r.label}</td>`; legIds.forEach(id => { tramosTableHtml += `<td style="padding:6px 8px; border-right:1px solid rgba(255,255,255,0.05); color:var(--text-main); ${bBottom}">${r.get(id)}</td>`; }); tramosTableHtml += `</tr>`; }); tramosTableHtml += `</tbody></table>`;
 if(el('ui_resumen_tramos')) el('ui_resumen_tramos').innerHTML = tramosTableHtml;
@@ -876,11 +882,16 @@ container.innerHTML = webHtml; printContainer.innerHTML = printHtml; updateFormF
 function syncPrintData(air, block, initF, refF, usedF, finF, strPax, activeDates, dailyStats) {
 ['pov', 'material', 'matricula'].forEach(f => setTxt(`p_${f}`, val(`m_${f}`)));
 setTxt('p_fecha_gen', formatDatePdf(val('m_fecha_gen')));
-const stdFields = ['folio','dest','desde','dist','pax','pf','pm','winds','time_out','time_off','time_on','time_in','block_diff','air_diff','horo_top','horo_bot','horo_diff','fuel_on','fuel_off','fuel_diff'];
+const stdFields = ['folio','dest','desde','dist','pax','pf','pm','winds','time_out','time_off','time_on','time_in','block_diff','air_diff','horo_top','horo_bot','horo_diff','fuel_on','fuel_off'];
 const prmFields = ['fl','mach','isa','oat','gspd','ff','n1','n2','oilt','oilp','itt','obs'];
 const wpfFields = ['wp1','wp2','wp3','wp4','cp1','cp2','cp3','cp4','cr1','cr2','cr3','cr4'];
 legIds.forEach(id => {
 stdFields.forEach(f => setTxt(`p_t${id}_${f}`, val(`m_t${id}_${f}`)));
+
+// Aplicar formato sin decimales a "Combustible Used"
+const fUsedVal = val(`m_t${id}_fuel_diff`);
+setTxt(`p_t${id}_fuel_diff`, fUsedVal ? Math.round(parseFloat(fUsedVal)) : '');
+
 setTxt(`p_t${id}_fecha`, formatDatePdf(val(`m_t${id}_fecha`)));
 const windsVal = val(`m_t${id}_winds`).trim(); if(el(`p_t${id}_winds_wrapper`)) el(`p_t${id}_winds_wrapper`).style.display = windsVal ? "inline-block" : "none";
 const hasPrm = prmFields.some(f => val(`m_t${id}_${f}`).trim() !== ""); const hasFuel = wpfFields.some(f => val(`m_t${id}_${f}`).trim() !== ""); const hasMet = val(`m_t${id}_meteo`).trim() !== "", hasAtc = val(`m_t${id}_atc`).trim() !== "";
@@ -893,9 +904,17 @@ setTxt(`p_t${id}_dn_text`, dnVal === 'D' ? 'DIURNO' : (dnVal === 'N' ? 'NOCTURNO
 setTxt(`p_t${id}_pnp_text`, pnpVal === 'P' ? 'PRECISIÓN' : (pnpVal === 'NP' ? 'NO PRECISIÓN' : ''));
 });
 
-let picIni = val('m_pic_ini').trim().toUpperCase() || 'CAP'; let sicIni = val('m_sic_ini').trim().toUpperCase() || 'FO';
+let picIni = val('m_pic_ini').trim().toUpperCase() || 'CAP'; 
+let sicIni = val('m_sic_ini').trim().toUpperCase() || 'FO';
+let sic2Ini = val('m_sic2_ini').trim().toUpperCase() || 'FO2';
 
-let totDuty = 0, totBlock = 0, totAir = 0, totFuel = 0, totPax = ""; let totP1Block = 0, totP1Air = 0, totP1Dep = 0, totP1PFBlock = 0, totP1PFAir = 0; let totP2Block = 0, totP2Air = 0, totP2Dep = 0, totP2PFBlock = 0, totP2PFAir = 0;
+let hasSic2 = val('m_sic2_ini').trim() !== '';
+
+let totDuty = 0, totBlock = 0, totAir = 0, totFuel = 0, totPax = ""; 
+let totP1Block = 0, totP1Air = 0, totP1Dep = 0, totP1PFBlock = 0, totP1PFAir = 0; 
+let totP2Block = 0, totP2Air = 0, totP2Dep = 0, totP2PFBlock = 0, totP2PFAir = 0;
+let totP3Block = 0, totP3Air = 0, totP3Dep = 0, totP3PFBlock = 0, totP3PFAir = 0;
+
 dailyStats.forEach(ds => {
     totDuty += ds.duration; totBlock += ds.block; totAir += ds.air; totFuel += ds.fuelUsed;
     totPax += (totPax && ds.pax ? " " : "") + ds.pax;
@@ -903,18 +922,24 @@ dailyStats.forEach(ds => {
     totP1PFBlock += ds.p1.pf_block; totP1PFAir += ds.p1.pf_air;
     totP2Block += ds.p2.block; totP2Air += ds.p2.air; totP2Dep += ds.p2.dep;
     totP2PFBlock += ds.p2.pf_block; totP2PFAir += ds.p2.pf_air;
+    totP3Block += ds.p3.block; totP3Air += ds.p3.air; totP3Dep += ds.p3.dep;
+    totP3PFBlock += ds.p3.pf_block; totP3PFAir += ds.p3.pf_air;
 });
 
+let pfCols = hasSic2 ? 3 : 2;
+let pfWidth = hasSic2 ? "27%" : "20%";
+let fuelWidth = hasSic2 ? "19%" : "26%";
+
 let t1Html = `<table class="print-table" style="margin-top:0; border-top:none; text-transform:uppercase; table-layout: fixed; width: 100%;">
-<tr><td colspan="13" class="summary-title-pdf"><b>CONSOLIDADO POR DIA</b></td></tr>
+<tr><td colspan="${hasSic2 ? 14 : 13}" class="summary-title-pdf"><b>CONSOLIDADO POR DIA</b></td></tr>
 <tr class="gray-bg compact-th">
 <td rowspan="2" style="width:7%; vertical-align:middle;" class="text-center"><b>FECHA</b></td>
 <td colspan="2" style="width:16%;" class="text-center"><b>DUTY</b></td>
 <td style="width:10%;" class="text-center"><b>HOROMETRO</b></td>
 <td style="width:8%;" class="text-center"><b>AIRTIME</b></td>
 <td style="width:8%;" class="text-center"><b>BLOCK</b></td>
-<td colspan="2" style="width:20%;" class="text-center"><b>HORAS PF (DEP/AT)</b></td>
-<td colspan="4" style="width:26%;" class="text-center"><b>COMBUSTIBLE</b></td>
+<td colspan="${pfCols}" style="width:${pfWidth};" class="text-center"><b>HORAS PF (DEP/AT)</b></td>
+<td colspan="4" style="width:${fuelWidth};" class="text-center"><b>COMBUSTIBLE</b></td>
 <td rowspan="2" style="width:5%; vertical-align:middle;" class="text-center"><b>PAX<br>(P)</b></td>
 </tr>
 <tr class="gray-bg compact-th">
@@ -925,6 +950,7 @@ let t1Html = `<table class="print-table" style="margin-top:0; border-top:none; t
 <td class="text-center"><b>TOTAL</b></td>
 <td class="text-center"><b>CAP: ${picIni} (DEP/AT: ${totP1Dep})</b></td>
 <td class="text-center"><b>FO: ${sicIni} (DEP/AT: ${totP2Dep})</b></td>
+${hasSic2 ? `<td class="text-center"><b>FO2: ${sic2Ini} (DEP/AT: ${totP3Dep})</b></td>` : ''}
 <td class="text-center"><b>INICIAL</b></td>
 <td class="text-center"><b>FINAL</b></td>
 <td class="text-center"><b>USADO</b></td>
@@ -945,10 +971,15 @@ let p2A_dec = ds.p2.pf_air > 0 ? formatDec(ds.p2.pf_air/60).replace('.', ',') : 
 let p2B_dec = ds.p2.pf_block > 0 ? formatDec(ds.p2.pf_block/60).replace('.', ',') : '0,0';
 let p2PFStr = (ds.p2.pf_block > 0 || ds.p2.pf_air > 0) ? `<div style="line-height:1.2; font-size:7.5px; text-align:left; padding-left:2px;">AIR: (${p2A_dec})<br>BLK: (${p2B_dec})</div>` : '--';
 
-t1Html += `<tr class="compact-td"><td class="text-center bold">${fDate}</td><td class="text-center">${ds.start || '--'} - ${ds.end || '--'}</td><td class="text-center bold">${dStr}</td><td class="text-center">${ds.hIni} - ${ds.hFin}</td><td class="text-center bold">${aStr}</td><td class="text-center bold">${bStr}</td><td class="text-center">${p1PFStr}</td><td class="text-center">${p2PFStr}</td><td class="text-center">${Math.round(ds.fuelInit)}</td><td class="text-center">${Math.round(ds.fuelFinal)}</td><td class="text-center bold">${Math.round(ds.fuelUsed)}</td><td class="text-center">${Math.round(ds.fuelRefuel)}</td><td class="text-center">${ds.pax}</td></tr>`;
+let p3A_dec = ds.p3.pf_air > 0 ? formatDec(ds.p3.pf_air/60).replace('.', ',') : '0,0'; 
+let p3B_dec = ds.p3.pf_block > 0 ? formatDec(ds.p3.pf_block/60).replace('.', ',') : '0,0';
+let p3PFStr = (ds.p3.pf_block > 0 || ds.p3.pf_air > 0) ? `<div style="line-height:1.2; font-size:7.5px; text-align:left; padding-left:2px;">AIR: (${p3A_dec})<br>BLK: (${p3B_dec})</div>` : '--';
+
+t1Html += `<tr class="compact-td"><td class="text-center bold">${fDate}</td><td class="text-center">${ds.start || '--'} - ${ds.end || '--'}</td><td class="text-center bold">${dStr}</td><td class="text-center">${ds.hIni} - ${ds.hFin}</td><td class="text-center bold">${aStr}</td><td class="text-center bold">${bStr}</td><td class="text-center">${p1PFStr}</td><td class="text-center">${p2PFStr}</td>${hasSic2 ? `<td class="text-center">${p3PFStr}</td>` : ''}<td class="text-center">${Math.round(ds.fuelInit)}</td><td class="text-center">${Math.round(ds.fuelFinal)}</td><td class="text-center bold">${Math.round(ds.fuelUsed)}</td><td class="text-center">${Math.round(ds.fuelRefuel)}</td><td class="text-center">${ds.pax}</td></tr>`;
 });
 
-if (dailyStats.length > 1 || dailyStats.length === 1) { // Mostrar si hay data
+// Condicional estricto: Sólo renderizar si hay más de 1 día de vuelo
+if (dailyStats.length > 1) { 
 let p1TotAirDec = totP1PFAir > 0 ? formatDec(totP1PFAir/60).replace('.', ',') : '0,0'; 
 let p1TotBlkDec = totP1PFBlock > 0 ? formatDec(totP1PFBlock/60).replace('.', ',') : '0,0';
 let totP1PFStr = (totP1PFBlock > 0 || totP1PFAir > 0) ? `<div style="line-height:1.2; font-size:7.5px; text-align:left; padding-left:2px;">AIR: (${p1TotAirDec})<br>BLK: (${p1TotBlkDec})</div>` : '--'; 
@@ -956,6 +987,10 @@ let totP1PFStr = (totP1PFBlock > 0 || totP1PFAir > 0) ? `<div style="line-height
 let p2TotAirDec = totP2PFAir > 0 ? formatDec(totP2PFAir/60).replace('.', ',') : '0,0'; 
 let p2TotBlkDec = totP2PFBlock > 0 ? formatDec(totP2PFBlock/60).replace('.', ',') : '0,0';
 let totP2PFStr = (totP2PFBlock > 0 || totP2PFAir > 0) ? `<div style="line-height:1.2; font-size:7.5px; text-align:left; padding-left:2px;">AIR: (${p2TotAirDec})<br>BLK: (${p2TotBlkDec})</div>` : '--';
+
+let p3TotAirDec = totP3PFAir > 0 ? formatDec(totP3PFAir/60).replace('.', ',') : '0,0'; 
+let p3TotBlkDec = totP3PFBlock > 0 ? formatDec(totP3PFBlock/60).replace('.', ',') : '0,0';
+let totP3PFStr = (totP3PFBlock > 0 || totP3PFAir > 0) ? `<div style="line-height:1.2; font-size:7.5px; text-align:left; padding-left:2px;">AIR: (${p3TotAirDec})<br>BLK: (${p3TotBlkDec})</div>` : '--';
 
 let totDStr = totDuty > 0 ? `${minsToTime(totDuty)} (${formatDec(totDuty/60).replace('.', ',')})` : '--:--';
 let totAStr = totAir > 0 ? `${minsToTime(totAir)} (${formatDec(totAir/60).replace('.', ',')})` : '--:--';
@@ -969,6 +1004,7 @@ t1Html += `<tr class="compact-td">
 <td class="text-center summary-total-bg"><b>${totBStr}</b></td>
 <td class="text-center summary-total-bg"><b>${totP1PFStr}</b></td>
 <td class="text-center summary-total-bg"><b>${totP2PFStr}</b></td>
+${hasSic2 ? `<td class="text-center summary-total-bg"><b>${totP3PFStr}</b></td>` : ''}
 <td class="text-center summary-total-bg"></td>
 <td class="text-center summary-total-bg"></td>
 <td class="text-center summary-total-bg"></td>
@@ -989,7 +1025,7 @@ setTxt(`sec_p_nombre_${dateKey}`, capitanActual.nombre || ""); setTxt(`sec_p_rut
 
 function getAllData() {
 let data = { globals: {}, legs: legIds.length, legData: {}, refuelData: refuelData, secManualState: secManualState };
-let globalFields = ['duty_start', 'duty_end', 'm_fecha_gen', 'm_pov', 'm_material', 'm_matricula', 'm_matricula_suffix', 'm_pic_ini', 'm_sic_ini', 'm_sms_obs', 'm_sms_sin_obs'];
+let globalFields = ['duty_start', 'duty_end', 'm_fecha_gen', 'm_pov', 'm_material', 'm_matricula', 'm_matricula_suffix', 'm_pic_ini', 'm_sic_ini', 'm_sic2_ini', 'm_sms_obs', 'm_sms_sin_obs'];
 for(let i=1; i<=47; i++) globalFields.push(`m_sms_${i}`);
 globalFields.forEach(id => { let element = el(id); if (element) { if(element.type === 'checkbox') data.globals[id] = element.checked; else data.globals[id] = element.value; } });
 legIds.forEach(id => { 
